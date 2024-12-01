@@ -1,11 +1,12 @@
 {
   "name": "create-nitro-module",
+  "version": "0.17.0",
   "description": "CLI that enables you to create react native modules with Nitro Modules",
   "private": false,
   "type": "module",
   "files": [
     "lib",
-    "lib/assets"
+    "README.md"
   ],
   "bin": {
     "create-nitro-module": "./lib/cli.js",
@@ -13,21 +14,45 @@
   },
   "scripts": {
     "dev": "bun typecheck && tsx src/cli.ts",
-    "build": "tsup src",
-    "typecheck": "tsc --noEmit"
+    "build": "bun typecheck && tsup src",
+    "typecheck": "tsc --noEmit",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "prerelease": "rm -rf ./lib/assets",
+    "release": "bun run build && changeset publish",
+    "lint": "eslint . --ignore-pattern 'eslint.config.js' --no-warn-ignored",
+    "format": "prettier --write src/*.ts"
   },
   "dependencies": {
+    "@changesets/cli": "^2.27.10",
     "commander": "^12.1.0",
     "inquirer": "^12.1.0",
     "kleur": "^4.1.5",
     "ora": "^8.1.1",
     "tsup": "^8.3.5"
   },
-  "eslintConfig": {},
-  "prettier": {},
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "arrowParens": "avoid"
+  },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.16.0",
+    "@typescript-eslint/parser": "^8.16.0",
+    "eslint": "^9.16.0",
+    "eslint-plugin-n": "^17.14.0",
+    "prettier": "^3.4.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   }
 }

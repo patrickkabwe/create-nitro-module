@@ -1,9 +1,9 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ["src/cli.ts"],
-  format: ["esm"],
+  entry: ['src/cli.ts'],
+  format: ['esm'],
   clean: true,
   shims: true,
-  outDir: "lib",
-});
+  outDir: 'lib',
+})

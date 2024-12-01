@@ -1,26 +1,24 @@
-#!/usr/bin/env node
+import { Command } from 'commander'
+import packageJson from '../package.json' assert { type: 'json' }
+import { createModule, generateModule } from './create.js'
 
-import { Command } from "commander";
-import packageJson from "../package.json" assert { type: "json" };
-import { createModule, generateModule } from "./create.js";
-
-const program = new Command();
+const program = new Command()
 program
-  .name("nitro-module")
+  .name('nitro-module')
   .description(packageJson.description)
-  .version("Create nitro version: 0.1.0", "-v, --version")
-  .action(createModule);
+  .version('Create nitro version: 0.1.0', '-v, --version')
+  .action(createModule)
 
 program
-  .command("create [moduleName]")
+  .command('create [moduleName]')
   .description(
-    "create a new nitro module. If no moduleName is provided, you will be prompted for one."
+    'create a new nitro module. If no moduleName is provided, you will be prompted for one.'
   )
-  .action(createModule);
+  .action(createModule)
 
 program
-  .command("generate <moduleName>")
-  .description("generate a hybrid object into the package directory")
-  .action(generateModule);
+  .command('generate <moduleName>')
+  .description('generate a hybrid object into the package directory')
+  .action(generateModule)
 
-program.parse();
+program.parse()

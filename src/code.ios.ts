@@ -1,7 +1,7 @@
-import { toPascalCase } from "./utils.js";
+import { toPascalCase } from './utils.js'
 
 export const getSwiftCode = (moduleName: string) =>
-`import Foundation
+  `import Foundation
 
 class ${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
     var hybridContext = margelo.nitro.HybridContext()
@@ -11,4 +11,4 @@ class ${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
         return num1 + num2
     }
 }
-`;
+`

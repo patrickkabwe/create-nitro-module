@@ -1,9 +1,9 @@
-import { toPascalCase } from "./utils.js";
+import { toPascalCase } from './utils.js'
 
 export const androidManifestCode = `
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 </manifest>
-`;
+`
 
 export const getKotlinCode = (moduleName: string, packageT: string) => `
 package ${packageT}
@@ -20,4 +20,4 @@ class ${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec() {
         return num1 + num2
     }
 }
-`;
+`

@@ -1,4 +1,4 @@
-import { toPascalCase } from "./utils.js";
+import { toPascalCase } from './utils.js'
 
 export const appExampleCode = (moduleName: string, packagePrefix: string) => `
 import React from 'react';
@@ -15,7 +15,7 @@ function App(): React.JSX.Element {
   );
 }
 export default App;
-    `;
+    `
 
 export const specCode = (moduleName: string, platformLang: string) => `
 import { type HybridObject } from 'react-native-nitro-modules'
@@ -25,7 +25,7 @@ export interface ${toPascalCase(
 )} extends HybridObject<{ ${platformLang} }> {
 sumNum(num1: number, num2: number): number
 }
-`;
+`
 
 export const exportCode = (moduleName: string) => `
 export {} from './specs/${moduleName}.nitro'
@@ -38,4 +38,4 @@ export const ${toPascalCase(moduleName)} =
   NitroModules.createHybridObject<${toPascalCase(
     moduleName
   )}Spec>('${toPascalCase(moduleName)}')
-  `;
+  `
