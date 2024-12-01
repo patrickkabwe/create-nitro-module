@@ -1,5 +1,7 @@
+#!/usr/bin/env node
+
 import { Command } from 'commander'
-import packageJson from '../package.json' assert { type: 'json' }
+import packageJson from '../package.json'
 import { createModule, generateModule } from './create.js'
 
 const program = new Command()
@@ -21,4 +23,4 @@ program
   .description('generate a hybrid object into the package directory')
   .action(generateModule)
 
-program.parse()
+program.allowUnknownOption().parse(process.argv)
