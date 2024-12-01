@@ -1,4 +1,4 @@
-# 🚀 Nitro CLI
+# 🚀 Nitro Module CLI
 
 Create cross-platform native modules with ease!
 
