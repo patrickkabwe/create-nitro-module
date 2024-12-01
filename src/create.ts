@@ -36,7 +36,7 @@ export const createModule = async (name: string) => {
     spinner.succeed(kleur.green('✨ Nitro Module created successfully!'))
   } catch (error) {
     spinner.fail(
-      kleur.red(`❌ Failed to create nitro module: ${error.message}`)
+      kleur.red(`❌ Failed to create nitro module: ${(error as Error).message}`)
     )
   }
 }
