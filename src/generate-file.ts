@@ -14,12 +14,13 @@ import tsconfigFile from "./assets/tsconfig.json" assert { type: "json" };
 import workspacePackageJsonFile from "./assets/workspace-package.json" assert { type: "json" };
 import { androidManifestCode, getKotlinCode } from "./code.android.js";
 import { getSwiftCode } from "./code.ios.js";
+import { appExampleCode, exportCode, specCode } from "./code.js.js";
 import {
   ANDROID_CXX_LIB_NAME_TAG,
   ANDROID_NAME_SPACE_TAG,
   CXX_NAME_SPACE_TAG,
   IOS_MODULE_NAME_TAG,
-} from "./tags.js";
+} from "./constants.js";
 import {
   generateAutolinking,
   getGitUserInfo,
@@ -66,7 +67,7 @@ class FileGenerator {
     this.tmpDir = `/tmp/${moduleName}`;
     this.moduleName = moduleName;
     this.androidPackageName = `com.${this.moduleName.toLowerCase()}`;
- 
+
     await this.generateFolder();
     await this.cloneNitroTemplate();
     await this.copyFiles();
@@ -149,31 +150,17 @@ class FileGenerator {
       encoding: "utf8",
     });
 
-    const appCode = `
-import React from 'react';
-import { Text, View } from 'react-native';
-import { ${toPascalCase(this.moduleName)} } from '${this.packagePrefix}${
-      this.moduleName
-    }';
-
-function App(): React.JSX.Element {
-  return (
-    <View style={{justifyContent: 'center', alignItems: 'center'}}>
-      <Text>{${toPascalCase(this.moduleName)}.sumNum(1, 2)}</Text>
-    </View>
-  );
-}
-export default App;
-    `;
     const appPath = path.join(this.cwd, "example/App.tsx");
-    await writeFile(appPath, appCode, { encoding: "utf8" });
+    await writeFile(
+      appPath,
+      appExampleCode(this.moduleName, this.packagePrefix),
+      { encoding: "utf8" }
+    );
   }
 
   private async prepare(pm: string) {
     await execAsync(`${pm} install`);
-    await execAsync(
-      `cd ${this.moduleName}; rm -rf nitrogen`
-    );
+    await execAsync(`cd ${this.moduleName}; rm -rf nitrogen`);
     await execAsync(`cd ${this.moduleName}; ${pm} specs; ${pm} run build`);
     await execAsync(
       `cd ${this.moduleName}; pod install --project-directory=./ios; cd ..`
@@ -435,32 +422,12 @@ export default App;
       .map(([platform, lang]) => `${platform}: '${lang.toLowerCase()}'`)
       .join(", ");
 
-    const specCode = `
-import { type HybridObject } from 'react-native-nitro-modules'
-
-export interface ${toPascalCase(
-      this.moduleName
-    )} extends HybridObject<{ ${platformLang} }> {
-  sumNum(num1: number, num2: number): number
-}
-  `;
-
-    const exportCode = `
-export * from './specs/${this.moduleName}.nitro'
-import { NitroModules } from 'react-native-nitro-modules'
-import type { ${toPascalCase(this.moduleName)} as ${toPascalCase(
-      this.moduleName
-    )}Spec } from './specs/${this.moduleName}.nitro'
-
-export const ${toPascalCase(this.moduleName)} =
-  NitroModules.createHybridObject<${toPascalCase(
-    this.moduleName
-  )}Spec>('${toPascalCase(this.moduleName)}')
-  `;
-
     await this.generateFolder("src/specs");
-    await this.generateFile(`/src/specs/${this.moduleName}.nitro.ts`, specCode);
-    await this.generateFile("/src/index.ts", exportCode);
+    await this.generateFile(
+      `/src/specs/${this.moduleName}.nitro.ts`,
+      specCode(this.moduleName, platformLang)
+    );
+    await this.generateFile("/src/index.ts", exportCode(this.moduleName));
   }
 
   async generateJSTemplateFile({ platforms, langs }: PlatformLang) {
