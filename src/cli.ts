@@ -13,10 +13,6 @@ program
     "-p, --platform <type>",
     "specify type of platform can be ios or android or both"
   )
-  .option(
-    "-d, --directory <string>",
-    "specify the directory you would like put the package"
-  )
   .option("-n, --name <string>", "specify the name of nitro module")
   .action(createModule);
 
