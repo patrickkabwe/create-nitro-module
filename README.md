@@ -1,6 +1,12 @@
 # 🚀 Nitro Module CLI
 
-Create cross-platform native modules with ease!
+A CLI tool that simplifies creating React Native modules powered by Nitro Modules.
+
+[![Version](https://img.shields.io/npm/v/create-nitro-module.svg)](https://www.npmjs.com/package/create-nitro-module)
+[![Downloads](https://img.shields.io/npm/dm/create-nitro-module.svg)](https://www.npmjs.com/package/create-nitro-module)
+[![License](https://img.shields.io/npm/l/create-nitro-module.svg)](LICENSE)
+
+![CLI Demo](./assets/nitro-module-cli.gif)
 
 ## 📦 Quick Start
 
@@ -26,7 +32,7 @@ nitro-module
 ```bash
 Usage: nitro-module [options] [command]
 
-CLI that enables you to create react native modules with Nitro Modules
+A CLI tool that simplifies creating React Native modules powered by Nitro Modules.
 
 Options:
   -v, --version          output the version number
@@ -44,22 +50,8 @@ Commands:
 bun create nitro-module my-awesome-module
 ```
 
-## 🔧 Supported Features
+## What's Inside?
 
-### Platforms
-
-- 📱 iOS
-- 🤖 Android
-
-### Languages
-
-- 🔵 Swift (iOS)
-- ☕️ Kotlin (Android)
-- 🔧 C++ (Both)
-
-### Package Managers
-
-- 🥟 bun (default)
-- 🧶 yarn
-- 📦 pnpm
-- 🎁 npm
+- 📱 Pre-configured iOS & Android native module templates
+- 📦 Automatic linking and installation
+- 📚 TypeScript support out of the box
