@@ -1,0 +1,32 @@
+{
+  "name": "create-nitro-module",
+  "description": "CLI that enables you to create react native modules with Nitro Modules",
+  "private": false,
+  "type": "module",
+  "files": [
+    "lib"
+  ],
+  "bin": {
+    "create-nitro-module": "./lib/cli.js",
+    "nitro-module": "./lib/cli.js"
+  },
+  "scripts": {
+    "dev": "bun typecheck && tsx src/cli.ts",
+    "build": "tsup src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "inquirer": "^12.1.0",
+    "kleur": "^4.1.5",
+    "ora": "^8.1.1",
+    "tsup": "^8.3.5"
+  },
+  "eslintConfig": {},
+  "prettier": {},
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
