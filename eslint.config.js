@@ -7,7 +7,7 @@ export default [
   js.configs.recommended,
   nodePlugin.configs['flat/recommended-script'],
   {
-    files: ['src/**/*.ts'],
+    files: ['src/*.ts'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
@@ -17,10 +17,14 @@ export default [
     },
     plugins: {
       '@typescript-eslint': ts,
+      n: nodePlugin,
     },
     rules: {
       ...ts.configs.recommended.rules,
+      'n/hashbang': 'off',
     },
-    ignores: ['lib/*', 'node_modules/*', 'src/assets/*'],
+  },
+  {
+    ignores: ['lib/', 'node_modules/', 'eslint.config.js'],
   },
 ]
