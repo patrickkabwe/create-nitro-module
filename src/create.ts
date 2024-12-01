@@ -4,11 +4,6 @@ import ora from "ora";
 import { nosIcon } from "./constants.js";
 import { fileGenerator } from "./generate-file.js";
 
-type CreateModule = {
-  platform: string;
-  name: string;
-};
-
 interface PlatformLanguageMap {
   [key: string]: string[];
 }
@@ -20,10 +15,13 @@ const PLATFORM_LANGUAGE_MAP: PlatformLanguageMap = {
 
 const PLATFORMS = ["ios", "android"];
 
-export const createModule = async (opt: CreateModule) => {
+export const createModule = async (name: string) => {
+  if (typeof name !== "string") {
+    name = "";
+  }
   const spinner = ora();
   try {
-    const answers = await getCreateModuleAnswer(opt);
+    const answers = await getCreateModuleAnswer(name);
     spinner.start(kleur.yellow("🔄 Creating your Nitro Module..."));
     await fileGenerator.generate({
       langs: answers.langs,
@@ -37,7 +35,9 @@ export const createModule = async (opt: CreateModule) => {
     );
     spinner.succeed(kleur.green("✨ Nitro Module created successfully!"));
   } catch (error) {
-    spinner.fail(kleur.red(`❌ Failed to create module: ${error.message}`));
+    spinner.fail(
+      kleur.red(`❌ Failed to create nitro module: ${error.message}`)
+    );
   }
 };
 
@@ -45,13 +45,13 @@ export const generateModule = () => {
   throw new Error("Not Implemented");
 };
 
-const getCreateModuleAnswer = async (opt: CreateModule) => {
+const getCreateModuleAnswer = async (name: string) => {
   const moduleName = await inquirer.prompt([
     {
       type: "input",
       message: kleur.cyan("📝 What is the name of your module?"),
       name: "name",
-      when: !opt.name,
+      when: !name,
       validate: (input: string) => {
         if (input.trim().length < 1) {
           return kleur.red("⚠️  Module name cannot be empty");
@@ -131,7 +131,7 @@ const getCreateModuleAnswer = async (opt: CreateModule) => {
     default: "bun",
   });
   return {
-    moduleName: moduleName.name || opt.name,
+    moduleName: moduleName.name || name,
     platforms: platforms.names,
     langs: langs.names,
     pm: pm.name,
