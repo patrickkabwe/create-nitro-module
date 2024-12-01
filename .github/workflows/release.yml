@@ -6,8 +6,8 @@ on:
       - main
 
 permissions:
-  contents: write 
-  pages: write
+  contents: write
+  pull-requests: write
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -17,7 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js 20.x
         uses: oven-sh/setup-bun@v2
@@ -29,6 +31,14 @@ jobs:
 
       - name: Restore ccache
         uses: hendrikmuhs/ccache-action@v1.2
+
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
       - name: Get Version
         id: get-version
@@ -46,3 +56,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Release Status
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          echo "🎉 Published version ${{ steps.get-version.outputs.version }}"
