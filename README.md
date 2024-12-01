@@ -6,7 +6,7 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 [![Downloads](https://img.shields.io/npm/dm/create-nitro-module.svg)](https://www.npmjs.com/package/create-nitro-module)
 [![License](https://img.shields.io/npm/l/create-nitro-module.svg)](LICENSE)
 
-![CLI Demo](./assets/nitro-module-cli.gif)
+![CLI Demo](https://raw.githubusercontent.com/patrickkabwe/nitro-cli/refs/heads/main/assets/nitro-module-cli.gif)
 
 ## 📦 Quick Start
 
