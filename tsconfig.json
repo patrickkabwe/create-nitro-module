@@ -1,17 +1,13 @@
 {
   "compilerOptions": {
+    "target": "es2021",
+    "module": "ESNext",
     "outDir": "lib",
-    "noImplicitAny": true,
-    "diagnostics": false,
-    "noImplicitThis": true,
-    "noEmitOnError": true,
+    "moduleResolution": "bundler",
+    "strict": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "moduleResolution": "nodenext",
-    "lib": ["esnext", "es6", "dom"],
-    "target": "esnext",
-    "module": "NodeNext"
+    "skipLibCheck": false
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "assets"]
+  "exclude": ["node_modules", "lib"]
 }

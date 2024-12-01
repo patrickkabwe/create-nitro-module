@@ -16,19 +16,20 @@
     "nitro-modules",
     "nitro-modules-cli"
   ],
+  "license": "MIT",
   "bin": {
     "create-nitro-module": "./lib/cli.js",
     "nitro-module": "./lib/cli.js"
   },
   "scripts": {
     "dev": "bun typecheck && tsx src/cli.ts",
-    "build": "bun typecheck && tsup src",
+    "build": "rm -rf lib && bun typecheck && tsup src",
     "typecheck": "tsc --noEmit",
     "changeset": "changeset",
     "version": "changeset version",
     "prerelease": "rm -rf ./lib/assets",
     "release": "bun run build && bun version && changeset publish",
-    "lint": "eslint . --ignore-pattern 'eslint.config.js' --no-warn-ignored",
+    "lint": "eslint src/*.ts",
     "format": "prettier --write src/*.ts"
   },
   "dependencies": {

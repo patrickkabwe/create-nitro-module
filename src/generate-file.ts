@@ -9,9 +9,9 @@ import {
 } from 'node:fs/promises'
 import path from 'node:path'
 import util from 'node:util'
-import packageJsonFile from './assets/package.json' assert { type: 'json' }
-import tsconfigFile from './assets/tsconfig.json' assert { type: 'json' }
-import workspacePackageJsonFile from './assets/workspace-package.json' assert { type: 'json' }
+import packageJsonFile from '../assets/package.json'
+import tsconfigFile from '../assets/tsconfig.json'
+import workspacePackageJsonFile from '../assets/workspace-package.json'
 import { androidManifestCode, getKotlinCode } from './code.android.js'
 import { getSwiftCode } from './code.ios.js'
 import { appExampleCode, exportCode, specCode } from './code.js.js'
@@ -55,11 +55,11 @@ type PlatformLang = {
 }
 
 class FileGenerator {
-  private tmpDir: string
+  private tmpDir = ''
   private cwd = process.cwd()
   private packagePrefix = 'react-native-'
-  private moduleName: string
-  private androidPackageName: string
+  private moduleName = ''
+  private androidPackageName = ''
 
   constructor() {}
 
@@ -199,7 +199,7 @@ class FileGenerator {
 
     nitroJson = {
       $schema:
-        'https://raw.githubusercontent.com/patrickkabwe/nitro-cli/refs/heads/main/src/assets/nitro-schema.json',
+        'https://raw.githubusercontent.com/patrickkabwe/nitro-cli/refs/heads/main/assets/nitro-schema.json',
       ...nitroJson,
       autolinking: generateAutolinking(toPascalCase(this.moduleName), langs),
     }
