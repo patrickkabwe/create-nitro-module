@@ -6,18 +6,20 @@ import { createModule, generateModule } from "./create.js";
 
 const program = new Command();
 program
-  .name("create-nitro-modules")
+  .name("nitro-module")
   .description(packageJson.description)
   .version("Create nitro version: 0.1.0", "-v, --version")
-  .option(
-    "-p, --platform <type>",
-    "specify type of platform can be ios or android or both"
-  )
-  .option("-n, --name <string>", "specify the name of nitro module")
   .action(createModule);
 
 program
-  .command("generate <name>")
+  .command("create [moduleName]")
+  .description(
+    "create a new nitro module. If no moduleName is provided, you will be prompted for one."
+  )
+  .action(createModule);
+
+program
+  .command("generate <moduleName>")
   .description("generate a hybrid object into the package directory")
   .action(generateModule);
 
