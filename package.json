@@ -27,7 +27,7 @@
     "changeset": "changeset",
     "version": "changeset version",
     "prerelease": "rm -rf ./lib/assets",
-    "release": "bun run build && changeset publish",
+    "release": "bun run build && bun version && changeset publish",
     "lint": "eslint . --ignore-pattern 'eslint.config.js' --no-warn-ignored",
     "format": "prettier --write src/*.ts"
   },
