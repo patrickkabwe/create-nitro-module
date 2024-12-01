@@ -1,5 +1,13 @@
 # create-nitro-module
 
+## 0.18.2
+
+### Patch Changes
+
+- 96e751f: - Fix bug where `bun create nitro-module [name]` was not working
+  - Minify the tsconfig file
+  - Update eslint rules to meet project needs
+
 ## 0.18.1
 
 ### Patch Changes
