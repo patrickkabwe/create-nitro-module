@@ -85,3 +85,4 @@ lib/
 
 # TypeScript
 tsconfig.tsbuildinfo
+.ccache
