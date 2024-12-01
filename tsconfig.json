@@ -8,11 +8,10 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "moduleResolution": "nodenext",
-    
     "lib": ["esnext", "es6", "dom"],
     "target": "esnext",
     "module": "NodeNext"
   },
-  "include": ["src", "templates"],
-  "exclude": ["node_modules"]
+  "include": ["src"],
+  "exclude": ["node_modules", "assets"]
 }
