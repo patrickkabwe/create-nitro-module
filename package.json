@@ -8,6 +8,14 @@
     "lib",
     "README.md"
   ],
+  "keywords": [
+    "react native",
+    "react-native",
+    "nitro-create",
+    "nitro-cli",
+    "nitro-modules",
+    "nitro-modules-cli"
+  ],
   "bin": {
     "create-nitro-module": "./lib/cli.js",
     "nitro-module": "./lib/cli.js"
@@ -19,7 +27,7 @@
     "changeset": "changeset",
     "version": "changeset version",
     "prerelease": "rm -rf ./lib/assets",
-    "release": "bun run build && changeset publish",
+    "release": "bun run build && bun version && changeset publish",
     "lint": "eslint . --ignore-pattern 'eslint.config.js' --no-warn-ignored",
     "format": "prettier --write src/*.ts"
   },

@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  pages: write
+
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
@@ -36,7 +40,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: bun release 
+          publish: bun release
           commit: 'chore(release): version packages v${{ steps.get-version.outputs.version }}'
           title: 'chore(release): version packages v${{ steps.get-version.outputs.version }}'
         env:
