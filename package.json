@@ -4,7 +4,8 @@
   "private": false,
   "type": "module",
   "files": [
-    "lib"
+    "lib",
+    "lib/assets"
   ],
   "bin": {
     "create-nitro-module": "./lib/cli.js",
