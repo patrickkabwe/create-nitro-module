@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 0.18.3
+
+### Patch Changes
+
+- 1272085: adds nitro-module gif file and modifies docs
+
 ## 0.18.2
 
 ### Patch Changes
