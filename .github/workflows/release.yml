@@ -17,6 +17,8 @@ jobs:
 
       - name: Setup Node.js 20.x
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Install npm dependencies (bun)
         run: bun install
@@ -34,7 +36,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: bun release
+          publish: bun release 
           commit: 'chore(release): version packages v${{ steps.get-version.outputs.version }}'
           title: 'chore(release): version packages v${{ steps.get-version.outputs.version }}'
         env:
