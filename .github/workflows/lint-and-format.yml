@@ -18,6 +18,8 @@ jobs:
 
       - name: Setup Node.js 20.x
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Install npm dependencies (bun)
         run: bun install
