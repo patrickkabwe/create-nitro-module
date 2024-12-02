@@ -1,3 +1,4 @@
+import kleur from 'kleur'
 import { exec } from 'node:child_process'
 import {
   access,
@@ -12,6 +13,7 @@ import util from 'node:util'
 import packageJsonFile from '../assets/package.json'
 import tsconfigFile from '../assets/tsconfig.json'
 import workspacePackageJsonFile from '../assets/workspace-package.json'
+import projectPackageJsonFile from '../package.json'
 import { androidManifestCode, getKotlinCode } from './code.android.js'
 import { getSwiftCode } from './code.ios.js'
 import { appExampleCode, exportCode, specCode } from './code.js.js'
@@ -20,11 +22,15 @@ import {
   ANDROID_NAME_SPACE_TAG,
   CXX_NAME_SPACE_TAG,
   IOS_MODULE_NAME_TAG,
+  messages,
+  nosIcon,
 } from './constants.js'
+import { NitroSpinner } from './nitro-spinner.js'
 import {
   generateAutolinking,
   getGitUserInfo,
   mapPlatformToLanguage,
+  replaceHyphen,
   replaceTag,
   toPascalCase,
 } from './utils.js'
@@ -54,20 +60,24 @@ type PlatformLang = {
   platforms: SupportedPlatform[]
 }
 
-class FileGenerator {
+export class FileGenerator {
   private tmpDir = ''
   private cwd = process.cwd()
   private packagePrefix = 'react-native-'
   private moduleName = ''
   private androidPackageName = ''
+  private spinner: NitroSpinner
 
-  constructor() {}
+  constructor(spinner: NitroSpinner) {
+    this.spinner = spinner
+  }
 
   public async generate({ moduleName, langs, platforms, pm }: Generate) {
     this.tmpDir = `/tmp/${moduleName}`
     this.moduleName = moduleName
-    this.androidPackageName = `com.${this.moduleName.toLowerCase()}`
+    this.androidPackageName = `com.${replaceHyphen(this.moduleName)}`
 
+    this.spinner.start(kleur.yellow(messages.creating))
     await this.generateFolder()
     await this.cloneNitroTemplate()
     await this.copyFiles()
@@ -87,84 +97,37 @@ class FileGenerator {
     }
     await this.generatePackageJsonFile()
     await this.generateJSFiles({ platforms, langs })
+    this.spinner.succeed(kleur.green(messages.creating))
+
+    this.spinner.update(kleur.yellow(messages.installing))
     await this.cloneNitroExample()
     await this.prepare(pm ?? 'bun')
+    this.spinner.succeed(kleur.green(messages.installing))
+
     await rm(`${this.tmpDir}`, { recursive: true, force: true })
+    this.spinner.succeed(kleur.green(messages.success))
+    console.log(nosIcon)
+    console.log(
+      kleur
+        .cyan()
+        .dim(`Create Nitro Module - ${projectPackageJsonFile.description}\n`)
+    )
   }
 
   private async cloneNitroTemplate() {
-    let exists: boolean = false
+    let exists = false
     try {
       await access('/tmp/nitro')
       exists = true
     } catch {
       exists = false
     }
-
+    await rm(`${this.tmpDir}`, { recursive: true, force: true })
     if (!exists) {
-      await rm(`${this.tmpDir}`, { recursive: true, force: true })
       await execAsync(
         'git clone --depth 1 https://github.com/mrousavy/nitro /tmp/nitro'
       )
     }
-  }
-
-  private async cloneNitroExample() {
-    let exists: boolean = false
-    try {
-      await access('./example')
-      exists = true
-    } catch {
-      exists = false
-    }
-
-    if (!exists) {
-      await rm(`${this.tmpDir}`, { recursive: true, force: true })
-      await execAsync(
-        'git clone --depth 1 https://github.com/patrickkabwe/nitro-example example'
-      )
-    }
-    await rm(path.join(this.cwd, 'example/.git'), {
-      recursive: true,
-      force: true,
-    })
-
-    const packageJsonPath = path.join(this.cwd, 'example/package.json')
-    const packageJsonStr = await readFile(packageJsonPath, {
-      encoding: 'utf8',
-    })
-    const packageJson = JSON.parse(packageJsonStr)
-    packageJson.scripts = {
-      ...packageJson.scripts,
-      ios: "react-native run-ios --simulator='iPhone 16'",
-      start: 'react-native start --reset-cache',
-      pod: 'pod install --project-directory=ios',
-    }
-    packageJson.dependencies = {
-      ...packageJson.dependencies,
-      'react-native-nitro-modules': '*',
-      [`${this.packagePrefix}${this.moduleName}`]: '*',
-    }
-
-    await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2), {
-      encoding: 'utf8',
-    })
-
-    const appPath = path.join(this.cwd, 'example/App.tsx')
-    await writeFile(
-      appPath,
-      appExampleCode(this.moduleName, this.packagePrefix),
-      { encoding: 'utf8' }
-    )
-  }
-
-  private async prepare(pm: string) {
-    await execAsync(`${pm} install`)
-    await execAsync(`cd ${this.moduleName}; rm -rf nitrogen`)
-    await execAsync(`cd ${this.moduleName}; ${pm} specs; ${pm} run build`)
-    await execAsync(
-      `cd ${this.moduleName}; pod install --project-directory=./ios; cd ..`
-    )
   }
 
   private async copyFiles() {
@@ -186,8 +149,8 @@ class FileGenerator {
 
   private async generateNitroJson({ langs }: PlatformLang) {
     const replacements = {
-      [ANDROID_NAME_SPACE_TAG]: this.moduleName.toLowerCase(),
-      [CXX_NAME_SPACE_TAG]: this.moduleName.toLowerCase(),
+      [ANDROID_NAME_SPACE_TAG]: replaceHyphen(this.moduleName),
+      [CXX_NAME_SPACE_TAG]: replaceHyphen(this.moduleName),
       [IOS_MODULE_NAME_TAG]: toPascalCase(this.moduleName),
       [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(this.moduleName),
     }
@@ -262,7 +225,7 @@ class FileGenerator {
   private async generateAndroidFiles() {
     await this.generateFolder('android/src/main/cpp')
     await this.generateFolder(
-      `android/src/main/java/com/${this.moduleName.toLowerCase()}`
+      `android/src/main/java/com/${replaceHyphen(this.moduleName)}`
     )
 
     await this.generateFile(
@@ -293,8 +256,8 @@ class FileGenerator {
     )
 
     const replacements = {
-      [`com.margelo.nitro.${ANDROID_NAME_SPACE_TAG}`]: `com.${this.moduleName.toLowerCase()}`,
-      [ANDROID_CXX_LIB_NAME_TAG]: this.moduleName,
+      [`com.margelo.nitro.${ANDROID_NAME_SPACE_TAG}`]: this.androidPackageName,
+      [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(this.moduleName),
     }
 
     await this.generateFile(
@@ -318,7 +281,7 @@ class FileGenerator {
     const prefixPath = 'android'
     const cmakeListFilePath = path.join(this.tmpDir, prefixPath, cmakeListFile)
     const replacements = {
-      [ANDROID_CXX_LIB_NAME_TAG]: this.moduleName,
+      [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(this.moduleName),
     }
     await this.generateFile(
       `${prefixPath}/${cmakeListFile}`,
@@ -339,8 +302,8 @@ class FileGenerator {
     )
 
     const replacements = {
-      [ANDROID_CXX_LIB_NAME_TAG]: this.moduleName,
-      [ANDROID_NAME_SPACE_TAG]: this.moduleName.toLowerCase(),
+      [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(this.moduleName),
+      [ANDROID_NAME_SPACE_TAG]: replaceHyphen(this.moduleName),
     }
 
     await this.generateFile(
@@ -364,7 +327,7 @@ class FileGenerator {
     const replacements = {
       [`com.margelo.nitro.${ANDROID_NAME_SPACE_TAG}`]: this.androidPackageName,
       [`${ANDROID_CXX_LIB_NAME_TAG}Package`]: androidPackageFile.split('.')[0],
-      [ANDROID_CXX_LIB_NAME_TAG]: this.moduleName,
+      [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(this.moduleName),
     }
 
     await this.generateFile(
@@ -382,7 +345,7 @@ class FileGenerator {
     const { name } = getGitUserInfo()
     const userName = name.replaceAll(' ', '').toLowerCase()
     const moduleName = `${this.packagePrefix}${this.moduleName}`.toLowerCase()
-    // package json
+
     const packageJsonFilePath = path.join(
       this.cwd + `/${this.moduleName}`,
       'package.json'
@@ -441,6 +404,76 @@ class FileGenerator {
     await this.generateFile('/src/index.ts', exportCode(this.moduleName))
   }
 
+  private async cloneNitroExample() {
+    let exists: boolean = false
+    try {
+      await access('./example')
+      exists = true
+    } catch {
+      exists = false
+    }
+
+    if (!exists) {
+      await rm(`${this.tmpDir}`, { recursive: true, force: true })
+      await execAsync(
+        'git clone --depth 1 https://github.com/patrickkabwe/nitro-example example'
+      )
+    }
+    await rm(path.join(this.cwd, 'example/.git'), {
+      recursive: true,
+      force: true,
+    })
+
+    const packageJsonPath = path.join(this.cwd, 'example/package.json')
+    const packageJsonStr = await readFile(packageJsonPath, {
+      encoding: 'utf8',
+    })
+    const packageJson = JSON.parse(packageJsonStr)
+    packageJson.scripts = {
+      ...packageJson.scripts,
+      ios: "react-native run-ios --simulator='iPhone 16'",
+      start: 'react-native start --reset-cache',
+      pod: 'pod install --project-directory=ios',
+    }
+    packageJson.dependencies = {
+      ...packageJson.dependencies,
+      'react-native-nitro-modules': '*',
+      [`${this.packagePrefix}${this.moduleName}`]: '*',
+    }
+
+    await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2), {
+      encoding: 'utf8',
+    })
+
+    const appPath = path.join(this.cwd, 'example/App.tsx')
+    await writeFile(
+      appPath,
+      appExampleCode(this.moduleName, this.packagePrefix),
+      { encoding: 'utf8' }
+    )
+  }
+
+  private async prepare(pm: string) {
+    await execAsync(`${pm} install`)
+    await execAsync(`cd ${this.moduleName}; rm -rf nitrogen`)
+    await execAsync(
+      `cd ${this.moduleName}; ${pm} specs; ${pm} run build; cd ..`
+    )
+    await execAsync(`cd example; pod install --project-directory=./ios`)
+    // Android custom package workaround
+    // AwesomeLibraryOnLoad.cpp
+    // tmp/tem/awesome-library/nitrogen/generated/android/AwesomeLibraryOnLoad.cpp
+    const androidOnLoadFile = path.join(
+      process.cwd(),
+      this.moduleName,
+      'nitrogen/generated/android',
+      `${toPascalCase(this.moduleName)}OnLoad.cpp`
+    )
+
+    const str = await readFile(androidOnLoadFile, { encoding: 'utf8' })
+    await writeFile(androidOnLoadFile, str.replace('margelo/nitro/', ''))
+  }
+
   async generateJSTemplateFile({ platforms, langs }: PlatformLang) {
     const platformToLangMap = mapPlatformToLanguage(platforms, langs)
 
@@ -497,5 +530,3 @@ export interface ${toPascalCase(
     )
   }
 }
-
-export const fileGenerator = new FileGenerator()

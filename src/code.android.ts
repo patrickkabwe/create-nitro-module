@@ -1,4 +1,4 @@
-import { toPascalCase } from './utils.js'
+import { replaceHyphen, toPascalCase } from './utils.js'
 
 export const androidManifestCode = `
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -8,7 +8,7 @@ export const androidManifestCode = `
 export const getKotlinCode = (moduleName: string, packageT: string) => `
 package ${packageT}
 
-import com.margelo.nitro.${moduleName.toLowerCase()}.Hybrid${toPascalCase(
+import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
   moduleName
 )}Spec
 

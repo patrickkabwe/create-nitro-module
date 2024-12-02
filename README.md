@@ -8,8 +8,15 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 
 ![CLI Demo](https://raw.githubusercontent.com/patrickkabwe/nitro-cli/refs/heads/main/assets/nitro-module-cli.gif)
 
-## 📦 Quick Start
+## Features
 
+- 📱 Pre-configured iOS & Android native module templates
+- 📦 Automatic linking and installation
+- 📚 TypeScript support out of the box
+
+## Installation & Usage
+
+### Quick Start
 ```bash
 # Using bun
 bun create nitro-module
@@ -27,31 +34,59 @@ yarn create nitro-module
 nitro-module
 ```
 
-## ⚡️ Options
-
+### CLI Commands
 ```bash
-Usage: nitro-module [options] [command]
-
-A CLI tool that simplifies creating React Native modules powered by Nitro Modules.
+Usage: create-nitro-module [options] [command]
 
 Options:
   -v, --version          output the version number
   -h, --help             display help for command
 
 Commands:
-  create [moduleName]    create a new nitro module. If no moduleName is provided, you will be prompted for one.
+  create [moduleName]    create a new nitro module. If no moduleName is provided, 
+                        you will be prompted for one.
   generate <moduleName>  generate a hybrid object into the package directory
 ```
 
-## 🎯 Examples
-
+### Examples
 ```bash
 # Create a new module
 bun create nitro-module my-awesome-module
+
+cd example
+
+bun android # build android app
+
+bun ios # build ios app
 ```
 
-## What's Inside?
+## Troubleshooting
 
-- 📱 Pre-configured iOS & Android native module templates
-- 📦 Automatic linking and installation
-- 📚 TypeScript support out of the box
+### iOS Build Issues
+1. **Pod Install Fails**
+   ```bash
+   cd yourpackage/ios
+   pod deintegrate
+   pod install
+   ```
+
+2. **Missing Header Files**
+   - Clean build folder in Xcode
+   - Ensure all native dependencies are properly linked
+   - Rebuild the project
+
+### Android Build Issues
+1. **Gradle Sync Failed**
+   ```bash
+   cd yourpackage/android
+   ./gradlew clean
+   ./gradlew build
+   ```
+
+2. **Missing Dependencies**
+   - Check `build.gradle` for correct dependencies
+   - Sync project with Gradle files
+   - Invalidate caches and restart Android Studio
+
+
+For additional support, please [open an issue](https://github.com/patrickkabwe/nitro-module-cli/issues) on our GitHub repository.

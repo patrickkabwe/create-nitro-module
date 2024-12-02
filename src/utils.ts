@@ -11,6 +11,10 @@ export const replaceTag = (tag: string, oldValue: string, newValue: string) => {
   return oldValue?.replaceAll(tag, newValue)
 }
 
+export const replaceHyphen = (str: string) => {
+  return str.toLowerCase()?.replaceAll('-', '')
+}
+
 export const getGitUserInfo = () => {
   try {
     const name = execSync('git config user.name').toString().trim()

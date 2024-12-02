@@ -6,9 +6,9 @@ import { createModule, generateModule } from './create.js'
 
 const program = new Command()
 program
-  .name('nitro-module')
+  .name(packageJson.name)
   .description(packageJson.description)
-  .version('Create nitro version: 0.1.0', '-v, --version')
+  .version('CLI Version: 0.1.0', '-v, --version')
   .action(createModule)
 
 program

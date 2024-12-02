@@ -14,6 +14,9 @@ export default [
         ecmaVersion: 'latest',
         sourceType: 'module',
       },
+      globals: {
+        NodeJS: true,
+      },
     },
     plugins: {
       '@typescript-eslint': ts,
@@ -22,6 +25,7 @@ export default [
     rules: {
       ...ts.configs.recommended.rules,
       'n/hashbang': 'off',
+      'n/no-process-exit': 'off',
     },
   },
   {

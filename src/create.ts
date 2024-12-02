@@ -1,8 +1,7 @@
 import inquirer from 'inquirer'
 import kleur from 'kleur'
-import ora from 'ora'
-import { nosIcon } from './constants.js'
-import { fileGenerator } from './generate-file.js'
+import { FileGenerator } from './generate-file.js'
+import { NitroSpinner } from './nitro-spinner.js'
 
 interface PlatformLanguageMap {
   [key: string]: string[]
@@ -19,24 +18,19 @@ export const createModule = async (name: string) => {
   if (typeof name !== 'string') {
     name = ''
   }
-  const spinner = ora()
+  const spinner = new NitroSpinner()
   try {
     const answers = await getCreateModuleAnswer(name)
-    spinner.start(kleur.yellow('🔄 Creating your Nitro Module...'))
+    const fileGenerator = new FileGenerator(spinner)
     await fileGenerator.generate({
       langs: answers.langs,
       moduleName: answers.moduleName,
       platforms: answers.platforms,
       pm: answers.pm,
     })
-    console.log(nosIcon)
-    console.log(
-      kleur.cyan().dim('Nitro CLI - Build Cross-Platform Native Modules\n')
-    )
-    spinner.succeed(kleur.green('✨ Nitro Module created successfully!'))
   } catch (error) {
-    spinner.fail(
-      kleur.red(`❌ Failed to create nitro module: ${(error as Error).message}`)
+    spinner.error(
+      kleur.red(`Failed to create nitro module: ${(error as Error).message}`)
     )
   }
 }
@@ -46,20 +40,19 @@ export const generateModule = () => {
 }
 
 const getCreateModuleAnswer = async (name: string) => {
-  const moduleName = await inquirer.prompt([
-    {
-      type: 'input',
-      message: kleur.cyan('📝 What is the name of your module?'),
-      name: 'name',
-      when: !name,
-      validate: (input: string) => {
-        if (input.trim().length < 1) {
-          return kleur.red('⚠️  Module name cannot be empty')
-        }
-        return true
-      },
+  const moduleName = await inquirer.prompt({
+    type: 'input',
+    message: kleur.cyan('📝 What is the name of your module?'),
+    name: 'name',
+    when: !name,
+    default: 'awesome-library',
+    validate: (input: string) => {
+      if (input.trim().length < 1) {
+        return kleur.red('⚠️  Module name cannot be empty')
+      }
+      return true
     },
-  ])
+  })
 
   const platforms = await inquirer.prompt({
     type: 'checkbox',
@@ -130,6 +123,21 @@ const getCreateModuleAnswer = async (name: string) => {
     choices: ['bun', 'yarn', 'pnpm', 'npm'],
     default: 'bun',
   })
+
+  const packageName = await inquirer.prompt({
+    type: 'confirm',
+    message: kleur.cyan(
+      `✨ Your package name will be called: "${kleur.green('react-native-' + (moduleName.name || name).toLowerCase())}" would you like to continue?`
+    ),
+    name: 'name',
+    choices: ['y', 'n'],
+    default: true,
+  })
+
+  if (!packageName.name) {
+    process.exit(0)
+  }
+
   return {
     moduleName: moduleName.name || name,
     platforms: platforms.names,
