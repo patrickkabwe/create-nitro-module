@@ -1,5 +1,14 @@
 # create-nitro-module
 
+## 0.18.4
+
+### Patch Changes
+
+- 32b9edb: - Fix build issue on android
+  - Adds new confirmation question
+  - Adds nitro-spinner
+  - Refactor cli
+
 ## 0.18.3
 
 ### Patch Changes
