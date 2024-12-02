@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 0.18.5
+
+### Patch Changes
+
+- b0789c4: add git urls to package.json
+
 ## 0.18.4
 
 ### Patch Changes
