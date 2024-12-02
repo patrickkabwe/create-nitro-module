@@ -7,8 +7,8 @@ import { ${toPascalCase(moduleName)} } from '${packagePrefix}${moduleName}';
 
 function App(): React.JSX.Element {
   return (
-    <View style={{justifyContent: 'center', alignItems: 'center'}}>
-      <Text style={{fontSize:40,color:'green'}}>
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text style={{fontSize:40, color:'green'}}>
       {${toPascalCase(moduleName)}.sumNum(1, 2)}
       </Text>
     </View>
