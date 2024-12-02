@@ -21,6 +21,15 @@
     "create-nitro-module": "./lib/cli.js",
     "nitro-module": "./lib/cli.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patrickkabwe/create-nitro-module.git"
+  },
+  "author": "Patrick Kabwe (https://github.com/patrickkabwe)",
+  "bugs": {
+    "url": "https://github.com/patrickkabwe/create-nitro-module/issues"
+  },
+  "homepage": "https://github.com/patrickkabwe/create-nitro-module#readme",
   "scripts": {
     "dev": "bun typecheck && tsx src/cli.ts",
     "build": "rm -rf lib && bun typecheck && tsup src",
