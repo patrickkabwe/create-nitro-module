@@ -1,0 +1,13 @@
+{
+  "$schema": "./ni",
+  "cxxNamespace": ["$$cxxNamespace$$"],
+  "ios": {
+    "iosModuleName": "$$iosModuleName$$"
+  },
+  "android": {
+    "androidNamespace": ["$$androidNamespace$$"],
+    "androidCxxLibName": "$$androidCxxLibName$$"
+  },
+  "autolinking": {},
+  "ignorePaths": ["node_modules"]
+}
