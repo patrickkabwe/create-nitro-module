@@ -14,6 +14,27 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 - 📦 Automatic linking and installation
 - 📚 TypeScript support out of the box
 
+## Project Structure
+
+```
+.
+├── bun.lockb
+├── example
+├── react-native-awesome-library
+│   ├── AwesomeLibrary.podspec
+│   ├── android
+│   ├── ios
+│   ├── src
+│       ├── index.ts
+│       └── specs
+│   ├── nitrogen
+│   ├── nitro.json
+│   ├── babel.config.js
+│   ├── package.json
+│   └── tsconfig.json
+└── package.json
+```
+
 ## Installation & Usage
 
 ### Quick Start

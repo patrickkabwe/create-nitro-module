@@ -9,7 +9,9 @@ import {
   writeFile,
 } from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import util from 'node:util'
+import nitroJsonFile from '../assets/nitro-temp.json'
 import packageJsonFile from '../assets/package.json'
 import tsconfigFile from '../assets/tsconfig.json'
 import workspacePackageJsonFile from '../assets/workspace-package.json'
@@ -22,6 +24,7 @@ import {
   ANDROID_NAME_SPACE_TAG,
   CXX_NAME_SPACE_TAG,
   IOS_MODULE_NAME_TAG,
+  JS_PACKAGE_NAME_TAG,
   messages,
   nosIcon,
 } from './constants.js'
@@ -36,6 +39,8 @@ import {
 } from './utils.js'
 
 const execAsync = util.promisify(exec)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 export enum SupportedLang {
   SWIFT = 'swift',
@@ -63,7 +68,8 @@ type PlatformLang = {
 export class FileGenerator {
   private tmpDir = ''
   private cwd = process.cwd()
-  private packagePrefix = 'react-native-'
+  private packagePrefix = 'react-native-' as const
+  private finalModuleName = ''
   private moduleName = ''
   private androidPackageName = ''
   private spinner: NitroSpinner
@@ -75,6 +81,7 @@ export class FileGenerator {
   public async generate({ moduleName, langs, platforms, pm }: Generate) {
     this.tmpDir = `/tmp/${moduleName}`
     this.moduleName = moduleName
+    this.finalModuleName = `${this.packagePrefix}${moduleName}`.toLowerCase()
     this.androidPackageName = `com.${replaceHyphen(this.moduleName)}`
 
     this.spinner.start(kleur.yellow(messages.creating))
@@ -106,11 +113,10 @@ export class FileGenerator {
 
     await rm(`${this.tmpDir}`, { recursive: true, force: true })
     this.spinner.succeed(kleur.green(messages.success))
-    console.log(nosIcon)
+    console.log(nosIcon(this.finalModuleName, pm))
+
     console.log(
-      kleur
-        .cyan()
-        .dim(`Create Nitro Module - ${projectPackageJsonFile.description}\n`)
+      kleur.dim(`Create Nitro Module - ${projectPackageJsonFile.description}\n`)
     )
   }
 
@@ -133,16 +139,11 @@ export class FileGenerator {
   private async copyFiles() {
     await execAsync(`cp -R /tmp/nitro/packages/template ${this.tmpDir}`)
 
-    const filesToCopy = [
-      'react-native.config.js',
-      'babel.config.js',
-      '.watchmanconfig',
-      '.gitignore',
-    ]
+    const filesToCopy = ['babel.config.js', '.watchmanconfig', '.gitignore']
     for (const file of filesToCopy) {
       await copyFile(
         path.join(this.tmpDir, file),
-        path.join(process.cwd(), this.moduleName, file)
+        path.join(process.cwd(), this.finalModuleName, file)
       )
     }
   }
@@ -154,24 +155,15 @@ export class FileGenerator {
       [IOS_MODULE_NAME_TAG]: toPascalCase(this.moduleName),
       [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(this.moduleName),
     }
-    const nitroFilePath = path.join(this.tmpDir, 'nitro.json')
-    const nitroJsonFile = await readFile(nitroFilePath, {
-      encoding: 'utf8',
-    })
-    let nitroJson = JSON.parse(nitroJsonFile)
-
-    nitroJson = {
-      $schema:
-        'https://raw.githubusercontent.com/patrickkabwe/nitro-cli/refs/heads/main/assets/nitro-schema.json',
-      ...nitroJson,
-      autolinking: generateAutolinking(toPascalCase(this.moduleName), langs),
-    }
-
-    await this.generateFile(
+    nitroJsonFile.autolinking = generateAutolinking(
+      toPascalCase(this.moduleName),
+      langs
+    )
+    await this.generateModuleFile(
       'nitro.json',
       await this.replacePlaceholder({
         replacements,
-        data: JSON.stringify(nitroJson, null, 2),
+        data: JSON.stringify(nitroJsonFile, null, 2),
       })
     )
   }
@@ -184,12 +176,11 @@ export class FileGenerator {
     const { name } = getGitUserInfo()
     const replacements = {
       [IOS_MODULE_NAME_TAG]: toPascalCase(this.moduleName),
-      'mrousavy/nitro': `${name
-        .replaceAll(' ', '')
-        .toLowerCase()}/${this.moduleName.toLowerCase()}`,
+      'mrousavy/nitro':
+        `${name.replaceAll(' ', '')}/${this.finalModuleName}`.toLowerCase(),
     }
 
-    await this.generateFile(
+    await this.generateModuleFile(
       `${toPascalCase(this.moduleName)}.podspec`,
       await this.replacePlaceholder({
         filePath: podspecFilePath,
@@ -209,14 +200,14 @@ export class FileGenerator {
       'Created by Marc Rousavy on 22.07.24.': `Created by ${name} on ${new Date().toLocaleDateString()}`, //TODO: user regex
     }
 
-    await this.generateFile(
+    await this.generateModuleFile(
       'ios/Bridge.h',
       await this.replacePlaceholder({
         filePath: bridgeFilePath,
         replacements,
       })
     )
-    await this.generateFile(
+    await this.generateModuleFile(
       `ios/${toPascalCase(this.moduleName)}.swift`,
       getSwiftCode(this.moduleName)
     )
@@ -228,11 +219,11 @@ export class FileGenerator {
       `android/src/main/java/com/${replaceHyphen(this.moduleName)}`
     )
 
-    await this.generateFile(
+    await this.generateModuleFile(
       `android/src/main/AndroidManifest.xml`,
       androidManifestCode
     )
-    await this.generateFile(
+    await this.generateModuleFile(
       `android/src/main/java/${this.androidPackageName
         .split('.')
         .join('/')}/${toPascalCase(this.moduleName)}.kt`,
@@ -260,14 +251,14 @@ export class FileGenerator {
       [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(this.moduleName),
     }
 
-    await this.generateFile(
+    await this.generateModuleFile(
       `${prefixPath}/${gradleFile}`,
       await this.replacePlaceholder({
         filePath: gradleFilePath,
         replacements,
       })
     )
-    await this.generateFile(
+    await this.generateModuleFile(
       `${prefixPath}/${gradlePropertiesFile}`,
       await this.replacePlaceholder({
         filePath: gradlePropertiesFilePath,
@@ -283,7 +274,7 @@ export class FileGenerator {
     const replacements = {
       [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(this.moduleName),
     }
-    await this.generateFile(
+    await this.generateModuleFile(
       `${prefixPath}/${cmakeListFile}`,
       await this.replacePlaceholder({
         filePath: cmakeListFilePath,
@@ -306,7 +297,7 @@ export class FileGenerator {
       [ANDROID_NAME_SPACE_TAG]: replaceHyphen(this.moduleName),
     }
 
-    await this.generateFile(
+    await this.generateModuleFile(
       `${prefixPath}/${cppAdapterFile}`,
       await this.replacePlaceholder({
         filePath: cppAdapterFilePath,
@@ -330,7 +321,7 @@ export class FileGenerator {
       [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(this.moduleName),
     }
 
-    await this.generateFile(
+    await this.generateModuleFile(
       `${prefixPath}/${this.androidPackageName
         .split('.')
         .join('/')}/${androidPackageFile}`,
@@ -344,35 +335,32 @@ export class FileGenerator {
   private async generatePackageJsonFile() {
     const { name } = getGitUserInfo()
     const userName = name.replaceAll(' ', '').toLowerCase()
-    const moduleName = `${this.packagePrefix}${this.moduleName}`.toLowerCase()
 
     const packageJsonFilePath = path.join(
-      this.cwd + `/${this.moduleName}`,
+      this.cwd + `/${this.finalModuleName}`,
       'package.json'
     )
-    packageJsonFile.name = moduleName
+    packageJsonFile.name = this.finalModuleName
     packageJsonFile.author = name
-    packageJsonFile.repository = `https://github.com/${userName}/${moduleName}.git`
-    packageJsonFile.bugs = `https://github.com/${userName}/${moduleName}/issues`
-    packageJsonFile.homepage = `https://github.com/${userName}/${moduleName}#readme`
+    packageJsonFile.repository = `https://github.com/${userName}/${this.finalModuleName}.git`
+    packageJsonFile.bugs = `https://github.com/${userName}/${this.finalModuleName}/issues`
+    packageJsonFile.homepage = `https://github.com/${userName}/${this.finalModuleName}#readme`
 
     // Workspace package json
     const workspacePackageJsonFilePath = path.join(this.cwd, 'package.json')
-    workspacePackageJsonFile.name = moduleName
-    workspacePackageJsonFile.repository = `https://github.com/${userName}/${moduleName}.git`
+    workspacePackageJsonFile.name = this.finalModuleName
+    workspacePackageJsonFile.repository = `https://github.com/${userName}/${this.finalModuleName}.git`
     workspacePackageJsonFile.author = name
     workspacePackageJsonFile.workspaces = [
-      this.moduleName.toLowerCase(),
+      this.finalModuleName.toLowerCase(),
       'example',
     ]
 
     // tsconfig
     const tsconfigFilePath = path.join(
-      this.cwd + `/${this.moduleName}`,
+      this.cwd + `/${this.finalModuleName}`,
       'tsconfig.json'
     )
-
-    // tsconfigFilePath
 
     await writeFile(
       packageJsonFilePath,
@@ -397,15 +385,15 @@ export class FileGenerator {
       .join(', ')
 
     await this.generateFolder('src/specs')
-    await this.generateFile(
+    await this.generateModuleFile(
       `/src/specs/${this.moduleName}.nitro.ts`,
       specCode(this.moduleName, platformLang)
     )
-    await this.generateFile('/src/index.ts', exportCode(this.moduleName))
+    await this.generateModuleFile('/src/index.ts', exportCode(this.moduleName))
   }
 
   private async cloneNitroExample() {
-    let exists: boolean = false
+    let exists = false
     try {
       await access('./example')
       exists = true
@@ -438,10 +426,27 @@ export class FileGenerator {
     packageJson.dependencies = {
       ...packageJson.dependencies,
       'react-native-nitro-modules': '*',
-      [`${this.packagePrefix}${this.moduleName}`]: '*',
     }
 
     await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2), {
+      encoding: 'utf8',
+    })
+
+    const reactNativeConfigPath = path.join(
+      this.cwd,
+      'example/react-native.config.js'
+    )
+
+    const replacements = {
+      [JS_PACKAGE_NAME_TAG]: this.finalModuleName,
+    }
+
+    const reactNativeConfig = await this.replacePlaceholder({
+      filePath: path.join(__dirname, '..', 'assets', 'react-native.config.js'),
+      replacements,
+    })
+
+    await writeFile(reactNativeConfigPath, reactNativeConfig, {
       encoding: 'utf8',
     })
 
@@ -455,9 +460,9 @@ export class FileGenerator {
 
   private async prepare(pm: string) {
     await execAsync(`${pm} install`)
-    await execAsync(`cd ${this.moduleName}; rm -rf nitrogen`)
+    await execAsync(`cd ${this.finalModuleName}; rm -rf nitrogen`)
     await execAsync(
-      `cd ${this.moduleName}; ${pm} specs; ${pm} run build; cd ..`
+      `cd ${this.finalModuleName}; ${pm} codegen; ${pm} run build; cd ..`
     )
     await execAsync(`cd example; pod install --project-directory=./ios`)
     // Android custom package workaround
@@ -465,7 +470,7 @@ export class FileGenerator {
     // tmp/tem/awesome-library/nitrogen/generated/android/AwesomeLibraryOnLoad.cpp
     const androidOnLoadFile = path.join(
       process.cwd(),
-      this.moduleName,
+      this.finalModuleName,
       'nitrogen/generated/android',
       `${toPascalCase(this.moduleName)}OnLoad.cpp`
     )
@@ -490,17 +495,21 @@ export interface ${toPascalCase(
   `
 
     await this.generateFolder('/src/specs')
-    await this.generateFile(`/src/specs/${this.moduleName}.nitro.ts`, specCode)
+    await this.generateModuleFile(
+      `/src/specs/${this.moduleName}.nitro.ts`,
+      specCode
+    )
   }
 
   private async generateFolder(dir?: string) {
-    await mkdir(path.join(process.cwd(), `${this.moduleName}/${dir ?? ''}`), {
-      recursive: true,
-    })
+    await mkdir(
+      path.join(process.cwd(), `${this.finalModuleName}/${dir ?? ''}`),
+      { recursive: true }
+    )
   }
 
-  private async generateFile(fileName: string, data: string) {
-    const filePath = path.join(process.cwd(), this.moduleName, fileName)
+  private async generateModuleFile(fileName: string, data: string) {
+    const filePath = path.join(process.cwd(), this.finalModuleName, fileName)
     await writeFile(filePath, data, { encoding: 'utf8' })
   }
 
