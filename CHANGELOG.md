@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 0.18.7
+
+### Patch Changes
+
+- 89dba2d: fix assets folder not found
+
 ## 0.18.6
 
 ### Patch Changes
