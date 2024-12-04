@@ -2,7 +2,7 @@ import { execSync } from 'child_process'
 import { SupportedLang } from './generate-file.js'
 
 type AutolinkingConfig = {
-  [key: string]: Partial<Record<SupportedLang, string>>
+  [key: string]: Partial<Record<SupportedLang | 'cpp', string>>
 }
 
 export const LANGS = ['c++', 'swift', 'kotlin'] as const
@@ -60,7 +60,11 @@ export const generateAutolinking = (
       [SupportedLang.SWIFT, SupportedLang.KOTLIN].includes(lang)
     )
   ) {
-    return {}
+    return {
+      [moduleName]: {
+        cpp: moduleName,
+      },
+    }
   }
 
   const languageConfig = langs.reduce(
