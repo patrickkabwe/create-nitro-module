@@ -6,11 +6,12 @@
   "type": "module",
   "files": [
     "lib",
+    "assets/",
     "README.md"
   ],
   "keywords": [
     "react native",
-    "react-native",
+    "nitro",
     "nitro-create",
     "nitro-cli",
     "nitro-modules",
