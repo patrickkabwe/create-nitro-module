@@ -438,8 +438,7 @@ export class FileGenerator {
     )
 
     const replacements = {
-      [JS_PACKAGE_NAME_TAG]:
-        `${this.packagePrefix}${this.moduleName}`.toLowerCase(),
+      [JS_PACKAGE_NAME_TAG]: this.finalModuleName,
     }
 
     const reactNativeConfig = await this.replacePlaceholder({
