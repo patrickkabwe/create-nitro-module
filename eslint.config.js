@@ -29,6 +29,11 @@ export default [
     },
   },
   {
-    ignores: ['lib/', 'node_modules/', 'eslint.config.js'],
+    ignores: [
+      'lib/',
+      'node_modules/',
+      'eslint.config.js',
+      'assets/react-native.config.js',
+    ],
   },
 ]
