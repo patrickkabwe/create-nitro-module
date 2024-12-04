@@ -1,5 +1,14 @@
 # create-nitro-module
 
+## 0.18.6
+
+### Patch Changes
+
+- a50e84c: - fix: nitro tags
+  - chore: prefix lib name with react-native-
+  - fix: windows paths
+  - feat: adds react-native.config.js to locally autolink the module
+
 ## 0.18.5
 
 ### Patch Changes
