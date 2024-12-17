@@ -18,7 +18,6 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 
 ```
 .
-├── bun.lockb
 ├── example
 ├── react-native-awesome-library
 │   ├── AwesomeLibrary.podspec
@@ -32,6 +31,7 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 │   ├── babel.config.js
 │   ├── package.json
 │   └── tsconfig.json
+├── bun.lockb
 └── package.json
 ```
 

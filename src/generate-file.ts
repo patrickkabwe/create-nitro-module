@@ -461,6 +461,7 @@ export class FileGenerator {
   private async prepare(pm: string) {
     await execAsync(`${pm} install`)
     await execAsync(`cd ${this.finalModuleName}; rm -rf nitrogen`)
+    await this.createCustomAndroidPackageNameWorkaround()
     await execAsync(
       `cd ${this.finalModuleName}; ${pm} codegen; ${pm} run build; cd ..`
     )
@@ -537,5 +538,31 @@ export interface ${toPascalCase(
       (acc, [tag, value]) => replaceTag(tag, acc, value),
       fileContent
     )
+  }
+
+  async createCustomAndroidPackageNameWorkaround() {
+    const code = `
+const path = require('node:path')
+const { writeFile, readFile } = require('node:fs/promises')
+
+const androidWorkaround = async () => {
+  const androidOnLoadFile = path.join(
+    process.cwd(),
+    'nitrogen/generated/android',
+    '${toPascalCase(this.moduleName)}OnLoad.cpp'
+  )
+
+  const str = await readFile(androidOnLoadFile, { encoding: 'utf8' })
+  await writeFile(androidOnLoadFile, str.replace('margelo/nitro/', ''))
+}
+androidWorkaround()
+`
+    const androidWorkaroundPath = path.join(
+      process.cwd(),
+      this.finalModuleName,
+      'android-workaround.js',
+    )
+
+    await writeFile(androidWorkaroundPath, code)
   }
 }
