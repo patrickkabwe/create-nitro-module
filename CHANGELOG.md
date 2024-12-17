@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 0.18.8
+
+### Patch Changes
+
+- fb67977: fix: linking issue when using a custom android package name
+
 ## 0.18.7
 
 ### Patch Changes
