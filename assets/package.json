@@ -32,7 +32,7 @@
     "clean": "rm -rf android/build node_modules/**/android/build lib android/.cxx node_modules/**/android/.cxx",
     "release": "release-it",
     "codegen": "bun typecheck && nitro-codegen --logLevel=\"debug\"",
-    "postcodegen": "bun run build"
+    "postcodegen": "bun run build && node android-workaround.js"
   },
   "keywords": [
     "react-native"
