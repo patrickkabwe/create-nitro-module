@@ -10,6 +10,24 @@ on:
     branches: [main]
 
 jobs:
+  lint-and-format:
+    name: Lint and Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Bun.js
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install npm dependencies (bun)
+        run: bun install
+
+      - name: Lint and Format
+        run: bun lint && bun format
+
   test-module-generation:
     runs-on: macOS-15
     env:
@@ -98,7 +116,7 @@ jobs:
           EOF
           chmod +x test-module.exp
           ls -la test-module.exp
-  
+
       - name: Generate New Module
         run: ./test-module.exp
 
