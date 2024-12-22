@@ -17,6 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
       - name: Setup Bun.js
         uses: oven-sh/setup-bun@v2
         with:
@@ -77,7 +82,7 @@ jobs:
           EOF
           chmod +x test-module.exp
           ls -la test-module.exp
-  
+
       - name: Generate New Module
         run: ./test-module.exp
 
@@ -89,6 +94,8 @@ jobs:
 
       - name: Build CLI and Link Locally
         run: |
+          pwd
+          ls -la
           bun run build
           bun link
 
