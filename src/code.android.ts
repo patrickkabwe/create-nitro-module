@@ -9,7 +9,7 @@ export const getKotlinCode = (moduleName: string, packageT: string) => `
 package ${packageT}
 
 import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
-  moduleName
+    moduleName
 )}Spec
 
 class ${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec() {
@@ -20,4 +20,13 @@ class ${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec() {
         return num1 + num2
     }
 }
+`
+
+export const androidSettingsGradleCode = (moduleName: string) => `
+pluginManagement { includeBuild("../../node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+rootProject.name = '${moduleName}Example'
+include ':app'
+includeBuild('../../node_modules/@react-native/gradle-plugin')
 `
