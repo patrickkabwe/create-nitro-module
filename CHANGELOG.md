@@ -1,5 +1,17 @@
 # create-nitro-module
 
+## 0.19.0
+
+### Minor Changes
+
+- afb99f0: - feat(BREAKING CHANGE): generate root module folder
+  - feat: add nitro schema url
+  - feat: upgrade rn version
+  - chore: remove unnecessary packages
+  - feat: remove hybridContext and memorySize from swift example 😍
+  - feat: generate example app based on module name 🚀
+  - feat: `bun create nitro-module <moduleName>` now works!! 🚀
+
 ## 0.18.8
 
 ### Patch Changes
