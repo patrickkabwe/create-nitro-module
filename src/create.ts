@@ -1,6 +1,6 @@
 import inquirer from 'inquirer'
 import kleur from 'kleur'
-import { FileGenerator } from './generate-file.js'
+import { FileGenerator } from './file-generator.js'
 import { NitroSpinner } from './nitro-spinner.js'
 
 interface PlatformLanguageMap {
