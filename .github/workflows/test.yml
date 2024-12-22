@@ -1,0 +1,65 @@
+name: Integration Test
+
+permissions:
+  contents: write
+  packages: write
+  actions: write
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-module-generation:
+    runs-on: macOS-15
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun.js
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Java for Android builds
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Ruby and Cocoapods
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install npm dependencies (bun)
+        run: bun install
+
+      - name: Build CLI and Link Locally
+        run: |
+          bun run build
+          bun link
+
+      - name: Generate New Module
+        run: |
+          bun create nitro-module test-module
+
+      - name: Install CocoaPods dependencies
+        working-directory: react-native-test-module
+        run: |
+          bun pod
+
+      - name: Build iOS
+        working-directory: react-native-test-module/example/ios
+        run: |
+          xcodebuild -workspace example/ios/Example.xcworkspace -scheme Example -sdk iphonesimulator -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 16' build
+
+      - name: Run Gradle Build for react-native-test-module/example/android
+        working-directory: react-native-test-module/example/android
+        run: ./gradlew assembleDebug --no-daemon --build-cache
+
+      - name: Stop Gradle Daemon
+        working-directory: react-native-test-module/example/android
+        run: ./gradlew --stop

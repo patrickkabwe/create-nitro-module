@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20.x
+      - name: Setup Bun.js
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
