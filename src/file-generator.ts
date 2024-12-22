@@ -93,16 +93,14 @@ export class FileGenerator {
     await this.copyFiles()
     await this.generateNitroJson({ platforms, langs })
 
-    if (langs.includes(SupportedLang.SWIFT)) {
+    if (langs.includes(SupportedLang.SWIFT) || langs.includes(SupportedLang.CPP)) {
       await this.generatePodJson()
-      await this.generateIOSBridgeFile()
+      await this.generateIOSBridgeFile(langs.includes(SupportedLang.SWIFT))
     }
-    if (langs.includes(SupportedLang.KOTLIN)) {
-      await this.generateAndroidFiles() //TODO: check if there ias need to add android files
+    if (langs.includes(SupportedLang.KOTLIN) || langs.includes(SupportedLang.CPP)) {
+      await this.generateAndroidFiles()
     }
-    if (langs.includes(SupportedLang.CPP)) {
-      await this.generatePodJson()
-    }
+
     await this.generatePackageJsonFile()
     await this.generateJSFiles({ platforms, langs })
     this.spinner.succeed(kleur.green(messages.creating))
@@ -193,7 +191,7 @@ export class FileGenerator {
     )
   }
 
-  private async generateIOSBridgeFile() {
+  private async generateIOSBridgeFile(generateSwiftFile: boolean) {
     await this.generateFolder('ios')
     const { name } = getGitUserInfo()
 
@@ -211,10 +209,13 @@ export class FileGenerator {
         replacements,
       })
     )
-    await this.generateModuleFile(
-      `ios/${toPascalCase(this.moduleName)}.swift`,
-      getSwiftCode(this.moduleName)
-    )
+    if (generateSwiftFile) {
+      await this.generateModuleFile(
+        `ios/${toPascalCase(this.moduleName)}.swift`,
+        getSwiftCode(this.moduleName)
+      )
+    }
+
   }
 
   private async generateAndroidFiles() {
