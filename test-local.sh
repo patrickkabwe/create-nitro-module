@@ -72,7 +72,7 @@ EOF
 
 chmod +x test-module.exp
 
-# Build and test
+# Install, build and link bun
 bun install
 bun run build
 bun link
