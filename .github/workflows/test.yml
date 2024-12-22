@@ -39,6 +39,17 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
+      - name: Install npm dependencies (bun)
+        run: bun install
+
+      - name: Build CLI and Link Locally
+        run: |
+          pwd
+          ls -la
+          bun run build
+          bun link
+
+
       - name: Create expect script
         run: |
           cat << 'EOF' > test-module.exp
@@ -82,23 +93,10 @@ jobs:
           EOF
           chmod +x test-module.exp
           ls -la test-module.exp
-
+  
       - name: Generate New Module
         run: ./test-module.exp
-
-      - name: Install expect
-        run: brew install expect
-
-      - name: Install npm dependencies (bun)
-        run: bun install
-
-      - name: Build CLI and Link Locally
-        run: |
-          pwd
-          ls -la
-          bun run build
-          bun link
-
+  
       - name: Install CocoaPods dependencies
         working-directory: react-native-test-module/example
         run: bun pod
