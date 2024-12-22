@@ -34,12 +34,6 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      - name: Generate New Module
-        run: ./test-module.exp
-
-      - name: Install expect
-        run: brew install expect
-
       - name: Create expect script
         run: |
           cat << 'EOF' > test-module.exp
@@ -82,6 +76,13 @@ jobs:
           expect eof
           EOF
           chmod +x test-module.exp
+          ls -la test-module.exp
+  
+      - name: Generate New Module
+        run: ./test-module.exp
+
+      - name: Install expect
+        run: brew install expect
 
       - name: Install npm dependencies (bun)
         run: bun install
