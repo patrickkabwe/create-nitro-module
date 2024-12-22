@@ -9,6 +9,8 @@ on:
   pull_request:
     branches: [main]
 
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
   lint-and-format:
     name: Lint and Format
@@ -29,6 +31,7 @@ jobs:
         run: bun lint && bun format
 
   test-module-generation:
+    needs: lint-and-format
     runs-on: macOS-15
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
