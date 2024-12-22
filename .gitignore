@@ -86,3 +86,5 @@ lib/
 # TypeScript
 tsconfig.tsbuildinfo
 .ccache
+*.exp
+*test-module

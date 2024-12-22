@@ -39,16 +39,21 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.bun
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
       - name: Install npm dependencies (bun)
         run: bun install
 
       - name: Build CLI and Link Locally
         run: |
-          pwd
-          ls -la
           bun run build
           bun link
-
 
       - name: Create expect script
         run: |
@@ -96,7 +101,17 @@ jobs:
   
       - name: Generate New Module
         run: ./test-module.exp
-  
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cocoapods
+            ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
       - name: Install CocoaPods dependencies
         working-directory: react-native-test-module/example
         run: bun pod
@@ -113,6 +128,16 @@ jobs:
           -destination 'platform=iOS Simulator,name=iPhone 16' \
           build \
           CODE_SIGNING_ALLOWED=NO"
+
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Run Gradle Build
         working-directory: react-native-test-module/example/android
