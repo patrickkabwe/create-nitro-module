@@ -34,6 +34,89 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
+      - name: Create retry function
+        run: |
+          retry() {
+            local max_attempts=3
+            local timeout=30
+            local attempt=1
+            local exitCode=0
+
+            while (( $attempt <= $max_attempts ))
+            do
+              if (( $attempt > 1 )); then
+                echo "Retry attempt $attempt of $max_attempts"
+                sleep $((attempt * 5))
+              fi
+
+              "$@"
+              exitCode=$?
+
+              if [[ $exitCode == 0 ]]; then
+                break
+              fi
+
+              attempt=$(( attempt + 1 ))
+            done
+
+            if [[ $exitCode != 0 ]]; then
+              echo "Failed after $max_attempts attempts"
+              return $exitCode
+            fi
+
+            return 0
+          }
+
+      - name: Generate New Module
+        run: |
+          retry ./test-module.exp
+
+      - name: Install expect
+        run: brew install expect
+
+      - name: Create expect script
+        run: |
+          cat << 'EOF' > test-module.exp
+          #!/usr/bin/expect -f
+          set timeout 30
+          spawn bun create nitro-module test-module
+
+          # Module name
+          expect "📝 What is the name of your module?"
+          send "test-module\r"
+
+          # Platform selection
+          expect "🎯 Select target platforms:"
+          sleep 1
+          send \x20
+          sleep 1
+          send \x1B\[B
+          sleep 1
+          send \x20
+          send \r
+
+          # Language selection
+          expect "💻 Select programming languages:"
+          sleep 1
+          send \x20
+          sleep 1
+          send \x1B\[B\x1B\[B
+          sleep 1
+          send \x20
+          send \r
+
+          # Package manager
+          expect "📦 Select package manager:"
+          send \r
+
+          # Confirm package name
+          expect "✨ Your package name will be called:"
+          send "y\r"
+
+          expect eof
+          EOF
+          chmod +x test-module.exp
+
       - name: Install npm dependencies (bun)
         run: bun install
 
@@ -42,23 +125,29 @@ jobs:
           bun run build
           bun link
 
-      - name: Generate New Module
-        run: |
-          bun create nitro-module test-module
-
       - name: Install CocoaPods dependencies
-        working-directory: react-native-test-module
+        working-directory: react-native-test-module/example
         run: |
-          bun pod
+          retry bun pod
 
       - name: Build iOS
         working-directory: react-native-test-module/example/ios
         run: |
-          xcodebuild -workspace example/ios/Example.xcworkspace -scheme Example -sdk iphonesimulator -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 16' build
+          retry "set -o pipefail && xcodebuild \
+          CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
+          -derivedDataPath build -UseModernBuildSystem=YES \
+          -workspace TestModuleExample.xcworkspace \
+          -scheme TestModuleExample \
+          -sdk iphonesimulator \
+          -configuration Debug \
+          -destination 'platform=iOS Simulator,name=iPhone 16' \
+          build \
+          CODE_SIGNING_ALLOWED=NO"
 
-      - name: Run Gradle Build for react-native-test-module/example/android
+      - name: Run Gradle Build
         working-directory: react-native-test-module/example/android
-        run: ./gradlew assembleDebug --no-daemon --build-cache
+        run: |
+          retry ./gradlew assembleDebug --no-daemon --build-cache
 
       - name: Stop Gradle Daemon
         working-directory: react-native-test-module/example/android
