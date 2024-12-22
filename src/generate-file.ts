@@ -16,9 +16,9 @@ import packageJsonFile from '../assets/package.json'
 import tsconfigFile from '../assets/tsconfig.json'
 import workspacePackageJsonFile from '../assets/workspace-package.json'
 import projectPackageJsonFile from '../package.json'
-import { androidManifestCode, getKotlinCode } from './code.android.js'
+import { androidManifestCode, androidSettingsGradleCode, getKotlinCode } from './code.android.js'
 import { getSwiftCode } from './code.ios.js'
-import { appExampleCode, exportCode, specCode } from './code.js.js'
+import { appExampleCode, exportCode, metroConfig, specCode } from './code.js.js'
 import {
   ANDROID_CXX_LIB_NAME_TAG,
   ANDROID_NAME_SPACE_TAG,
@@ -26,7 +26,7 @@ import {
   IOS_MODULE_NAME_TAG,
   JS_PACKAGE_NAME_TAG,
   messages,
-  nosIcon,
+  nosIcon
 } from './constants.js'
 import { NitroSpinner } from './nitro-spinner.js'
 import {
@@ -53,8 +53,10 @@ export enum SupportedPlatform {
   ANDROID = 'android',
 }
 
+type PackageManager = 'bun' | 'pnpm' | 'yarn' | 'npm'
+
 type Generate = {
-  pm: 'bun' | 'pnpm' | 'yarn' | 'npm'
+  pm: PackageManager
   moduleName: string
   langs: SupportedLang[]
   platforms: SupportedPlatform[]
@@ -83,31 +85,33 @@ export class FileGenerator {
     this.moduleName = moduleName
     this.finalModuleName = `${this.packagePrefix}${moduleName}`.toLowerCase()
     this.androidPackageName = `com.${replaceHyphen(this.moduleName)}`
+    this.cwd = `${this.cwd}/${this.finalModuleName}`
 
     this.spinner.start(kleur.yellow(messages.creating))
     await this.generateFolder()
     await this.cloneNitroTemplate()
     await this.copyFiles()
     await this.generateNitroJson({ platforms, langs })
-    if (
-      !langs.includes(SupportedLang.KOTLIN) ||
-      !langs.includes(SupportedLang.CPP)
-    ) {
+
+    if (langs.includes(SupportedLang.SWIFT)) {
       await this.generatePodJson()
       await this.generateIOSBridgeFile()
     }
-    if (
-      !langs.includes(SupportedLang.KOTLIN) ||
-      !langs.includes(SupportedLang.CPP)
-    ) {
+    if (langs.includes(SupportedLang.KOTLIN)) {
       await this.generateAndroidFiles() //TODO: check if there ias need to add android files
+    }
+    if (langs.includes(SupportedLang.CPP)) {
+      await this.generatePodJson()
     }
     await this.generatePackageJsonFile()
     await this.generateJSFiles({ platforms, langs })
     this.spinner.succeed(kleur.green(messages.creating))
 
+    this.spinner.update(kleur.yellow(messages.cloning))
+    await this.cloneNitroExample(pm)
+    this.spinner.succeed(kleur.yellow(messages.cloning))
+
     this.spinner.update(kleur.yellow(messages.installing))
-    await this.cloneNitroExample()
     await this.prepare(pm ?? 'bun')
     this.spinner.succeed(kleur.green(messages.installing))
 
@@ -143,7 +147,7 @@ export class FileGenerator {
     for (const file of filesToCopy) {
       await copyFile(
         path.join(this.tmpDir, file),
-        path.join(process.cwd(), this.finalModuleName, file)
+        path.join(this.cwd, this.finalModuleName, file)
       )
     }
   }
@@ -392,7 +396,7 @@ export class FileGenerator {
     await this.generateModuleFile('/src/index.ts', exportCode(this.moduleName))
   }
 
-  private async cloneNitroExample() {
+  private async cloneNitroExample(pm: PackageManager) {
     let exists = false
     try {
       await access('./example')
@@ -403,8 +407,9 @@ export class FileGenerator {
 
     if (!exists) {
       await rm(`${this.tmpDir}`, { recursive: true, force: true })
+      const packageManager = pm === 'bun' ? 'bunx' : 'npx'
       await execAsync(
-        'git clone --depth 1 https://github.com/patrickkabwe/nitro-example example'
+        `${packageManager} -y @react-native-community/cli@latest init ${toPascalCase(this.moduleName)}Example --directory ${this.cwd}/example --skip-install`
       )
     }
     await rm(path.join(this.cwd, 'example/.git'), {
@@ -456,25 +461,72 @@ export class FileGenerator {
       appExampleCode(this.moduleName, this.packagePrefix),
       { encoding: 'utf8' }
     )
+
+    const metroConfigPath = path.join(this.cwd, 'example/metro.config.js')
+
+    await writeFile(
+      metroConfigPath,
+      metroConfig,
+      { encoding: 'utf8' }
+    )
+
+    const androidSettingsGradlePath = path.join(
+      this.cwd,
+      'example/android/settings.gradle'
+    )
+
+    await writeFile(
+      androidSettingsGradlePath,
+      androidSettingsGradleCode(toPascalCase(this.moduleName)),
+      { encoding: 'utf8' }
+    )
+
+    const androidBuildGradlePath = path.join(
+      this.cwd,
+      'example/android/app/build.gradle'
+    )
+
+    const androidBuildGradle = await readFile(androidBuildGradlePath, {
+      encoding: 'utf8',
+    })
+
+    const gradleReplacements = {
+      '// reactNativeDir = file("../../node_modules/react-native")': 'reactNativeDir = file("../../../node_modules/react-native")',
+      '// codegenDir = file("../../node_modules/@react-native/codegen")': 'codegenDir = file("../../../node_modules/@react-native/codegen")',
+      '// cliFile = file("../../node_modules/react-native/cli.js")': 'cliFile = file("../../../node_modules/react-native/cli.js")',
+      '// hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"': 'hermesCommand = "$rootDir/../../node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc"',
+    }
+
+    const toWrite = await this.replacePlaceholder({
+      data: androidBuildGradle,
+      replacements: gradleReplacements,
+    })
+
+    await writeFile(androidBuildGradlePath, toWrite, { encoding: 'utf8' })
   }
 
-  private async prepare(pm: string) {
-    await execAsync(`${pm} install`)
-    await execAsync(`cd ${this.finalModuleName}; rm -rf nitrogen`)
+  private async prepare(pm: PackageManager) {
+    await execAsync(`cd ${this.cwd}/${this.finalModuleName}; rm -rf nitrogen; ${pm} install`)
     await this.createCustomAndroidPackageNameWorkaround()
     await execAsync(
-      `cd ${this.finalModuleName}; ${pm} codegen; ${pm} run build; cd ..`
+      `cd ${this.cwd}/${this.finalModuleName}; ${pm} codegen; cd ..`
     )
-    await execAsync(`cd example; pod install --project-directory=./ios`)
+    await execAsync(`cd ${this.cwd}/example;`)
     // Android custom package workaround
     // AwesomeLibraryOnLoad.cpp
     // tmp/tem/awesome-library/nitrogen/generated/android/AwesomeLibraryOnLoad.cpp
     const androidOnLoadFile = path.join(
-      process.cwd(),
+      this.cwd,
       this.finalModuleName,
       'nitrogen/generated/android',
       `${toPascalCase(this.moduleName)}OnLoad.cpp`
     )
+
+    try {
+      await access(androidOnLoadFile)
+    } catch {
+      return
+    }
 
     const str = await readFile(androidOnLoadFile, { encoding: 'utf8' })
     await writeFile(androidOnLoadFile, str.replace('margelo/nitro/', ''))
@@ -504,13 +556,13 @@ export interface ${toPascalCase(
 
   private async generateFolder(dir?: string) {
     await mkdir(
-      path.join(process.cwd(), `${this.finalModuleName}/${dir ?? ''}`),
+      path.join(this.cwd, `${this.finalModuleName}/${dir ?? ''}`),
       { recursive: true }
     )
   }
 
   private async generateModuleFile(fileName: string, data: string) {
-    const filePath = path.join(process.cwd(), this.finalModuleName, fileName)
+    const filePath = path.join(this.cwd, this.finalModuleName, fileName)
     await writeFile(filePath, data, { encoding: 'utf8' })
   }
 
@@ -558,7 +610,7 @@ const androidWorkaround = async () => {
 androidWorkaround()
 `
     const androidWorkaroundPath = path.join(
-      process.cwd(),
+      this.cwd,
       this.finalModuleName,
       'android-workaround.js',
     )
