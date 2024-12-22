@@ -34,39 +34,6 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      - name: Create retry function
-        run: |
-          retry() {
-            local max_attempts=3
-            local timeout=30
-            local attempt=1
-            local exitCode=0
-
-            while (( $attempt <= $max_attempts ))
-            do
-              if (( $attempt > 1 )); then
-                echo "Retry attempt $attempt of $max_attempts"
-                sleep $((attempt * 5))
-              fi
-
-              "$@"
-              exitCode=$?
-
-              if [[ $exitCode == 0 ]]; then
-                break
-              fi
-
-              attempt=$(( attempt + 1 ))
-            done
-
-            if [[ $exitCode != 0 ]]; then
-              echo "Failed after $max_attempts attempts"
-              return $exitCode
-            fi
-
-            return 0
-          }
-
       - name: Generate New Module
         run: |
           retry ./test-module.exp
@@ -127,13 +94,11 @@ jobs:
 
       - name: Install CocoaPods dependencies
         working-directory: react-native-test-module/example
-        run: |
-          retry bun pod
+        run: bun pod
 
       - name: Build iOS
         working-directory: react-native-test-module/example/ios
-        run: |
-          retry "set -o pipefail && xcodebuild \
+        run: "set -o pipefail && xcodebuild \
           CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
           -derivedDataPath build -UseModernBuildSystem=YES \
           -workspace TestModuleExample.xcworkspace \
@@ -146,8 +111,7 @@ jobs:
 
       - name: Run Gradle Build
         working-directory: react-native-test-module/example/android
-        run: |
-          retry ./gradlew assembleDebug --no-daemon --build-cache
+        run: ./gradlew assembleDebug --no-daemon --build-cache
 
       - name: Stop Gradle Daemon
         working-directory: react-native-test-module/example/android
