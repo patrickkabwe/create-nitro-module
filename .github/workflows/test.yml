@@ -35,8 +35,7 @@ jobs:
           bundler-cache: true
 
       - name: Generate New Module
-        run: |
-          retry ./test-module.exp
+        run: ./test-module.exp
 
       - name: Install expect
         run: brew install expect
