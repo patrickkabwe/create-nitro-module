@@ -8,4 +8,4 @@
 - chore: remove unnecessary packages
 - feat: remove hybridContext and memorySize from swift example 😍
 - feat: generate example app based on module name 🚀
-- feat: `bun create nitro-module <moduleName>` now work!!
+- feat: `bun create nitro-module <moduleName>` now works!! 🚀
