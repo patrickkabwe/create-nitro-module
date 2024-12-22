@@ -8,7 +8,8 @@ const program = new Command()
 program
   .name(packageJson.name)
   .description(packageJson.description)
-  .version('CLI Version: 0.1.0', '-v, --version')
+  .version(`CLI Version: ${packageJson.version}`, '-v, --version')
+  .argument('<name>', 'Name of the module to create')
   .action(createModule)
 
 program

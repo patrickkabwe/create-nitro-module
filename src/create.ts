@@ -1,6 +1,7 @@
+import { rmSync } from 'fs'
 import inquirer from 'inquirer'
 import kleur from 'kleur'
-import { FileGenerator } from './generate-file.js'
+import { FileGenerator } from './file-generator.js'
 import { NitroSpinner } from './nitro-spinner.js'
 
 interface PlatformLanguageMap {
@@ -21,6 +22,7 @@ export const createModule = async (name: string) => {
   const spinner = new NitroSpinner()
   try {
     const answers = await getCreateModuleAnswer(name)
+    name = answers.moduleName
     const fileGenerator = new FileGenerator(spinner)
     await fileGenerator.generate({
       langs: answers.langs,
@@ -32,6 +34,7 @@ export const createModule = async (name: string) => {
     spinner.error(
       kleur.red(`Failed to create nitro module: ${(error as Error).message}`)
     )
+    rmSync('react-native-' + name.toLowerCase(), { recursive: true, force: true })
   }
 }
 

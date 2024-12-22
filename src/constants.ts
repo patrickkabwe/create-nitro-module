@@ -7,9 +7,10 @@ export const IOS_MODULE_NAME_TAG = '$$iosModuleName$$'
 export const JS_PACKAGE_NAME_TAG = '$$packageName$$'
 
 export const messages = {
-  creating: '🔄 Creating your Nitro Module...',
-  installing: '📦 Installing packages...',
-  success: '✨ Nitro Module created successfully!',
+   creating: '🔄 Creating your Nitro Module...',
+   cloning: '📦 Cloning app template...',
+   installing: '📦 Installing packages...',
+   success: '✨ Nitro Module created successfully!',
 }
 
 export const nosIcon = (moduleName: string, pm: string) => `
@@ -30,15 +31,17 @@ ${kleur.red().bold('Next steps:')}
 
 ${kleur.yellow('1)')} Run your example app:
    ${kleur.green('cd example')}
-   ${kleur.green(`${pm} ios`)}     ${kleur.dim('# Run iOS example')}
+   ${kleur.green(`${pm} ios`)}      ${kleur.dim('# Run iOS example')}
    ${kleur.green(`${pm} android`)}  ${kleur.dim('# Run Android example')}
 
 ${kleur.yellow('2)')} Begin development:
    ${kleur.green(`cd ${moduleName}`)}
+   ${kleur.green(`${pm} pod`)}      ${kleur.dim('# Install CocoaPods dependencies (iOS)')}
+   ${kleur.green(`${pm} start`)}    ${kleur.dim('# Start Metro bundler')}
    
    ${kleur.cyan('Define your module:')}
-   ${kleur.white('src/specs/')}    ${kleur.dim('# Define your module specifications')}
-   ${kleur.green(`${pm} codegen`)}   ${kleur.dim('# Generates native interfaces from TypeScript definitions')}
+   ${kleur.white('src/specs/')}     ${kleur.dim('# Define your module specifications')}
+   ${kleur.green(`${pm} codegen`)}  ${kleur.dim('# Generates native interfaces from TypeScript definitions')}
    
    ${kleur.cyan('Implement native code:')}
    ${kleur.white('ios/')}          ${kleur.dim('# iOS native implementation')}

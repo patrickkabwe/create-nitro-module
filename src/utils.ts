@@ -1,5 +1,5 @@
 import { execSync } from 'child_process'
-import { SupportedLang } from './generate-file.js'
+import { SupportedLang } from './file-generator.js'
 
 type AutolinkingConfig = {
   [key: string]: Partial<Record<SupportedLang | 'cpp', string>>

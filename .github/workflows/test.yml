@@ -1,0 +1,169 @@
+name: Integration Test
+
+permissions:
+  contents: write
+  packages: write
+  actions: write
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  lint-and-format:
+    name: Lint and Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Bun.js
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install npm dependencies (bun)
+        run: bun install
+
+      - name: Lint and Format
+        run: bun lint && bun format
+
+  test-module-generation:
+    needs: lint-and-format
+    runs-on: macOS-15
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
+      - name: Setup Bun.js
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Java for Android builds
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Ruby and Cocoapods
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.bun
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install npm dependencies (bun)
+        run: bun install
+
+      - name: Build CLI and Link Locally
+        run: |
+          bun run build
+          bun link
+
+      - name: Create expect script
+        run: |
+          cat << 'EOF' > test-module.exp
+          #!/usr/bin/expect -f
+          set timeout 30
+          spawn bun create nitro-module test-module
+
+          # Module name
+          expect "📝 What is the name of your module?"
+          send "test-module\r"
+
+          # Platform selection
+          expect "🎯 Select target platforms:"
+          sleep 1
+          send \x20
+          sleep 1
+          send \x1B\[B
+          sleep 1
+          send \x20
+          send \r
+
+          # Language selection
+          expect "💻 Select programming languages:"
+          sleep 1
+          send \x20
+          sleep 1
+          send \x1B\[B\x1B\[B
+          sleep 1
+          send \x20
+          send \r
+
+          # Package manager
+          expect "📦 Select package manager:"
+          send \r
+
+          # Confirm package name
+          expect "✨ Your package name will be called:"
+          send "y\r"
+
+          expect eof
+          EOF
+          chmod +x test-module.exp
+          ls -la test-module.exp
+
+      - name: Generate New Module
+        run: ./test-module.exp
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cocoapods
+            ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install CocoaPods dependencies
+        working-directory: react-native-test-module/example
+        run: bun pod
+
+      - name: Build iOS
+        working-directory: react-native-test-module/example/ios
+        run: "set -o pipefail && xcodebuild \
+          CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
+          -derivedDataPath build -UseModernBuildSystem=YES \
+          -workspace TestModuleExample.xcworkspace \
+          -scheme TestModuleExample \
+          -sdk iphonesimulator \
+          -configuration Debug \
+          -destination 'platform=iOS Simulator,name=iPhone 16' \
+          build \
+          CODE_SIGNING_ALLOWED=NO"
+
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Run Gradle Build
+        working-directory: react-native-test-module/example/android
+        run: ./gradlew assembleDebug --no-daemon --build-cache
+
+      - name: Stop Gradle Daemon
+        working-directory: react-native-test-module/example/android
+        run: ./gradlew --stop
