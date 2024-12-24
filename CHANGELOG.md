@@ -1,5 +1,12 @@
 # create-nitro-module
 
+## 0.20.0
+
+### Minor Changes
+
+- 604ef36: - feat: add support for --module-dir
+  - feat: add support for --skip-example
+
 ## 0.19.0
 
 ### Minor Changes
