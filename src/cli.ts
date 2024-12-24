@@ -11,7 +11,7 @@ program
   .version(`CLI Version: ${packageJson.version}`, '-v, --version')
   .argument('[name]', 'Name of the module to create')
   .option('-d, --module-dir <moduleDirectory>', 'Directory to create the module in')
-  .option('-s, --skip-example', 'Skip example generation')
+  .option('-s, --skip-example', 'Skip example app generation')
   .action(createModule)
 
 program
