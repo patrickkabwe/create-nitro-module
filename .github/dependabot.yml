@@ -10,6 +10,18 @@ updates:
 
   - package-ecosystem: 'npm'
     directories:
-      - '/src'
+      - '/'
+      - '/assets'
     schedule:
       interval: 'daily'
+    groups:
+      rncli:
+        patterns:
+          - '@react-native-community/cli*'
+      babel:
+        patterns:
+          - '@babel/*'
+      react-native:
+        patterns:
+          - '@react-native/*'
+          - 'react-native'
