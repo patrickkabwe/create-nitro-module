@@ -30,6 +30,7 @@ import {
 } from './constants.js'
 import { NitroSpinner } from './nitro-spinner.js'
 import {
+  dirExist,
   generateAutolinking,
   getGitUserInfo,
   mapPlatformToLanguage,
@@ -58,6 +59,8 @@ type PackageManager = 'bun' | 'pnpm' | 'yarn' | 'npm'
 type Generate = {
   pm: PackageManager
   moduleName: string
+  moduleDir?: string
+  skipExample?: boolean
   langs: SupportedLang[]
   platforms: SupportedPlatform[]
 }
@@ -80,12 +83,17 @@ export class FileGenerator {
     this.spinner = spinner
   }
 
-  public async generate({ moduleName, langs, platforms, pm }: Generate) {
+  public async generate({ moduleName, langs, platforms, pm, moduleDir, skipExample }: Generate) {
     this.tmpDir = `/tmp/${moduleName}`
     this.moduleName = moduleName
     this.finalModuleName = `${this.packagePrefix}${moduleName}`.toLowerCase()
     this.androidPackageName = `com.${replaceHyphen(this.moduleName)}`
-    this.cwd = `${this.cwd}/${this.finalModuleName}`
+
+    if (moduleDir) {
+      this.cwd = `${this.cwd}/${moduleDir}`
+    } else {
+      this.cwd = `${this.cwd}/${this.finalModuleName}`
+    }
 
     this.spinner.start(kleur.yellow(messages.creating))
     await this.generateFolder()
@@ -101,13 +109,23 @@ export class FileGenerator {
       await this.generateAndroidFiles()
     }
 
-    await this.generatePackageJsonFile()
+    await this.generatePackageJsonFile(skipExample)
     await this.generateJSFiles({ platforms, langs })
+    await this.createCustomAndroidPackageNameWorkaround()
     this.spinner.succeed(kleur.green(messages.creating))
+
+    if (skipExample) {
+      this.spinner.succeed(kleur.green(messages.success))
+      console.log(nosIcon(this.finalModuleName, pm))
+      console.log(
+        kleur.dim(`Create Nitro Module - ${projectPackageJsonFile.description}\n`)
+      )
+      return
+    }
 
     this.spinner.update(kleur.yellow(messages.cloning))
     await this.cloneNitroExample(pm)
-    this.spinner.succeed(kleur.yellow(messages.cloning))
+    this.spinner.succeed(kleur.green(messages.cloning))
 
     this.spinner.update(kleur.yellow(messages.installing))
     await this.prepare(pm ?? 'bun')
@@ -337,7 +355,7 @@ export class FileGenerator {
     )
   }
 
-  private async generatePackageJsonFile() {
+  private async generatePackageJsonFile(skipExample?: boolean) {
     const { name } = getGitUserInfo()
     const userName = name.replaceAll(' ', '').toLowerCase()
 
@@ -352,14 +370,22 @@ export class FileGenerator {
     packageJsonFile.homepage = `https://github.com/${userName}/${this.finalModuleName}#readme`
 
     // Workspace package json
-    const workspacePackageJsonFilePath = path.join(this.cwd, 'package.json')
-    workspacePackageJsonFile.name = this.finalModuleName
-    workspacePackageJsonFile.repository = `https://github.com/${userName}/${this.finalModuleName}.git`
-    workspacePackageJsonFile.author = name
-    workspacePackageJsonFile.workspaces = [
-      this.finalModuleName.toLowerCase(),
-      'example',
-    ]
+    if (!skipExample) {
+      const workspacePackageJsonFilePath = path.join(this.cwd, 'package.json')
+      workspacePackageJsonFile.name = this.finalModuleName
+      workspacePackageJsonFile.repository = `https://github.com/${userName}/${this.finalModuleName}.git`
+      workspacePackageJsonFile.author = name
+      workspacePackageJsonFile.workspaces = [
+        this.finalModuleName.toLowerCase(),
+        'example',
+      ]
+      await writeFile(
+        workspacePackageJsonFilePath,
+        JSON.stringify(workspacePackageJsonFile, null, 2),
+        { encoding: 'utf8' }
+      )
+    }
+
 
     // tsconfig
     const tsconfigFilePath = path.join(
@@ -372,11 +398,7 @@ export class FileGenerator {
       JSON.stringify(packageJsonFile, null, 2),
       { encoding: 'utf8' }
     )
-    await writeFile(
-      workspacePackageJsonFilePath,
-      JSON.stringify(workspacePackageJsonFile, null, 2),
-      { encoding: 'utf8' }
-    )
+
     await writeFile(tsconfigFilePath, JSON.stringify(tsconfigFile, null, 2), {
       encoding: 'utf8',
     })
@@ -398,13 +420,7 @@ export class FileGenerator {
   }
 
   private async cloneNitroExample(pm: PackageManager) {
-    let exists = false
-    try {
-      await access('./example')
-      exists = true
-    } catch {
-      exists = false
-    }
+    const exists = await dirExist('./example')
 
     if (!exists) {
       await rm(`${this.tmpDir}`, { recursive: true, force: true })
@@ -508,7 +524,6 @@ export class FileGenerator {
 
   private async prepare(pm: PackageManager) {
     await execAsync(`cd ${this.cwd}/${this.finalModuleName}; rm -rf nitrogen; ${pm} install`)
-    await this.createCustomAndroidPackageNameWorkaround()
     await execAsync(
       `cd ${this.cwd}/${this.finalModuleName}; ${pm} codegen; cd ..`
     )
@@ -594,7 +609,14 @@ export interface ${toPascalCase(
   }
 
   async createCustomAndroidPackageNameWorkaround() {
-    const code = `
+    const code = `/**
+ * @file This script is auto-generated by create-nitro-module and should not be edited.
+ *
+ * @description This script applies a workaround for Android by modifying the '<ModuleName>OnLoad.cpp' file.
+ * It reads the file content and removes the 'margelo/nitro/' string from it. This enables support for custom package names.
+ *
+ * @module create-nitro-module
+ */
 const path = require('node:path')
 const { writeFile, readFile } = require('node:fs/promises')
 
@@ -613,7 +635,7 @@ androidWorkaround()
     const androidWorkaroundPath = path.join(
       this.cwd,
       this.finalModuleName,
-      'android-workaround.js',
+      'post-script.js',
     )
 
     await writeFile(androidWorkaroundPath, code)

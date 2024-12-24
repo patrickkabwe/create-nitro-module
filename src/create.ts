@@ -3,9 +3,15 @@ import inquirer from 'inquirer'
 import kleur from 'kleur'
 import { FileGenerator } from './file-generator.js'
 import { NitroSpinner } from './nitro-spinner.js'
+import { dirExist } from './utils.js'
 
 interface PlatformLanguageMap {
   [key: string]: string[]
+}
+
+type CreateModuleOptions = {
+  moduleDir?: string
+  skipExample?: boolean
 }
 
 const PLATFORM_LANGUAGE_MAP: PlatformLanguageMap = {
@@ -13,22 +19,32 @@ const PLATFORM_LANGUAGE_MAP: PlatformLanguageMap = {
   android: ['kotlin', 'cpp'],
 }
 
+
 const PLATFORMS = ['ios', 'android']
 
-export const createModule = async (name: string) => {
-  if (typeof name !== 'string') {
-    name = ''
-  }
+export const createModule = async (name: string, options: CreateModuleOptions) => {
   const spinner = new NitroSpinner()
   try {
+    if (typeof name !== 'string') {
+      name = ''
+    }
+    if (options.moduleDir) {
+      const moduleDirExists = await dirExist(options.moduleDir)
+      if (!moduleDirExists) {
+        throw new Error('Module directory does not exist')
+      }
+    }
     const answers = await getCreateModuleAnswer(name)
     name = answers.moduleName
+
     const fileGenerator = new FileGenerator(spinner)
     await fileGenerator.generate({
       langs: answers.langs,
       moduleName: answers.moduleName,
       platforms: answers.platforms,
       pm: answers.pm,
+      moduleDir: options.moduleDir,
+      skipExample: options.skipExample,
     })
   } catch (error) {
     spinner.error(

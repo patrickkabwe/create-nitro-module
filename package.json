@@ -12,10 +12,13 @@
   "keywords": [
     "react native",
     "nitro",
-    "nitro-create",
+    "nitro create",
     "nitro-cli",
-    "nitro-modules",
-    "nitro-modules-cli"
+    "nitro modules",
+    "create-nitro-modules",
+    "Native Modules",
+    "Create React Native Modules with Nitro",
+    "Create Nitro Modules"
   ],
   "license": "MIT",
   "bin": {

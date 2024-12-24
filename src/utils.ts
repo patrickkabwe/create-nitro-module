@@ -1,4 +1,5 @@
 import { execSync } from 'child_process'
+import { access } from 'fs/promises'
 import { SupportedLang } from './file-generator.js'
 
 type AutolinkingConfig = {
@@ -111,4 +112,13 @@ export const validateLang = (choices: string[]) => {
     return 'You can not choose kotlin and c++. use either swift with kotlin or c++'
   }
   return true
+}
+
+export const dirExist = async (dir: string) => {
+  try {
+    await access(dir)
+    return true
+  } catch {
+    return false
+  }
 }
