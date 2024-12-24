@@ -10,8 +10,8 @@ program
   .description(packageJson.description)
   .version(`CLI Version: ${packageJson.version}`, '-v, --version')
   .argument('[name]', 'Name of the module to create')
-  .option('-md, --module-dir <moduleDirectory>', 'Directory to create the module in')
-  .option('-se, --skip-example', 'Skip example generation')
+  .option('-d, --module-dir <moduleDirectory>', 'Directory to create the module in')
+  .option('-s, --skip-example', 'Skip example generation')
   .action(createModule)
 
 program
