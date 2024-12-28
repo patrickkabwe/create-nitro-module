@@ -13,7 +13,7 @@ Welcome to the Nitro Module CLI! Follow these steps to get started quickly.
 Bun is a fast all-in-one JavaScript runtime. To create a Nitro Module using Bun, run:
 
 ```bash
-bun create nitro-module my-awesome-module
+bun create nitro-module@latest my-awesome-module
 ```
 
 ### Using NPX
@@ -21,7 +21,7 @@ bun create nitro-module my-awesome-module
 NPX comes with Node.js and allows you to run commands directly. To create a Nitro Module using NPX, run:
 
 ```bash
-npx create-nitro-module my-awesome-module
+npx create-nitro-module@latest my-awesome-module
 ```
 
 ### Using PNPM
@@ -29,7 +29,7 @@ npx create-nitro-module my-awesome-module
 PNPM is a fast, disk space-efficient package manager. To create a Nitro Module using PNPM, run:
 
 ```bash
-pnpm create nitro-module my-awesome-module
+pnpm create nitro-module@latest my-awesome-module
 ```
 
 ### Using Yarn
@@ -37,7 +37,7 @@ pnpm create nitro-module my-awesome-module
 Yarn is a package manager that doubles down as a project manager. To create a Nitro Module using Yarn, run:
 
 ```bash
-yarn create nitro-module my-awesome-module
+yarn create nitro-module@latest my-awesome-module
 ```
 
 ### Using Global Install
@@ -45,7 +45,7 @@ yarn create nitro-module my-awesome-module
 You can also install the Nitro Module CLI globally and use it to create a new module:
 
 ```bash
-npm install -g create-nitro-module
+npm install -g create-nitro-module@latest
 nitro-module create my-awesome-module
 ```
 

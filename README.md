@@ -44,19 +44,19 @@ For detailed installation and usage instructions, please visit our [documentatio
 ### Quick Start
 ```bash
 # Using bun
-bun create nitro-module my-nitro-module
+bun create nitro-module@latest my-nitro-module
 
 # Using npx
-npx create-nitro-module my-nitro-module
+npx create-nitro-module@latest my-nitro-module
 
 # Using pnpm
-pnpm create nitro-module my-nitro-module
+pnpm create nitro-module@latest my-nitro-module
 
 # Using yarn
-yarn create nitro-module my-nitro-module
+yarn create nitro-module@latest my-nitro-module
 
 # Using global install
-npm install -g create-nitro-module
+npm install -g create-nitro-module@latest
 nitro-module create my-nitro-module
 ```
 

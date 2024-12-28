@@ -16,22 +16,22 @@ To create a Nitro Module along with an example app, use the following command. T
 <Tabs groupId="cli">
   <TabItem value="bun" label="Bun" default>
   ```bash
-  bun create nitro-module my-awesome-module
+  bun create nitro-module@latest my-awesome-module
   ```
   </TabItem>
   <TabItem value="npx" label="Npx" default>
   ```bash
-  npx create-nitro-module my-awesome-module
+  npx create-nitro-module@latest my-awesome-module
   ```
   </TabItem>
   <TabItem value="pnpm" label="Pnpm" default>
   ```bash
-  pnpm create nitro-module my-awesome-module
+  pnpm create nitro-module@latest my-awesome-module
   ```
   </TabItem>
   <TabItem value="yarn" label="Yarn" default>
   ```bash
-  yarn create nitro-module my-awesome-module
+  yarn create nitro-module@latest my-awesome-module
   ```
   </TabItem>
   <TabItem value="global" label="Global" default>
@@ -41,7 +41,7 @@ To create a Nitro Module along with an example app, use the following command. T
   :::warning
 
   Make sure you have installed the Nitro Module CLI globally to use the `nitro-module` command. You can install it using the following command:
-  `npm install -g create-nitro-module`
+  `npm install -g create-nitro-module@latest`
   :::
   </TabItem>
 </Tabs>
@@ -53,25 +53,25 @@ If you prefer to create a Nitro Module without an example app, use the following
 <Tabs groupId="cli">
   <TabItem value="bun" label="Bun" default>
   ```bash
-  bun create nitro-module my-awesome-module --skip-example
+  bun create nitro-module@latest my-awesome-module --skip-example
   ```
   </TabItem>
-  <TabItem value="npx" label="Npx" default>
+  <TabItem value="npx" label="Npx">
   ```bash
-  npx create-nitro-module my-awesome-module --skip-example
+  npx create-nitro-module@latest my-awesome-module --skip-example
   ```
   </TabItem>
-  <TabItem value="pnpm" label="Pnpm" default>
+  <TabItem value="pnpm" label="Pnpm">
   ```bash
-  pnpm create nitro-module my-awesome-module --skip-example
+  pnpm create nitro-module@latest my-awesome-module --skip-example
   ```
   </TabItem>
-  <TabItem value="yarn" label="Yarn" default>
+  <TabItem value="yarn" label="Yarn">
   ```bash
-  yarn create nitro-module my-awesome-module --skip-example
+  yarn create nitro-module@latest my-awesome-module --skip-example
   ```
   </TabItem>
-  <TabItem value="global" label="Global" default>
+  <TabItem value="global" label="Global">
   ```bash
   nitro-module create my-awesome-module --skip-example
   ```
@@ -87,25 +87,25 @@ If you prefer to create a Nitro Module within a specific directory, use the foll
 <Tabs groupId="cli">
   <TabItem value="bun" label="Bun" default>
   ```bash
-  bun create nitro-module my-awesome-module --module-dir packages
+  bun create nitro-module@latest my-awesome-module --module-dir packages
   ```
   </TabItem>
-  <TabItem value="npx" label="Npx" default>
+  <TabItem value="npx" label="Npx">
   ```bash
-  npx create-nitro-module my-awesome-module --module-dir packages
+  npx create-nitro-module@latest my-awesome-module --module-dir packages
   ```
   </TabItem>
-  <TabItem value="pnpm" label="Pnpm" default>
+  <TabItem value="pnpm" label="Pnpm">
   ```bash
-  pnpm create nitro-module my-awesome-module --module-dir packages
+  pnpm create nitro-module@latest my-awesome-module --module-dir packages
   ```
   </TabItem>
-  <TabItem value="yarn" label="Yarn" default>
+  <TabItem value="yarn" label="Yarn">
   ```bash
-  yarn create nitro-module my-awesome-module --module-dir packages
+  yarn create nitro-module@latest my-awesome-module --module-dir packages
   ```
   </TabItem>
-  <TabItem value="global" label="Global" default>
+  <TabItem value="global" label="Global">
   ```bash
   nitro-module create my-awesome-module --module-dir packages
   ```
