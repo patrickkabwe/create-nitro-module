@@ -49,4 +49,4 @@ MyNitroApp
 - **tsconfig.json**: Contains the TypeScript configuration.
 - **README.md**: Contains the documentation for your project.
 
-For additional support, please [open an issue](https://github.com/patrickkabwe/create-nitro-modules/issues) on our GitHub repository.
+For additional support, please [open an issue](https://github.com/patrickkabwe/create-nitro-module/issues) on our GitHub repository.

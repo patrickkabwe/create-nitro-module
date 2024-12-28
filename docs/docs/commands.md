@@ -2,6 +2,9 @@
 sidebar_position: 3
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Commands
 
 This document provides an overview of the commands available in the Nitro Module CLI.
@@ -35,22 +38,33 @@ create [moduleName]
 
 #### Example
 
-```bash
-# Using bun
-bun create nitro-module my-awesome-module
-
-# Using npx
-npx create-nitro-module my-awesome-module
-
-# Using pnpm
-pnpm create nitro-module my-awesome-module
-
-# Using yarn
-yarn create nitro-module my-awesome-module
-
-# Using global install
-nitro-module my-awesome-module
-```
+<Tabs groupId="cli">
+    <TabItem value="bun" label="Bun" default>
+    ```bash
+    bun create nitro-module my-awesome-module
+    ```
+    </TabItem>
+    <TabItem value="npx" label="Npx" default>
+    ```bash
+    npx create-nitro-module my-awesome-module
+    ```
+    </TabItem>
+    <TabItem value="pnpm" label="Pnpm" default>
+    ```bash
+    pnpm create nitro-module my-awesome-module
+    ```
+    </TabItem>
+    <TabItem value="yarn" label="Yarn" default>
+    ```bash
+    yarn create nitro-module my-awesome-module
+    ```
+    </TabItem>
+    <TabItem value="global" label="Global" default>
+    ```bash
+    nitro-module create my-awesome-module
+    ```
+    </TabItem>
+</Tabs>
 
 <!-- ### generate
 
@@ -79,4 +93,4 @@ yarn create nitro-module generate my-awesome-module
 nitro-module generate my-awesome-module
 ``` -->
 
-For additional support, please [open an issue](https://github.com/patrickkabwe/nitro-module-cli/issues) on our GitHub repository.
+For additional support, please [open an issue](https://github.com/patrickkabwe/create-nitro-module/issues) on our GitHub repository.
