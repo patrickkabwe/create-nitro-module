@@ -41,27 +41,27 @@ create [moduleName]
 <Tabs groupId="cli">
     <TabItem value="bun" label="Bun" default>
     ```bash
-    bun create nitro-module my-awesome-module
+    bun create nitro-module@latest my-awesome-module
     ```
     </TabItem>
-    <TabItem value="npx" label="Npx" default>
+    <TabItem value="npx" label="Npx">
     ```bash
-    npx create-nitro-module my-awesome-module
+    npx create-nitro-module@latest my-awesome-module
     ```
     </TabItem>
-    <TabItem value="pnpm" label="Pnpm" default>
+    <TabItem value="pnpm" label="Pnpm">
     ```bash
-    pnpm create nitro-module my-awesome-module
+    pnpm create nitro-module@latest my-awesome-module
     ```
     </TabItem>
-    <TabItem value="yarn" label="Yarn" default>
+    <TabItem value="yarn" label="Yarn">
     ```bash
-    yarn create nitro-module my-awesome-module
+    yarn create nitro-module@latest my-awesome-module
     ```
     </TabItem>
-    <TabItem value="global" label="Global" default>
+    <TabItem value="global" label="Global">
     ```bash
-    nitro-module create my-awesome-module
+    nitro-module@latest create my-awesome-module
     ```
     </TabItem>
 </Tabs>
@@ -78,19 +78,19 @@ generate <moduleName>
 
 ```bash
 # Using bun
-bun create nitro-module generate my-awesome-module
+bun create nitro-module@latest generate my-awesome-module
 
 # Using npx
-npx create-nitro-module generate my-awesome-module
+npx create-nitro-module@latest generate my-awesome-module
 
 # Using pnpm
-pnpm create nitro-module generate my-awesome-module
+pnpm create nitro-module@latest generate my-awesome-module
 
 # Using yarn
-yarn create nitro-module generate my-awesome-module
+yarn create nitro-module@latest generate my-awesome-module
 
 # Using global install
-nitro-module generate my-awesome-module
+nitro-module@latest generate my-awesome-module
 ``` -->
 
 For additional support, please [open an issue](https://github.com/patrickkabwe/create-nitro-module/issues) on our GitHub repository.
