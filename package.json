@@ -6,7 +6,7 @@
   "type": "module",
   "files": [
     "lib",
-    "assets/",
+    "assets/*.{json,js}",
     "README.md"
   ],
   "keywords": [

@@ -22,6 +22,8 @@ jobs:
   lint-and-format:
     name: Lint and Format
     runs-on: ubuntu-latest
+    outputs:
+      bun-cache-key: ${{ runner.os }}-bun
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -30,6 +32,15 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+
+      - name: Cache npm dependencies
+        id: bun-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
       - name: Install npm dependencies (bun)
         run: bun install
@@ -55,12 +66,6 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install Java for Android builds
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
       - name: Setup Ruby and Cocoapods
         uses: ruby/setup-ruby@v1
         with:
@@ -68,10 +73,11 @@ jobs:
           bundler-cache: true
 
       - name: Cache npm dependencies
+        id: bun-cache
         uses: actions/cache@v4
         with:
-          path: ~/.bun
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.bun/install/cache
+          key: ${{ needs.lint-and-format.outputs.bun-cache-key }}-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
@@ -131,14 +137,11 @@ jobs:
         run: ./test-module.exp
 
       - name: Cache CocoaPods
+        id: pods-cache
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cocoapods
-            ios/Pods
+          path: ./react-native-test-module/example/ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
 
       - name: Install CocoaPods dependencies
         working-directory: react-native-test-module/example
@@ -157,15 +160,12 @@ jobs:
           build \
           CODE_SIGNING_ALLOWED=NO"
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
+      - name: Install Java for Android builds
+        uses: actions/setup-java@v4
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          distribution: 'zulu'
+          java-version: '17'
+          cache: gradle
 
       - name: Run Gradle Build
         working-directory: react-native-test-module/example/android

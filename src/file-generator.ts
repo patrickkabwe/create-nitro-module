@@ -6,7 +6,8 @@ import {
   mkdir,
   readFile,
   rm,
-  writeFile,
+  stat,
+  writeFile
 } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -74,6 +75,7 @@ export class FileGenerator {
   private tmpDir = ''
   private cwd = process.cwd()
   private packagePrefix = 'react-native-' as const
+  private funcName = 'sum' as const
   private finalModuleName = ''
   private moduleName = ''
   private androidPackageName = ''
@@ -123,9 +125,9 @@ export class FileGenerator {
       return
     }
 
-    this.spinner.update(kleur.yellow(messages.cloning))
+    this.spinner.update(kleur.yellow(messages.generating))
     await this.cloneNitroExample(pm)
-    this.spinner.succeed(kleur.green(messages.cloning))
+    this.spinner.succeed(kleur.green(messages.generating))
 
     this.spinner.update(kleur.yellow(messages.installing))
     await this.prepare(pm ?? 'bun')
@@ -141,18 +143,19 @@ export class FileGenerator {
   }
 
   private async cloneNitroTemplate() {
-    let exists = false
-    try {
-      await access('/tmp/nitro')
-      exists = true
-    } catch {
-      exists = false
-    }
-    await rm(`${this.tmpDir}`, { recursive: true, force: true })
-    if (!exists) {
-      await execAsync(
-        'git clone --depth 1 https://github.com/mrousavy/nitro /tmp/nitro'
-      )
+    const nitroFolder = '/tmp/nitro'
+    const exists = await dirExist(nitroFolder)
+    await rm(this.tmpDir, { recursive: true, force: true })
+    const cloneCmd = `git clone --depth 1 https://github.com/mrousavy/nitro ${nitroFolder}`
+    if (exists) {
+      const fileStats = await stat(nitroFolder)
+      const shouldClone = fileStats.mtimeMs < Date.now() - 1000 * 60 * 60 * 24
+      if (shouldClone) {
+        await rm(nitroFolder, { recursive: true, force: true })
+        await execAsync(cloneCmd)
+      }
+    } else {
+      await execAsync(cloneCmd)
     }
   }
 
@@ -230,7 +233,7 @@ export class FileGenerator {
     if (generateSwiftFile) {
       await this.generateModuleFile(
         `ios/${toPascalCase(this.moduleName)}.swift`,
-        getSwiftCode(this.moduleName)
+        getSwiftCode(this.moduleName, this.funcName)
       )
     }
 
@@ -250,7 +253,7 @@ export class FileGenerator {
       `android/src/main/java/${this.androidPackageName
         .split('.')
         .join('/')}/${toPascalCase(this.moduleName)}.kt`,
-      getKotlinCode(this.moduleName, this.androidPackageName)
+      getKotlinCode(this.moduleName, this.androidPackageName, this.funcName)
     )
     await this.generateGradleFile()
     await this.generateCMakeFile()
@@ -414,7 +417,7 @@ export class FileGenerator {
     await this.generateFolder('src/specs')
     await this.generateModuleFile(
       `/src/specs/${this.moduleName}.nitro.ts`,
-      specCode(this.moduleName, platformLang)
+      specCode(this.moduleName, platformLang, this.funcName)
     )
     await this.generateModuleFile('/src/index.ts', exportCode(this.moduleName))
   }
@@ -475,7 +478,7 @@ export class FileGenerator {
     const appPath = path.join(this.cwd, 'example/App.tsx')
     await writeFile(
       appPath,
-      appExampleCode(this.moduleName, this.packagePrefix),
+      appExampleCode(this.moduleName, this.packagePrefix, this.funcName),
       { encoding: 'utf8' }
     )
 

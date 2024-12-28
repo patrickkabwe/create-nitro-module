@@ -5,7 +5,7 @@ export const androidManifestCode = `
 </manifest>
 `
 
-export const getKotlinCode = (moduleName: string, packageT: string) => `
+export const getKotlinCode = (moduleName: string, packageT: string, funcName: string) => `
 package ${packageT}
 
 import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
@@ -16,7 +16,7 @@ class ${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec() {
     override val memorySize: Long
         get() = 5
     
-    override fun sumNum(num1: Double, num2: Double): Double {
+    override fun ${funcName}(num1: Double, num2: Double): Double {
         return num1 + num2
     }
 }

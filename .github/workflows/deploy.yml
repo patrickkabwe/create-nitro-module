@@ -6,11 +6,13 @@ on:
       - main
     paths:
       - 'docs/**'
+      - '.github/workflows/deploy.yml'
   pull_request:
     branches:
       - main
     paths:
       - 'docs/**'
+      - '.github/workflows/deploy.yml'
 
 jobs:
   build:
@@ -45,7 +47,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     needs: build
-
+    if: ${{ github.event_name == 'push' }}
     permissions:
       pages: write
       id-token: write
