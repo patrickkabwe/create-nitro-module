@@ -9,5 +9,5 @@
     "esModuleInterop": true,
     "skipLibCheck": false
   },
-  "exclude": ["node_modules", "lib"]
+  "exclude": ["node_modules", "lib","docs"]
 }
