@@ -41,7 +41,6 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install npm dependencies (bun)
-        if: steps.bun-cache.outputs.cache-hit != 'true'
         run: bun install
 
       - name: Lint and Format
@@ -79,7 +78,6 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
 
       - name: Install npm dependencies (bun)
-        if: steps.bun-cache.outputs.cache-hit != 'true'
         run: bun install
 
       - name: Build CLI and Link Locally
