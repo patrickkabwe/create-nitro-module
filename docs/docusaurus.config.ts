@@ -63,8 +63,8 @@ const config: Config = {
         {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Introduction',
+          position: 'right',
+          label: 'Tutorial',
         },
         {
           href: 'https://github.com/patrickkabwe/create-nitro-module',
