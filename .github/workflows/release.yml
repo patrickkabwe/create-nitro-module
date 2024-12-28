@@ -37,10 +37,11 @@ jobs:
       - name: Restore ccache
         uses: hendrikmuhs/ccache-action@v1.2
 
-      - name: Cache Dependencies
+      - name: Cache npm dependencies
+        id: bun-cache
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: ~/.bun/install/cache
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-bun-
