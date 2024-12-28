@@ -14,6 +14,9 @@ jobs:
   build:
     name: Build Docs Website
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,9 +28,9 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: Build website
-        run: yarn build
+        run: bun run build
 
       - name: Upload Build Artifact
         uses: actions/upload-pages-artifact@v3
