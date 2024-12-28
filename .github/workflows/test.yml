@@ -31,7 +31,17 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Cache npm dependencies
+        id: bun-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
       - name: Install npm dependencies (bun)
+        if: steps.bun-cache.outputs.cache-hit != 'true'
         run: bun install
 
       - name: Lint and Format
@@ -60,6 +70,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
+          cache: gradle
 
       - name: Setup Ruby and Cocoapods
         uses: ruby/setup-ruby@v1
@@ -68,14 +79,14 @@ jobs:
           bundler-cache: true
 
       - name: Cache npm dependencies
+        id: bun-cache
         uses: actions/cache@v4
         with:
-          path: ~/.bun
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
 
       - name: Install npm dependencies (bun)
+        if: steps.bun-cache.outputs.cache-hit != 'true'
         run: bun install
 
       - name: Build CLI and Link Locally
@@ -131,17 +142,17 @@ jobs:
         run: ./test-module.exp
 
       - name: Cache CocoaPods
+        id: pods-cache
         uses: actions/cache@v4
         with:
           path: |
             ~/.cocoapods
             ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
 
       - name: Install CocoaPods dependencies
         working-directory: react-native-test-module/example
+        if: steps.pods-cache.outputs.cache-hit != 'true'
         run: bun pod
 
       - name: Build iOS
@@ -156,16 +167,6 @@ jobs:
           -destination 'platform=iOS Simulator,name=iPhone 16' \
           build \
           CODE_SIGNING_ALLOWED=NO"
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
 
       - name: Run Gradle Build
         working-directory: react-native-test-module/example/android
