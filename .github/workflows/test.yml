@@ -65,13 +65,6 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install Java for Android builds
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: gradle
-
       - name: Setup Ruby and Cocoapods
         uses: ruby/setup-ruby@v1
         with:
@@ -167,6 +160,13 @@ jobs:
           -destination 'platform=iOS Simulator,name=iPhone 16' \
           build \
           CODE_SIGNING_ALLOWED=NO"
+
+      - name: Install Java for Android builds
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: gradle
 
       - name: Run Gradle Build
         working-directory: react-native-test-module/example/android
