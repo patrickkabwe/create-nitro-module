@@ -22,6 +22,8 @@ jobs:
   lint-and-format:
     name: Lint and Format
     runs-on: ubuntu-latest
+    outputs:
+      bun-cache-key: ${{ runner.os }}-bun
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -75,7 +77,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ needs.lint-and-format.outputs.bun-cache-key }}-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
       - name: Install npm dependencies (bun)
         run: bun install
@@ -136,14 +140,11 @@ jobs:
         id: pods-cache
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cocoapods
-            ios/Pods
+          path: ./react-native-test-module/example/ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
 
       - name: Install CocoaPods dependencies
         working-directory: react-native-test-module/example
-        if: steps.pods-cache.outputs.cache-hit != 'true'
         run: bun pod
 
       - name: Build iOS
