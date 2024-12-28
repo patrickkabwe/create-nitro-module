@@ -44,7 +44,21 @@ This section provides solutions to common issues you might encounter while using
 
 ### General Issues
 
-1. **Module Not Found**
+1. **Error Invalid Version: latest**
+
+   If you encounter an invalid version error, this is due to an issue with the CLI: See issue: [Invalid Version: latest](https://github.com/react-native-community/cli/issues/2486)
+
+   ```bash
+   ✖ Failed to create nitro module: Command failed: bunx -y @react-native-community/cli@latest init TestToSpeechExample --directory path/react-native-module/example --skip-install
+   Resolving dependencies
+   Resolved, downloaded and extracted [2]
+   Saved lockfile
+   error Invalid Version: latest.
+   ```
+
+   To resolve this issue, use the following command: keep trying until it works.
+
+2. **Module Not Found**
 
    If a module is not found, ensure it is properly installed and linked:
 
@@ -53,7 +67,7 @@ This section provides solutions to common issues you might encounter while using
    npx react-native link <module-name>
    ```
 
-2. **Command Not Found**
+3. **Command Not Found**
 
    If a CLI command is not recognized, ensure the CLI is installed globally:
 
@@ -61,7 +75,7 @@ This section provides solutions to common issues you might encounter while using
    npm install -g create-nitro-module
    ```
 
-3. **Permission Denied**
+4. **Permission Denied**
 
    If you encounter permission issues, try running the command with `sudo`:
 
