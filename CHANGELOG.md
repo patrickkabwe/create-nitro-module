@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 0.20.1
+
+### Patch Changes
+
+- 823f643: docs: adds docs url and updates readme docs
+
 ## 0.20.0
 
 ### Minor Changes
