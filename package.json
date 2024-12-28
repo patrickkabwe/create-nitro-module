@@ -33,7 +33,7 @@
   "bugs": {
     "url": "https://github.com/patrickkabwe/create-nitro-module/issues"
   },
-  "homepage": "https://github.com/patrickkabwe/create-nitro-module#readme",
+  "homepage": "https://patrickkabwe.github.io/create-nitro-module/",
   "scripts": {
     "dev": "bun typecheck && tsx src/cli.ts",
     "build": "rm -rf lib && bun typecheck && tsup src",
