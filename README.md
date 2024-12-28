@@ -5,6 +5,7 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 [![Version](https://img.shields.io/npm/v/create-nitro-module.svg)](https://www.npmjs.com/package/create-nitro-module)
 [![Downloads](https://img.shields.io/npm/dm/create-nitro-module.svg)](https://www.npmjs.com/package/create-nitro-module)
 [![License](https://img.shields.io/npm/l/create-nitro-module.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-available-brightgreen.svg)](https://patrickkabwe.github.io/create-nitro-module/)
 
 ![CLI Demo](https://raw.githubusercontent.com/patrickkabwe/nitro-cli/refs/heads/main/assets/nitro-module-cli.gif)
 
@@ -26,6 +27,7 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 │   ├── src
 │       ├── index.ts
 │       └── specs
+│         └── awesome-library.nitro.ts
 │   ├── nitrogen
 │   ├── nitro.json
 │   ├── babel.config.js
@@ -37,77 +39,24 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 
 ## Installation & Usage
 
+For detailed installation and usage instructions, please visit our [documentation](https://patrickkabwe.github.io/create-nitro-module/).
+
 ### Quick Start
 ```bash
 # Using bun
-bun create nitro-module
+bun create nitro-module my-nitro-module
 
 # Using npx
-npx create-nitro-module
+npx create-nitro-module my-nitro-module
 
 # Using pnpm
-pnpm create nitro-module
+pnpm create nitro-module my-nitro-module
 
 # Using yarn
-yarn create nitro-module
+yarn create nitro-module my-nitro-module
 
 # Using global install
-nitro-module
+npm install -g create-nitro-module
+nitro-module create my-nitro-module
 ```
 
-### CLI Commands
-```bash
-Usage: create-nitro-module [options] [command]
-
-Options:
-  -v, --version          output the version number
-  -h, --help             display help for command
-
-Commands:
-  create [moduleName]    create a new nitro module. If no moduleName is provided, 
-                        you will be prompted for one.
-  generate <moduleName>  generate a hybrid object into the package directory
-```
-
-### Examples
-```bash
-# Create a new module
-bun create nitro-module my-awesome-module
-
-cd example
-
-bun android # build android app
-
-bun ios # build ios app
-```
-
-## Troubleshooting
-
-### iOS Build Issues
-1. **Pod Install Fails**
-   ```bash
-   cd yourpackage/ios
-   pod deintegrate
-   pod install
-   ```
-
-2. **Missing Header Files**
-   - Clean build folder in Xcode
-   - Ensure all native dependencies are properly linked
-   - Rebuild the project
-
-### Android Build Issues
-1. **Gradle Sync Failed**
-   ```bash
-   cd yourpackage/android
-   ./gradlew clean
-   ./gradlew build
-   ```
-
-2. **Missing Dependencies**
-   - Check `build.gradle` for correct dependencies
-   - Sync project with Gradle files
-   - Invalidate caches and restart Android Studio
-
-
-For additional support, please [open an issue](https://github.com/patrickkabwe/nitro-module-cli/issues) on our GitHub repository.
