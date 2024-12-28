@@ -8,7 +8,7 @@ export const JS_PACKAGE_NAME_TAG = '$$packageName$$'
 
 export const messages = {
    creating: '🔄 Creating your Nitro Module...',
-   cloning: '📦 Cloning app template...',
+   generating: '📦 Generating example app...',
    installing: '📦 Installing packages...',
    success: '✨ Nitro Module created successfully!',
 }

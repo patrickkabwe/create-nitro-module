@@ -29,6 +29,11 @@ handle_error() {
 
 trap 'handle_error $LINENO' ERR
 
+if [ -d "react-native-test-module" ]; then
+    echo -e "${RED}❌ react-native-test-module already exists. removing folder${NC}"
+    cleanup
+fi
+
 # Create expect script
 cat << 'EOF' > test-module.exp
 #!/usr/bin/expect -f
@@ -83,6 +88,7 @@ echo -e "${BLUE}🎯 Generating module...${NC}"
 
 # Build iOS/Android
 if [ -d "react-native-test-module" ]; then
+    ls -la react-native-test-module
     cd react-native-test-module/example
     bun pod
     cd ios
