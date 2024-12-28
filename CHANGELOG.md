@@ -1,5 +1,12 @@
 # create-nitro-module
 
+## 0.20.2
+
+### Patch Changes
+
+- 3684e69: feat: reduce cli npm size by ignoring the `nitro-module-cli.gif`
+  fix: no such file or directory error
+
 ## 0.20.1
 
 ### Patch Changes
