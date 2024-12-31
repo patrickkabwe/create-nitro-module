@@ -7,7 +7,7 @@ import {
   readFile,
   rm,
   stat,
-  writeFile
+  writeFile,
 } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -17,9 +17,18 @@ import packageJsonFile from '../assets/package.json'
 import tsconfigFile from '../assets/tsconfig.json'
 import workspacePackageJsonFile from '../assets/workspace-package.json'
 import projectPackageJsonFile from '../package.json'
-import { androidManifestCode, androidSettingsGradleCode, getKotlinCode } from './code.android.js'
-import { getSwiftCode } from './code.ios.js'
-import { appExampleCode, exportCode, metroConfig, specCode } from './code.js.js'
+import {
+  androidManifestCode,
+  androidSettingsGradleCode,
+  getKotlinCode,
+} from './code-snippets/code.android.js'
+import { getSwiftCode } from './code-snippets/code.ios.js'
+import {
+  appExampleCode,
+  exportCode,
+  metroConfig,
+  specCode,
+} from './code-snippets/code.js.js'
 import {
   ANDROID_CXX_LIB_NAME_TAG,
   ANDROID_NAME_SPACE_TAG,
@@ -27,7 +36,7 @@ import {
   IOS_MODULE_NAME_TAG,
   JS_PACKAGE_NAME_TAG,
   messages,
-  nosIcon
+  nosIcon,
 } from './constants.js'
 import { NitroSpinner } from './nitro-spinner.js'
 import {
@@ -39,16 +48,11 @@ import {
   replaceTag,
   toPascalCase,
 } from './utils.js'
+import { SupportedLang } from './types'
 
 const execAsync = util.promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
-export enum SupportedLang {
-  SWIFT = 'swift',
-  KOTLIN = 'kotlin',
-  CPP = 'c++',
-}
 
 export enum SupportedPlatform {
   IOS = 'ios',
@@ -57,14 +61,18 @@ export enum SupportedPlatform {
 
 type PackageManager = 'bun' | 'pnpm' | 'yarn' | 'npm'
 
+export type CreateModuleOptions = {
+  moduleDir?: string
+  skipExample?: boolean
+  skipInstall?: boolean
+}
+
 type Generate = {
   pm: PackageManager
   moduleName: string
-  moduleDir?: string
-  skipExample?: boolean
   langs: SupportedLang[]
   platforms: SupportedPlatform[]
-}
+} & CreateModuleOptions
 
 type PlatformLang = {
   langs: SupportedLang[]
@@ -85,7 +93,14 @@ export class FileGenerator {
     this.spinner = spinner
   }
 
-  public async generate({ moduleName, langs, platforms, pm, moduleDir, skipExample }: Generate) {
+  public async generate({
+    moduleName,
+    langs,
+    platforms,
+    pm,
+    moduleDir,
+    skipExample,
+  }: Generate) {
     this.tmpDir = `/tmp/${moduleName}`
     this.moduleName = moduleName
     this.finalModuleName = `${this.packagePrefix}${moduleName}`.toLowerCase()
@@ -103,11 +118,17 @@ export class FileGenerator {
     await this.copyFiles()
     await this.generateNitroJson({ platforms, langs })
 
-    if (langs.includes(SupportedLang.SWIFT) || langs.includes(SupportedLang.CPP)) {
+    if (
+      langs.includes(SupportedLang.SWIFT) ||
+      langs.includes(SupportedLang.CPP)
+    ) {
       await this.generatePodJson()
       await this.generateIOSBridgeFile(langs.includes(SupportedLang.SWIFT))
     }
-    if (langs.includes(SupportedLang.KOTLIN) || langs.includes(SupportedLang.CPP)) {
+    if (
+      langs.includes(SupportedLang.KOTLIN) ||
+      langs.includes(SupportedLang.CPP)
+    ) {
       await this.generateAndroidFiles()
     }
 
@@ -120,7 +141,9 @@ export class FileGenerator {
       this.spinner.succeed(kleur.green(messages.success))
       console.log(nosIcon(this.finalModuleName, pm))
       console.log(
-        kleur.dim(`Create Nitro Module - ${projectPackageJsonFile.description}\n`)
+        kleur.dim(
+          `Create Nitro Module - ${projectPackageJsonFile.description}\n`
+        )
       )
       return
     }
@@ -232,11 +255,10 @@ export class FileGenerator {
     )
     if (generateSwiftFile) {
       await this.generateModuleFile(
-        `ios/${toPascalCase(this.moduleName)}.swift`,
+        `ios/Hybrid${toPascalCase(this.moduleName)}.swift`,
         getSwiftCode(this.moduleName, this.funcName)
       )
     }
-
   }
 
   private async generateAndroidFiles() {
@@ -252,7 +274,7 @@ export class FileGenerator {
     await this.generateModuleFile(
       `android/src/main/java/${this.androidPackageName
         .split('.')
-        .join('/')}/${toPascalCase(this.moduleName)}.kt`,
+        .join('/')}/Hybrid${toPascalCase(this.moduleName)}.kt`,
       getKotlinCode(this.moduleName, this.androidPackageName, this.funcName)
     )
     await this.generateGradleFile()
@@ -389,7 +411,6 @@ export class FileGenerator {
       )
     }
 
-
     // tsconfig
     const tsconfigFilePath = path.join(
       this.cwd + `/${this.finalModuleName}`,
@@ -484,11 +505,7 @@ export class FileGenerator {
 
     const metroConfigPath = path.join(this.cwd, 'example/metro.config.js')
 
-    await writeFile(
-      metroConfigPath,
-      metroConfig,
-      { encoding: 'utf8' }
-    )
+    await writeFile(metroConfigPath, metroConfig, { encoding: 'utf8' })
 
     const androidSettingsGradlePath = path.join(
       this.cwd,
@@ -511,10 +528,14 @@ export class FileGenerator {
     })
 
     const gradleReplacements = {
-      '// reactNativeDir = file("../../node_modules/react-native")': 'reactNativeDir = file("../../../node_modules/react-native")',
-      '// codegenDir = file("../../node_modules/@react-native/codegen")': 'codegenDir = file("../../../node_modules/@react-native/codegen")',
-      '// cliFile = file("../../node_modules/react-native/cli.js")': 'cliFile = file("../../../node_modules/react-native/cli.js")',
-      '// hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"': 'hermesCommand = "$rootDir/../../node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc"',
+      '// reactNativeDir = file("../../node_modules/react-native")':
+        'reactNativeDir = file("../../../node_modules/react-native")',
+      '// codegenDir = file("../../node_modules/@react-native/codegen")':
+        'codegenDir = file("../../../node_modules/@react-native/codegen")',
+      '// cliFile = file("../../node_modules/react-native/cli.js")':
+        'cliFile = file("../../../node_modules/react-native/cli.js")',
+      '// hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"':
+        'hermesCommand = "$rootDir/../../node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc"',
     }
 
     const toWrite = await this.replacePlaceholder({
@@ -526,7 +547,9 @@ export class FileGenerator {
   }
 
   private async prepare(pm: PackageManager) {
-    await execAsync(`cd ${this.cwd}/${this.finalModuleName}; rm -rf nitrogen; ${pm} install`)
+    await execAsync(
+      `cd ${this.cwd}/${this.finalModuleName}; rm -rf nitrogen; ${pm} install`
+    )
     await execAsync(
       `cd ${this.cwd}/${this.finalModuleName}; ${pm} codegen; cd ..`
     )
@@ -574,10 +597,9 @@ export interface ${toPascalCase(
   }
 
   private async generateFolder(dir?: string) {
-    await mkdir(
-      path.join(this.cwd, `${this.finalModuleName}/${dir ?? ''}`),
-      { recursive: true }
-    )
+    await mkdir(path.join(this.cwd, `${this.finalModuleName}/${dir ?? ''}`), {
+      recursive: true,
+    })
   }
 
   private async generateModuleFile(fileName: string, data: string) {
@@ -638,7 +660,7 @@ androidWorkaround()
     const androidWorkaroundPath = path.join(
       this.cwd,
       this.finalModuleName,
-      'post-script.js',
+      'post-script.js'
     )
 
     await writeFile(androidWorkaroundPath, code)
