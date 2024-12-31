@@ -67,10 +67,7 @@ export class NitroSpinner {
   }
 
   public start(text: string): this {
-    if (this.isSpinning) {
-      this.succeed(this.currentText)
-    }
-
+    this.stopSpinner()
     this.currentText = text
     this.isSpinning = true
 
@@ -110,7 +107,7 @@ export class NitroSpinner {
     return this
   }
 
-  public error(text: string): this {
+  public fail(text: string): this {
     this.stopSpinner()
     this.write(
       `${this.colors.red}${this.symbols.error}${this.colors.reset} ${text}\n`
