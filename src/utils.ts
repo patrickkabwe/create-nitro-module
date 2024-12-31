@@ -1,11 +1,7 @@
 import { execSync } from 'child_process'
 import { access, copyFile, mkdir, readFile, writeFile } from 'fs/promises'
 import path from 'path'
-import { fileURLToPath } from 'url'
 import { GenerateModuleConfig, SupportedLang } from './types'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 type AutolinkingConfig = {
   [key: string]: Partial<Record<SupportedLang | 'cpp', string>>
@@ -129,13 +125,14 @@ export const dirExist = async (dir: string) => {
 }
 
 export const createFolder = async (cwd: string, dir?: string) => {
-  await mkdir(
-    path.join(cwd, dir ?? ''),
-    { recursive: true }
-  )
+  await mkdir(path.join(cwd, dir ?? ''), { recursive: true })
 }
 
-export const createModuleFile = async (cwd: string, fileName: string, data: string) => {
+export const createModuleFile = async (
+  cwd: string,
+  fileName: string,
+  data: string
+) => {
   const filePath = path.join(cwd, fileName)
   await writeFile(filePath, data, { encoding: 'utf8', mode: 0o755 }) // use other mode if needed
 }
@@ -166,12 +163,12 @@ export const replacePlaceholder = async ({
   )
 }
 
-
-export const copyTemplateFiles = async (config: GenerateModuleConfig, arg: string[], filesToCopy: string[]) => {
+export const copyTemplateFiles = async (
+  config: GenerateModuleConfig,
+  paths: string[],
+  filesToCopy: string[]
+) => {
   for (const file of filesToCopy) {
-    await copyFile(
-      path.join(...arg, file),
-      path.join(config.cwd, file)
-    )
+    await copyFile(path.join(...paths, file), path.join(config.cwd, file))
   }
 }

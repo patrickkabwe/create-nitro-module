@@ -10,8 +10,10 @@ import { NitroModuleFactory } from './generate-nitro-module'
 import { NitroModuleType, PLATFORM_LANGUAGE_MAP } from './types'
 import { dirExist } from './utils'
 
-
-export const createModule = async (name: string, options: CreateModuleOptions) => {
+export const createModule = async (
+  name: string,
+  options: CreateModuleOptions
+) => {
   const spinner = ora()
   try {
     if (typeof name !== 'string') {
@@ -50,12 +52,14 @@ export const createModule = async (name: string, options: CreateModuleOptions) =
       kleur.red(`Failed to create Nitro module: ${(error as Error).message}`)
     )
     if (name) {
-      const modulePath = path.join(process.cwd(), 'react-native-' + name.toLowerCase())
+      const modulePath = path.join(
+        process.cwd(),
+        'react-native-' + name.toLowerCase()
+      )
       rmSync(modulePath, { recursive: true, force: true })
     }
   }
 }
-
 
 const getUserAnswers = async (name: string) => {
   const moduleName = await inquirer.prompt({

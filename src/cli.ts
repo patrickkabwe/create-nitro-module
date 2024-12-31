@@ -10,7 +10,10 @@ program
   .description(packageJson.description)
   .version(`CLI Version: ${packageJson.version}`, '-v, --version')
   .argument('[name]', 'Name of the module to create')
-  .option('-d, --module-dir <moduleDirectory>', 'Directory to create the module in')
+  .option(
+    '-d, --module-dir <moduleDirectory>',
+    'Directory to create the module in'
+  )
   .option('-s, --skip-example', 'Skip example app generation')
   .option('-si, --skip-install', 'Skip installing dependencies')
   .action(createModule)
@@ -21,7 +24,10 @@ program
     'create a new nitro module. If no moduleName is provided, you will be prompted for one.'
   )
   .action(createModule)
-  .option('-d, --module-dir <moduleDirectory>', 'Directory to create the module in')
+  .option(
+    '-d, --module-dir <moduleDirectory>',
+    'Directory to create the module in'
+  )
   .option('-s, --skip-example', 'Skip example app generation')
   .option('-si, --skip-install', 'Skip installing dependencies')
 

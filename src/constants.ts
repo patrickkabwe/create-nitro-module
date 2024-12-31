@@ -9,10 +9,10 @@ export const IOS_MODULE_NAME_TAG = '$$iosModuleName$$'
 export const JS_PACKAGE_NAME_TAG = '$$packageName$$'
 
 export const messages = {
-   creating: '🔄 Creating your Nitro Module...',
-   generating: '📦 Generating example app...',
-   installing: '📦 Installing dependencies...',
-   success: '✨ Nitro Module created successfully!',
+  creating: '🔄 Creating your Nitro Module...',
+  generating: '📦 Generating example app...',
+  installing: '📦 Installing dependencies...',
+  success: '✨ Nitro Module created successfully!',
 }
 
 export const nosIcon = (moduleName: string, pm: string) => `
