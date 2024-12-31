@@ -6,7 +6,11 @@ import path from 'path'
 import projectPackageJsonFile from '../package.json'
 import { nosIcon, SUPPORTED_PLATFORMS } from './constants'
 import { NitroModuleFactory } from './generate-nitro-module'
-import { CreateModuleOptions, NitroModuleType, PLATFORM_LANGUAGE_MAP } from './types'
+import {
+  CreateModuleOptions,
+  NitroModuleType,
+  PLATFORM_LANGUAGE_MAP,
+} from './types'
 import { dirExist } from './utils'
 
 export const createModule = async (
