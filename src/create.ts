@@ -5,9 +5,8 @@ import ora from 'ora'
 import path from 'path'
 import projectPackageJsonFile from '../package.json'
 import { nosIcon, SUPPORTED_PLATFORMS } from './constants'
-import { CreateModuleOptions } from './file-generator'
 import { NitroModuleFactory } from './generate-nitro-module'
-import { NitroModuleType, PLATFORM_LANGUAGE_MAP } from './types'
+import { CreateModuleOptions, NitroModuleType, PLATFORM_LANGUAGE_MAP } from './types'
 import { dirExist } from './utils'
 
 export const createModule = async (

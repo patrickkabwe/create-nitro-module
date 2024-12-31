@@ -17,6 +17,12 @@ export type PlatformLang = {
   platforms: SupportedPlatform[]
 }
 
+export type CreateModuleOptions = {
+  moduleDir?: string
+  skipExample?: boolean
+  skipInstall?: boolean
+}
+
 export type PackageManager = 'bun' | 'pnpm' | 'yarn' | 'npm'
 
 export enum NitroModuleType {
@@ -34,10 +40,8 @@ export type GenerateModuleConfig = {
   platforms: SupportedPlatform[]
   moduleType: NitroModuleType
   moduleName: string
-  skipExample?: boolean
-  skipInstall?: boolean
   finalModuleName: string
-}
+} & CreateModuleOptions
 
 export interface FileGenerator {
   /**
