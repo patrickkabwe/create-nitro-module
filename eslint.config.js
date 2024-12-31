@@ -26,12 +26,7 @@ export default [
       ...ts.configs.recommended.rules,
       'n/hashbang': 'off',
       'n/no-process-exit': 'off',
-      'node/no-missing-import': [
-        'error',
-        {
-          tryExtensions: ['.js', '.json'],
-        },
-      ],
+      'n/no-missing-import': 'off',
     },
   },
   {
