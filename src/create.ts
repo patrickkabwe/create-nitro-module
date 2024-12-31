@@ -1,64 +1,63 @@
 import { rmSync } from 'fs'
 import inquirer from 'inquirer'
 import kleur from 'kleur'
-import { FileGenerator } from './file-generator.js'
-import { NitroSpinner } from './nitro-spinner.js'
-import { dirExist } from './utils.js'
+import ora from 'ora'
+import path from 'path'
+import projectPackageJsonFile from '../package.json'
+import { nosIcon, SUPPORTED_PLATFORMS } from './constants'
+import { CreateModuleOptions } from './file-generator'
+import { NitroModuleFactory } from './generate-nitro-module'
+import { NitroModuleType, PLATFORM_LANGUAGE_MAP } from './types'
+import { dirExist } from './utils'
 
-interface PlatformLanguageMap {
-  [key: string]: string[]
-}
-
-type CreateModuleOptions = {
-  moduleDir?: string
-  skipExample?: boolean
-}
-
-const PLATFORM_LANGUAGE_MAP: PlatformLanguageMap = {
-  ios: ['swift', 'cpp'],
-  android: ['kotlin', 'cpp'],
-}
-
-
-const PLATFORMS = ['ios', 'android']
 
 export const createModule = async (name: string, options: CreateModuleOptions) => {
-  const spinner = new NitroSpinner()
+  const spinner = ora()
   try {
     if (typeof name !== 'string') {
       name = ''
     }
+
     if (options.moduleDir) {
       const moduleDirExists = await dirExist(options.moduleDir)
       if (!moduleDirExists) {
-        throw new Error('Module directory does not exist')
+        throw new Error(`Module directory does not exist: ${options.moduleDir}`)
       }
     }
-    const answers = await getCreateModuleAnswer(name)
+
+    const answers = await getUserAnswers(name)
     name = answers.moduleName
 
-    const fileGenerator = new FileGenerator(spinner)
-    await fileGenerator.generate({
+    const moduleFactory = new NitroModuleFactory({
       langs: answers.langs,
-      moduleName: answers.moduleName,
+      moduleName: name,
       platforms: answers.platforms,
       pm: answers.pm,
-      moduleDir: options.moduleDir,
-      skipExample: options.skipExample,
+      cwd: options.moduleDir || process.cwd(),
+      spinner,
+      moduleType: NitroModuleType.HybridObject,
+      finalModuleName: 'react-native-' + name.toLowerCase(),
     })
-  } catch (error) {
-    spinner.error(
-      kleur.red(`Failed to create nitro module: ${(error as Error).message}`)
+
+    await moduleFactory.createNitroModule()
+
+    console.log(nosIcon(`react-native-${name.toLowerCase()}`, answers.pm))
+    spinner.succeed(
+      kleur.dim(`Create Nitro Module - ${projectPackageJsonFile.description}\n`)
     )
-    rmSync('react-native-' + name.toLowerCase(), { recursive: true, force: true })
+  } catch (error) {
+    spinner.fail(
+      kleur.red(`Failed to create Nitro module: ${(error as Error).message}`)
+    )
+    if (name) {
+      const modulePath = path.join(process.cwd(), 'react-native-' + name.toLowerCase())
+      rmSync(modulePath, { recursive: true, force: true })
+    }
   }
 }
 
-export const generateModule = () => {
-  throw new Error('Not Implemented')
-}
 
-const getCreateModuleAnswer = async (name: string) => {
+const getUserAnswers = async (name: string) => {
   const moduleName = await inquirer.prompt({
     type: 'input',
     message: kleur.cyan('📝 What is the name of your module?'),
@@ -77,7 +76,7 @@ const getCreateModuleAnswer = async (name: string) => {
     type: 'checkbox',
     message: kleur.cyan('🎯 Select target platforms:'),
     name: 'names',
-    choices: PLATFORMS,
+    choices: SUPPORTED_PLATFORMS,
     validate: answers => {
       if (answers.length < 1) {
         return kleur.red('⚠️  You must choose at least one platform')
@@ -160,7 +159,7 @@ const getCreateModuleAnswer = async (name: string) => {
   return {
     moduleName: moduleName.name || name,
     platforms: platforms.names,
-    langs: langs.names,
+    langs: langs.names.includes('cpp') ? ['c++'] : langs.names,
     pm: pm.name,
   }
 }

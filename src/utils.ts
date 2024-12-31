@@ -1,6 +1,11 @@
 import { execSync } from 'child_process'
-import { access } from 'fs/promises'
-import { SupportedLang } from './file-generator.js'
+import { access, copyFile, mkdir, readFile, writeFile } from 'fs/promises'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { GenerateModuleConfig, SupportedLang } from './types'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 type AutolinkingConfig = {
   [key: string]: Partial<Record<SupportedLang | 'cpp', string>>
@@ -63,7 +68,7 @@ export const generateAutolinking = (
   ) {
     return {
       [moduleName]: {
-        cpp: moduleName,
+        cpp: `Hybrid${moduleName}`,
       },
     }
   }
@@ -71,7 +76,7 @@ export const generateAutolinking = (
   const languageConfig = langs.reduce(
     (config, lang) => {
       if ([SupportedLang.SWIFT, SupportedLang.KOTLIN].includes(lang)) {
-        config[lang] = moduleName
+        config[lang] = `Hybrid${moduleName}`
       }
       return config
     },
@@ -120,5 +125,53 @@ export const dirExist = async (dir: string) => {
     return true
   } catch {
     return false
+  }
+}
+
+export const createFolder = async (cwd: string, dir?: string) => {
+  await mkdir(
+    path.join(cwd, dir ?? ''),
+    { recursive: true }
+  )
+}
+
+export const createModuleFile = async (cwd: string, fileName: string, data: string) => {
+  const filePath = path.join(cwd, fileName)
+  await writeFile(filePath, data, { encoding: 'utf8', mode: 0o755 }) // use other mode if needed
+}
+
+export const replacePlaceholder = async ({
+  filePath,
+  replacements,
+  data,
+}: {
+  filePath?: string
+  replacements: Record<string, string>
+  data?: string
+}) => {
+  let fileContent
+  if (data) {
+    fileContent = data
+  } else if (filePath) {
+    fileContent = await readFile(filePath, { encoding: 'utf8' })
+  } else {
+    throw new Error(
+      'Error generate files. make sure you are passing data or filePath'
+    )
+  }
+
+  return Object.entries(replacements).reduce(
+    (acc, [tag, value]) => replaceTag(tag, acc, value),
+    fileContent
+  )
+}
+
+
+export const copyTemplateFiles = async (config: GenerateModuleConfig, arg: string[], filesToCopy: string[]) => {
+  for (const file of filesToCopy) {
+    await copyFile(
+      path.join(...arg, file),
+      path.join(config.cwd, file)
+    )
   }
 }
