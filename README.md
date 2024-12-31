@@ -20,13 +20,12 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 ```
 .
 ├── example
-├── react-native-awesome-library
-│   ├── AwesomeLibrary.podspec
-│   ├── android
-│   ├── ios
-│   ├── src
-│       ├── index.ts
-│       └── specs
+├── AwesomeLibrary.podspec
+├── android
+├── ios
+├── src
+│    ├── index.ts
+│    └── specs
 │         └── awesome-library.nitro.ts
 │   ├── nitrogen
 │   ├── nitro.json
@@ -42,6 +41,7 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 For detailed installation and usage instructions, please visit our [documentation](https://patrickkabwe.github.io/create-nitro-module/).
 
 ### Quick Start
+
 ```bash
 # Using bun
 bun create nitro-module@latest my-nitro-module
@@ -59,4 +59,3 @@ yarn create nitro-module@latest my-nitro-module
 npm install -g create-nitro-module@latest
 nitro-module create my-nitro-module
 ```
-

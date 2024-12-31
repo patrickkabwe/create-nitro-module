@@ -6,7 +6,8 @@
   "type": "module",
   "files": [
     "lib",
-    "assets/*.{json,js}",
+    "assets",
+    "!assets/nitro-module-cli.gif",
     "README.md"
   ],
   "keywords": [
