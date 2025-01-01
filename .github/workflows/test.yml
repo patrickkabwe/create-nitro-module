@@ -129,6 +129,7 @@ jobs:
           ls -la test-module.exp
 
       - name: Generate New Module
+        continue-on-error: false
         run: ./test-module.exp
 
       - name: Upload generated module
@@ -137,6 +138,7 @@ jobs:
           name: test-module
           path: react-native-test-module/
           include-hidden-files: true
+          if-no-files-found: error
           retention-days: 1
 
   build-ios:

@@ -61,6 +61,7 @@ export const createModule = async (
       )
       rmSync(modulePath, { recursive: true, force: true })
     }
+    process.exit(1)
   }
 }
 
