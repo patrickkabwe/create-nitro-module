@@ -50,7 +50,7 @@ jobs:
 
   module-generation:
     needs: lint-and-format
-    runs-on: ubuntu-latest
+    runs-on: macOS-15
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
