@@ -187,15 +187,15 @@ jobs:
         id: pods-cache
         uses: actions/cache@v4
         with:
-          path: ./example/ios/Pods
+          path: ./react-native-test-module/example/ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
 
       - name: Install CocoaPods dependencies
-        working-directory: example
+        working-directory: react-native-test-module/example
         run: bun pod
 
       - name: Build iOS
-        working-directory: example/ios
+        working-directory: react-native-test-module/example/ios
         run: "set -o pipefail && xcodebuild \
           CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
           -derivedDataPath build -UseModernBuildSystem=YES \
@@ -251,13 +251,13 @@ jobs:
           cache: gradle
 
       - name: Make gradlew executable
-        working-directory: example/android
+        working-directory: react-native-test-module/example/android
         run: chmod +x ./gradlew
 
       - name: Run Gradle Build
-        working-directory: example/android
+        working-directory: react-native-test-module/example/android
         run: ./gradlew assembleDebug --no-daemon --build-cache
 
       - name: Stop Gradle Daemon
-        working-directory: example/android
+        working-directory: react-native-test-module/example/android
         run: ./gradlew --stop
