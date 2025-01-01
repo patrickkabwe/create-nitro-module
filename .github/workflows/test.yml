@@ -130,11 +130,30 @@ jobs:
       - name: Generate New Module
         run: ./test-module.exp
 
+      - name: Upload generated module
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-module
+          path: react-native-test-module/
+          include-hidden-files: true
+          retention-days: 1
+
   build-ios:
     needs: module-generation
     runs-on: macOS-15
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download generated module
+        uses: actions/download-artifact@v4
+        with:
+          name: test-module
+          path: react-native-test-module
+
+      - name: Verify module directory
+        run: |
+          ls -la
+          ls -la react-native-test-module
 
       - name: Setup Ruby and Cocoapods
         uses: ruby/setup-ruby@v1
@@ -190,6 +209,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download generated module
+        uses: actions/download-artifact@v4
+        with:
+          name: test-module
+          path: react-native-test-module
 
       - name: Setup Bun.js
         uses: oven-sh/setup-bun@v2
