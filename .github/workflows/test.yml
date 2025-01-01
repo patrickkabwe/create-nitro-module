@@ -243,6 +243,9 @@ jobs:
           java-version: '17'
           cache: gradle
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Run Gradle Build
         working-directory: react-native-test-module/example/android
         run: ./gradlew assembleDebug --no-daemon --build-cache

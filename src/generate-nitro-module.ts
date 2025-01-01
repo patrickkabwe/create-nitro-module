@@ -292,7 +292,7 @@ export class NitroModuleFactory {
   }
 
   private async codegenAndInstallDependencies() {
-    await execAsync(`cd ${this.config.cwd} ${this.config.pm} codegen`)
+    await execAsync(`cd ${this.config.cwd} && ${this.config.pm} codegen`)
     if (!this.config.skipInstall) {
       this.config.spinner.start(messages.installing)
       await execAsync(`${this.config.pm} install`)
