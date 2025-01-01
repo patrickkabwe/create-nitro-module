@@ -316,10 +316,10 @@ export class NitroModuleFactory {
     private async runCodegenAndInstallDependencies() {
         this.config.spinner.text = messages.installing
 
-        execSync(`${this.config.pm} install`, { cwd: this.config.cwd, stdio: 'pipe' })
+        execSync(`${this.config.pm} install`, { cwd: this.config.cwd, stdio: 'ignore' })
         this.config.spinner.succeed()
 
         this.config.spinner.text = messages.runningCodegen
-        execSync(`${this.config.pm} codegen`, { cwd: this.config.cwd, stdio: 'pipe' })
+        execSync(`${this.config.pm} codegen`, { cwd: this.config.cwd, stdio: 'ignore' })
     }
 }

@@ -144,7 +144,7 @@ jobs:
   build-ios:
     name: Build iOS
     needs: module-generation
-    runs-on: macOS-15
+    runs-on: macos-latest
     defaults:
       run:
         working-directory: react-native-test-module
@@ -203,7 +203,7 @@ jobs:
           -scheme TestModuleExample \
           -sdk iphonesimulator \
           -configuration Debug \
-          -destination 'platform=iOS Simulator,name=iPhone 16' \
+          -destination 'platform=iOS Simulator,name=iPhone 15' \
           build \
           CODE_SIGNING_ALLOWED=NO"
 
