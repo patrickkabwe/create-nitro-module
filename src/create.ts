@@ -44,6 +44,8 @@ export const createModule = async (
             spinner,
             moduleType: NitroModuleType.HybridObject,
             finalModuleName: 'react-native-' + name.toLowerCase(),
+            skipInstall: options.skipInstall,
+            skipExample: options.skipExample,
         })
 
         await moduleFactory.createNitroModule()

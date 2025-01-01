@@ -52,6 +52,9 @@ jobs:
     name: Module Generation
     needs: lint-and-format
     runs-on: macOS-15
+    strategy:
+      matrix:
+        args: ['--skip-example', '--skip-install', '--module-dir test-module', '']
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -84,12 +87,12 @@ jobs:
           bun run build
           bun link
 
-      - name: Create expect script
+      - name: Create expect script ${{ matrix.args }}
         run: |
           cat << 'EOF' > test-module.exp
           #!/usr/bin/expect -f
           set timeout 30
-          spawn bun create nitro-module --skip-install
+          spawn bun create nitro-module ${{ matrix.args }}
 
           # Module name
           expect "📝 What is the name of your module?" {send "test-module\r"}
@@ -124,7 +127,7 @@ jobs:
           EOF
           chmod +x test-module.exp
 
-      - name: Generate New Module
+      - name: Generate New Module ${{ matrix.args }}
         continue-on-error: false
         run: ./test-module.exp
 

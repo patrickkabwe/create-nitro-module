@@ -74,10 +74,12 @@ export class NitroModuleFactory {
         await this.copyPackageFiles()
         await this.replaceNitroJsonPlaceholders()
         await this.updatePackageJsonConfig(this.config.skipExample)
-        await this.createExampleApp()
-        await this.configureExamplePackageJson()
-        await this.syncExampleAppConfigurations()
-        if (!this.config.skipInstall) {
+        if (!this.config.skipExample) {
+            await this.createExampleApp()
+            await this.configureExamplePackageJson()
+            await this.syncExampleAppConfigurations()
+        }
+        if (!this.config.skipInstall && !this.config.skipExample) {
             await this.runCodegenAndInstallDependencies()
         }
         this.config.spinner.succeed()
