@@ -1,4 +1,4 @@
-import { rmSync } from 'fs'
+import { mkdirSync, rmSync } from 'fs'
 import inquirer from 'inquirer'
 import kleur from 'kleur'
 import ora from 'ora'
@@ -26,9 +26,7 @@ export const createModule = async (
         if (options.moduleDir) {
             const moduleDirExists = await dirExist(options.moduleDir)
             if (!moduleDirExists) {
-                throw new Error(
-                    `Module directory does not exist: ${options.moduleDir}`
-                )
+                mkdirSync(options.moduleDir, { recursive: true })
             }
         }
 
