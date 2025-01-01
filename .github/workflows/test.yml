@@ -145,6 +145,9 @@ jobs:
     name: Build iOS
     needs: module-generation
     runs-on: macOS-15
+    defaults:
+      run:
+        working-directory: react-native-test-module
     steps:
       - uses: actions/checkout@v4
 
@@ -175,26 +178,24 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install npm dependencies (bun)
-        working-directory: react-native-test-module
         run: bun install
 
       - name: Codegen
-        working-directory: react-native-test-module
         run: bun codegen
 
       - name: Cache CocoaPods
         id: pods-cache
         uses: actions/cache@v4
         with:
-          path: ./react-native-test-module/example/ios/Pods
+          path: ./example/ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
 
       - name: Install CocoaPods dependencies
-        working-directory: react-native-test-module/example
+        working-directory: example
         run: bun pod
 
       - name: Build iOS
-        working-directory: react-native-test-module/example/ios
+        working-directory: example/ios
         run: "set -o pipefail && xcodebuild \
           CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
           -derivedDataPath build -UseModernBuildSystem=YES \
@@ -210,6 +211,9 @@ jobs:
     name: Build Android
     needs: module-generation
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: react-native-test-module
     steps:
       - uses: actions/checkout@v4
 
@@ -234,11 +238,9 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install npm dependencies (bun)
-        working-directory: react-native-test-module
         run: bun install
 
       - name: Codegen
-        working-directory: react-native-test-module
         run: bun codegen
 
       - name: Install Java for Android builds
@@ -249,12 +251,13 @@ jobs:
           cache: gradle
 
       - name: Make gradlew executable
+        working-directory: example/android
         run: chmod +x ./gradlew
 
       - name: Run Gradle Build
-        working-directory: react-native-test-module/example/android
+        working-directory: example/android
         run: ./gradlew assembleDebug --no-daemon --build-cache
 
       - name: Stop Gradle Daemon
-        working-directory: react-native-test-module/example/android
+        working-directory: example/android
         run: ./gradlew --stop
