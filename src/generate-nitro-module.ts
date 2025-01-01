@@ -160,11 +160,17 @@ export class NitroModuleFactory {
       pnpm: 'pnpx',
     }
     const packageManager = pmMap[this.config.pm]
+    console.log('example app', this.config.cwd);
+    
     await execAsync(
       `${packageManager} -y @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example --directory ${this.config.cwd}/example --skip-install --version 0.76.5`
     )
 
-    const packageJsonPath = path.join(this.config.cwd, 'example/package.json')
+    const packageJsonPath = path.join(
+      this.config.cwd,
+      'example',
+      'package.json'
+    )
     const packageJsonStr = await readFile(packageJsonPath, {
       encoding: 'utf8',
     })
