@@ -49,6 +49,7 @@ jobs:
         run: bun lint && bun format
 
   module-generation:
+    name: Module Generation
     needs: lint-and-format
     runs-on: macOS-15
     env:
@@ -139,6 +140,7 @@ jobs:
           retention-days: 1
 
   build-ios:
+    name: Build iOS
     needs: module-generation
     runs-on: macOS-15
     steps:
@@ -203,6 +205,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO"
 
   build-android:
+    name: Build Android
     needs: module-generation
     runs-on: ubuntu-latest
     steps:
