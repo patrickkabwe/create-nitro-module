@@ -48,9 +48,11 @@ jobs:
       - name: Lint and Format
         run: bun lint && bun format
 
-  test-module-generation:
+  module-generation:
     needs: lint-and-format
-    runs-on: macOS-15
+    runs-on: ubuntu-latest
+    outputs:
+      generated-module: ${{ steps.generate-module.outputs.generated-module }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -77,7 +79,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ needs.lint-and-format.outputs.bun-cache-key }}-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
@@ -134,7 +136,31 @@ jobs:
           ls -la test-module.exp
 
       - name: Generate New Module
+        id: generate-module
         run: ./test-module.exp
+
+  build-ios:
+    needs: module-generation
+    runs-on: macOS-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun.js
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache npm dependencies
+        id: bun-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install npm dependencies (bun)
+        run: bun install
 
       - name: Cache CocoaPods
         id: pods-cache
@@ -161,6 +187,29 @@ jobs:
           -destination 'platform=iOS Simulator,name=iPhone 16' \
           build \
           CODE_SIGNING_ALLOWED=NO"
+
+  build-android:
+    needs: module-generation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun.js
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache npm dependencies
+        id: bun-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install npm dependencies (bun)
+        run: bun install
 
       - name: Install Java for Android builds
         uses: actions/setup-java@v4
