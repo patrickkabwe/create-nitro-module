@@ -150,11 +150,6 @@ jobs:
           name: test-module
           path: react-native-test-module
 
-      - name: Verify module directory
-        run: |
-          ls -la
-          ls -la react-native-test-module
-
       - name: Setup Ruby and Cocoapods
         uses: ruby/setup-ruby@v1
         with:
@@ -176,6 +171,7 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install npm dependencies (bun)
+        working-directory: react-native-test-module
         run: bun install
 
       - name: Cache CocoaPods
@@ -187,9 +183,7 @@ jobs:
 
       - name: Install CocoaPods dependencies
         working-directory: react-native-test-module/example
-        run: |
-          ls -la
-          bun pod
+        run: bun pod
 
       - name: Build iOS
         working-directory: react-native-test-module/example/ios
@@ -231,6 +225,7 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install npm dependencies (bun)
+        working-directory: react-native-test-module
         run: bun install
 
       - name: Install Java for Android builds
