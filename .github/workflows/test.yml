@@ -133,6 +133,7 @@ jobs:
 
       - name: Upload generated module
         uses: actions/upload-artifact@v4
+        if: strategy.job-index == 3
         with:
           name: test-module
           path: react-native-test-module/
