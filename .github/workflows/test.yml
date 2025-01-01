@@ -51,8 +51,6 @@ jobs:
   module-generation:
     needs: lint-and-format
     runs-on: ubuntu-latest
-    outputs:
-      generated-module: ${{ steps.generate-module.outputs.generated-module }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -136,7 +134,6 @@ jobs:
           ls -la test-module.exp
 
       - name: Generate New Module
-        id: generate-module
         run: ./test-module.exp
 
   build-ios:
