@@ -66,18 +66,12 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Setup Ruby and Cocoapods
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-
       - name: Cache npm dependencies
         id: bun-cache
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ needs.lint-and-format.outputs.bun-cache-key }}-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
@@ -141,6 +135,12 @@ jobs:
     runs-on: macOS-15
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Ruby and Cocoapods
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
 
       - name: Setup Bun.js
         uses: oven-sh/setup-bun@v2
