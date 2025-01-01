@@ -54,7 +54,7 @@ jobs:
     runs-on: macOS-15
     strategy:
       matrix:
-        args: ['--skip-example', '--skip-install', '--module-dir test-module', '']
+        args: ['--skip-example', '--module-dir test-module', '--skip-install']
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -133,7 +133,7 @@ jobs:
 
       - name: Upload generated module
         uses: actions/upload-artifact@v4
-        if: strategy.job-index == 3
+        if: strategy.job-index == 2
         with:
           name: test-module
           path: react-native-test-module/
@@ -144,7 +144,7 @@ jobs:
   build-ios:
     name: Build iOS
     needs: module-generation
-    runs-on: macos-latest
+    runs-on: macOS-15
     defaults:
       run:
         working-directory: react-native-test-module
@@ -203,7 +203,7 @@ jobs:
           -scheme TestModuleExample \
           -sdk iphonesimulator \
           -configuration Debug \
-          -destination 'platform=iOS Simulator,name=iPhone 15' \
+          -destination 'platform=iOS Simulator,name=iPhone 16' \
           build \
           CODE_SIGNING_ALLOWED=NO"
 
