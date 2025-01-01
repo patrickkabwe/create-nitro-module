@@ -4,7 +4,11 @@ export const androidManifestCode = `<manifest xmlns:android="http://schemas.andr
 </manifest>
 `
 
-export const getKotlinCode = (moduleName: string, packageName: string, funcName: string) => `package ${packageName}
+export const getKotlinCode = (
+    moduleName: string,
+    packageName: string,
+    funcName: string
+) => `package ${packageName}
 
 import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
     moduleName
@@ -20,7 +24,9 @@ class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec()
 }
 `
 
-export const androidSettingsGradleCode = (moduleName: string) => `pluginManagement { includeBuild("../../node_modules/@react-native/gradle-plugin") }
+export const androidSettingsGradleCode = (
+    moduleName: string
+) => `pluginManagement { includeBuild("../../node_modules/@react-native/gradle-plugin") }
 plugins { id("com.facebook.react.settings") }
 extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
 rootProject.name = '${moduleName}Example'

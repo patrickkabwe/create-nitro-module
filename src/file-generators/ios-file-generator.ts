@@ -1,10 +1,20 @@
-import { cp } from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
-import { getSwiftCode } from "../code-snippets/code.ios";
-import { IOS_MODULE_NAME_TAG } from "../constants";
-import { SupportedLang, type FileGenerator, type GenerateModuleConfig } from "../types";
-import { createFolder, createModuleFile, getGitUserInfo, replacePlaceholder, toPascalCase } from "../utils";
+import { cp } from 'fs/promises'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { getSwiftCode } from '../code-snippets/code.ios'
+import { IOS_MODULE_NAME_TAG } from '../constants'
+import {
+    SupportedLang,
+    type FileGenerator,
+    type GenerateModuleConfig,
+} from '../types'
+import {
+    createFolder,
+    createModuleFile,
+    getGitUserInfo,
+    replacePlaceholder,
+    toPascalCase,
+} from '../utils'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -15,10 +25,27 @@ export class IOSFileGenerator implements FileGenerator {
 
         // Copy iOS template files
         await createFolder(config.cwd, 'ios')
-        const iosFolderPath = path.join(__dirname, '..', 'assets', 'template', 'ios')
-        const unnamedPodspecFilePath = path.join(__dirname, '..', 'assets', 'template', `${IOS_MODULE_NAME_TAG}.podspec`)
-        const podspecFilePath = path.join(config.cwd, `${toPascalCase(config.moduleName)}.podspec`)
-        await cp(iosFolderPath, path.join(config.cwd, 'ios'), { recursive: true })
+        const iosFolderPath = path.join(
+            __dirname,
+            '..',
+            'assets',
+            'template',
+            'ios'
+        )
+        const unnamedPodspecFilePath = path.join(
+            __dirname,
+            '..',
+            'assets',
+            'template',
+            `${IOS_MODULE_NAME_TAG}.podspec`
+        )
+        const podspecFilePath = path.join(
+            config.cwd,
+            `${toPascalCase(config.moduleName)}.podspec`
+        )
+        await cp(iosFolderPath, path.join(config.cwd, 'ios'), {
+            recursive: true,
+        })
 
         await cp(unnamedPodspecFilePath, podspecFilePath)
 
@@ -58,10 +85,8 @@ export class IOSFileGenerator implements FileGenerator {
             await createModuleFile(
                 config.cwd,
                 `ios/Hybrid${toPascalCase(config.moduleName)}.swift`,
-                getSwiftCode(config.moduleName, `${config.funcName}`),
+                getSwiftCode(config.moduleName, `${config.funcName}`)
             )
         }
     }
-
-
 }

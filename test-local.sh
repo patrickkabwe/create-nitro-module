@@ -38,11 +38,10 @@ fi
 cat << 'EOF' > test-module.exp
 #!/usr/bin/expect -f
 set timeout 30
-spawn bun create nitro-module test-module
+spawn bun create nitro-module
 
 # Module name
-expect "📝 What is the name of your module?"
-send "test-module\r"
+expect "📝 What is the name of your module?" {send "test-module\r"}
 
 # Platform selection
 expect "🎯 Select target platforms:"
@@ -65,12 +64,10 @@ send \x20
 send \r
 
 # Package manager
-expect "📦 Select package manager:"
-send \r
+expect "📦 Select package manager:" {send \r}
 
 # Confirm package name
-expect "✨ Your package name will be called:"
-send "y\r"
+expect "✨ Your package name will be called:" {send "y\r"}
 
 expect eof
 EOF

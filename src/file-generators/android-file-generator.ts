@@ -1,10 +1,19 @@
-import { cp, rm, writeFile } from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
-import { androidManifestCode, getKotlinCode } from "../code-snippets/code.android";
-import { ANDROID_CXX_LIB_NAME_TAG, ANDROID_NAME_SPACE_TAG } from "../constants";
-import { FileGenerator, GenerateModuleConfig, SupportedLang } from "../types";
-import { createFolder, createModuleFile, replaceHyphen, replacePlaceholder, toPascalCase } from "../utils";
+import { cp, rm, writeFile } from 'fs/promises'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import {
+    androidManifestCode,
+    getKotlinCode,
+} from '../code-snippets/code.android'
+import { ANDROID_CXX_LIB_NAME_TAG, ANDROID_NAME_SPACE_TAG } from '../constants'
+import { FileGenerator, GenerateModuleConfig, SupportedLang } from '../types'
+import {
+    createFolder,
+    createModuleFile,
+    replaceHyphen,
+    replacePlaceholder,
+    toPascalCase,
+} from '../utils'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -19,20 +28,35 @@ export class AndroidFileGenerator implements FileGenerator {
     }
 
     private async copyAndroidFiles(config: GenerateModuleConfig) {
-        const androidPath = path.join(__dirname, '..', 'assets/template/android')
-        await cp(androidPath, path.join(config.cwd, 'android'), { recursive: true })
+        const androidPath = path.join(
+            __dirname,
+            '..',
+            'assets/template/android'
+        )
+        await cp(androidPath, path.join(config.cwd, 'android'), {
+            recursive: true,
+        })
     }
 
     private async generateAndroidFiles(config: GenerateModuleConfig) {
         await createFolder(config.cwd, 'android/src/main/cpp')
-        const androidNamespacePath = path.join('android', 'src', 'main', 'java', 'com', replaceHyphen(config.moduleName))
-        await createFolder(
-            config.cwd,
-            androidNamespacePath
+        const androidNamespacePath = path.join(
+            'android',
+            'src',
+            'main',
+            'java',
+            'com',
+            replaceHyphen(config.moduleName)
         )
+        await createFolder(config.cwd, androidNamespacePath)
 
         // Generate AndroidManifest file
-        const androidManifestPath = path.join('android', 'src', 'main', 'AndroidManifest.xml')
+        const androidManifestPath = path.join(
+            'android',
+            'src',
+            'main',
+            'AndroidManifest.xml'
+        )
         await createModuleFile(
             config.cwd,
             androidManifestPath,
@@ -47,7 +71,11 @@ export class AndroidFileGenerator implements FileGenerator {
                 `android/src/main/java/${this.androidPackageName
                     .split('.')
                     .join('/')}/Hybrid${toPascalCase(config.moduleName)}.kt`,
-                getKotlinCode(config.moduleName, this.androidPackageName, `${config.funcName}`)
+                getKotlinCode(
+                    config.moduleName,
+                    this.androidPackageName,
+                    `${config.funcName}`
+                )
             )
         }
         await this.generateGradleFile(config)
@@ -93,7 +121,11 @@ export class AndroidFileGenerator implements FileGenerator {
     private async generateCMakeFile(config: GenerateModuleConfig) {
         const cmakeListFile = 'CMakeLists.txt'
         const prefixPath = 'android'
-        const cmakeListFilePath = path.join(config.cwd, prefixPath, cmakeListFile)
+        const cmakeListFilePath = path.join(
+            config.cwd,
+            prefixPath,
+            cmakeListFile
+        )
         const replacements = {
             [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(config.moduleName),
         }
@@ -142,7 +174,8 @@ export class AndroidFileGenerator implements FileGenerator {
 
         const replacements = {
             [`com.${ANDROID_NAME_SPACE_TAG}`]: this.androidPackageName,
-            [`${ANDROID_CXX_LIB_NAME_TAG}Package`]: androidPackageFile.split('.')[0],
+            [`${ANDROID_CXX_LIB_NAME_TAG}Package`]:
+                androidPackageFile.split('.')[0],
             [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(config.moduleName),
         }
 

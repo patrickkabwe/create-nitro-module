@@ -1,6 +1,6 @@
 {
   "name": "create-nitro-module",
-  "version": "0.20.2",
+  "version": "1.0.0",
   "description": "A CLI tool that simplifies creating React Native modules powered by Nitro Modules.",
   "private": false,
   "type": "module",
@@ -44,7 +44,7 @@
     "prerelease": "rm -rf ./lib/assets",
     "release": "bun run build && bun version && changeset publish",
     "lint": "eslint src/*.ts",
-    "format": "prettier --write src/*.ts"
+    "format": "prettier --write src/**/*.ts"
   },
   "dependencies": {
     "@changesets/cli": "^2.27.10",
@@ -58,7 +58,7 @@
     "semi": false,
     "singleQuote": true,
     "trailingComma": "es5",
-    "tabWidth": 2,
+    "tabWidth": 4,
     "arrowParens": "avoid"
   },
   "devDependencies": {

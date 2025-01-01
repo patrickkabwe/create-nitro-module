@@ -1,4 +1,7 @@
-export const cppCode = (moduleName: string, funcName: string) => `#include "Hybrid${moduleName}.hpp"
+export const cppCode = (
+    moduleName: string,
+    funcName: string
+) => `#include "Hybrid${moduleName}.hpp"
 
 namespace margelo::nitro::${moduleName.toLowerCase()} {
 

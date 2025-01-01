@@ -1,58 +1,58 @@
 import { Ora } from 'ora'
 
 export enum SupportedLang {
-  SWIFT = 'swift',
-  KOTLIN = 'kotlin',
-  CPP = 'c++',
-  JS = 'js',
+    SWIFT = 'swift',
+    KOTLIN = 'kotlin',
+    CPP = 'c++',
+    JS = 'js',
 }
 
 export enum SupportedPlatform {
-  IOS = 'ios',
-  ANDROID = 'android',
+    IOS = 'ios',
+    ANDROID = 'android',
 }
 
 export type PlatformLang = {
-  langs: SupportedLang[]
-  platforms: SupportedPlatform[]
+    langs: SupportedLang[]
+    platforms: SupportedPlatform[]
 }
 
 export type CreateModuleOptions = {
-  moduleDir?: string
-  skipExample?: boolean
-  skipInstall?: boolean
+    moduleDir?: string
+    skipExample?: boolean
+    skipInstall?: boolean
 }
 
 export type PackageManager = 'bun' | 'pnpm' | 'yarn' | 'npm'
 
 export enum NitroModuleType {
-  HybridObject = 'hybrid-object',
-  HybridView = 'hybrid-view',
+    HybridObject = 'hybrid-object',
+    HybridView = 'hybrid-view',
 }
 
 export type GenerateModuleConfig = {
-  pm: PackageManager
-  cwd: string
-  langs: SupportedLang[]
-  prefix?: string
-  spinner: Ora
-  funcName?: string
-  platforms: SupportedPlatform[]
-  moduleType: NitroModuleType
-  moduleName: string
-  finalModuleName: string
+    pm: PackageManager
+    cwd: string
+    langs: SupportedLang[]
+    prefix?: string
+    spinner: Ora
+    funcName?: string
+    platforms: SupportedPlatform[]
+    moduleType: NitroModuleType
+    moduleName: string
+    finalModuleName: string
 } & CreateModuleOptions
 
 export interface FileGenerator {
-  /**
-   * Generates the module files based on the platform and language
-   * @param config Configuration for generating the module
-   * @returns void
-   */
-  generate(config: GenerateModuleConfig): Promise<void>
+    /**
+     * Generates the module files based on the platform and language
+     * @param config Configuration for generating the module
+     * @returns void
+     */
+    generate(config: GenerateModuleConfig): Promise<void>
 }
 
 export const PLATFORM_LANGUAGE_MAP: Record<string, string[]> = {
-  ios: ['swift', 'cpp'],
-  android: ['kotlin', 'cpp'],
+    ios: ['swift', 'cpp'],
+    android: ['kotlin', 'cpp'],
 }
