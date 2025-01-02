@@ -1,10 +1,6 @@
 import { exportCode, specCode } from '../code-snippets/code.js'
 import type { FileGenerator, GenerateModuleConfig } from '../types'
-import {
-    createFolder,
-    createModuleFile,
-    mapPlatformToLanguage
-} from '../utils'
+import { createFolder, createModuleFile, mapPlatformToLanguage } from '../utils'
 
 export class JSFileGenerator implements FileGenerator {
     async generate(config: GenerateModuleConfig): Promise<void> {
