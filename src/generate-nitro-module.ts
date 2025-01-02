@@ -81,6 +81,7 @@ export class NitroModuleFactory {
             await this.createExampleApp()
             await this.configureExamplePackageJson()
             await this.syncExampleAppConfigurations()
+            await this.gitInit()
             this.config.spinner.succeed(messages.generating)
         }
         if (!this.config.skipInstall && !this.config.skipExample) {
@@ -170,7 +171,7 @@ export class NitroModuleFactory {
         } as const
         const packageManager = pmMap[this.config.pm]
 
-        const args = `${packageManager} -y @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example --directory example --skip-install --version 0.76.5`
+        const args = `${packageManager} -y @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example --directory example --skip-install --skip-git-init --version 0.76.5`
 
         await execAsync(args, { cwd: this.config.cwd })
 
@@ -322,5 +323,9 @@ export class NitroModuleFactory {
 
         this.config.spinner.text = messages.runningCodegen
         await execAsync(`${this.config.pm} codegen`, { cwd: this.config.cwd })
+    }
+
+    private async gitInit() {
+        await execAsync('git init', { cwd: this.config.cwd })
     }
 }
