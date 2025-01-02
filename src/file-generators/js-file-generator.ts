@@ -1,12 +1,9 @@
-import { writeFile } from 'fs/promises'
-import path from 'path'
-import { exportCode, postScript, specCode } from '../code-snippets/code.js'
+import { exportCode, specCode } from '../code-snippets/code.js'
 import type { FileGenerator, GenerateModuleConfig } from '../types'
 import {
     createFolder,
     createModuleFile,
-    mapPlatformToLanguage,
-    toPascalCase,
+    mapPlatformToLanguage
 } from '../utils'
 
 export class JSFileGenerator implements FileGenerator {
@@ -30,17 +27,6 @@ export class JSFileGenerator implements FileGenerator {
             config.cwd,
             '/src/index.ts',
             exportCode(config.moduleName)
-        )
-        await this.applyCustomAndroidPackageNameWorkaround(config)
-    }
-
-    async applyCustomAndroidPackageNameWorkaround(
-        config: GenerateModuleConfig
-    ) {
-        const androidWorkaroundPath = path.join(config.cwd, 'post-script.js')
-        await writeFile(
-            androidWorkaroundPath,
-            postScript(toPascalCase(config.moduleName))
         )
     }
 }

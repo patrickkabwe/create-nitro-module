@@ -85,6 +85,7 @@ export class NitroModuleFactory {
             this.config.spinner.succeed(messages.generating)
         }
         if (!this.config.skipInstall && !this.config.skipExample) {
+            this.config.spinner.text = messages.installing
             await this.runCodegenAndInstallDependencies()
         }
         this.config.spinner.succeed()
@@ -134,6 +135,10 @@ export class NitroModuleFactory {
         newWorkspacePackageJsonFile.bugs = `https://github.com/${userName}/${this.config.finalModuleName}/issues`
         newWorkspacePackageJsonFile.homepage = `https://github.com/${userName}/${this.config.finalModuleName}#readme`
         newWorkspacePackageJsonFile.author = name
+        newWorkspacePackageJsonFile.scripts = {
+            ...newWorkspacePackageJsonFile.scripts,
+            postcodegen: `bun run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
+        }
 
         if (skipExample) {
             delete newWorkspacePackageJsonFile.workspaces
@@ -316,12 +321,7 @@ export class NitroModuleFactory {
     }
 
     private async runCodegenAndInstallDependencies() {
-        this.config.spinner.text = messages.installing
-
         await execAsync(`${this.config.pm} install`, { cwd: this.config.cwd })
-        this.config.spinner.succeed()
-
-        this.config.spinner.text = messages.runningCodegen
         await execAsync(`${this.config.pm} codegen`, { cwd: this.config.cwd })
     }
 

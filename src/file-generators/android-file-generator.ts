@@ -5,6 +5,7 @@ import {
     androidManifestCode,
     getKotlinCode,
 } from '../code-snippets/code.android'
+import { postScript } from '../code-snippets/code.js'
 import { ANDROID_CXX_LIB_NAME_TAG, ANDROID_NAME_SPACE_TAG } from '../constants'
 import { FileGenerator, GenerateModuleConfig, SupportedLang } from '../types'
 import {
@@ -77,10 +78,11 @@ export class AndroidFileGenerator implements FileGenerator {
                     `${config.funcName}`
                 )
             )
+            this.applyCustomAndroidPackageNameWorkaround(config)
         }
         await this.generateGradleFile(config)
         await this.generateCMakeFile(config)
-        await this.generateCPPFile(config)
+        await this.generateCPPAdapterFile(config)
         await this.generatePackageFile(config)
     }
 
@@ -139,7 +141,7 @@ export class AndroidFileGenerator implements FileGenerator {
         )
     }
 
-    private async generateCPPFile(config: GenerateModuleConfig) {
+    private async generateCPPAdapterFile(config: GenerateModuleConfig) {
         const cppAdapterFile = 'cpp-adapter.cpp'
         const prefixPath = 'android/src/main/cpp'
         const cppAdapterFilePath = path.join(
@@ -191,5 +193,15 @@ export class AndroidFileGenerator implements FileGenerator {
         )
 
         await rm(path.join(androidPackageFilePath, '..'), { recursive: true })
+    }
+
+    async applyCustomAndroidPackageNameWorkaround(
+        config: GenerateModuleConfig
+    ) {
+        const androidWorkaroundPath = path.join(config.cwd, 'post-script.js')
+        await writeFile(
+            androidWorkaroundPath,
+            postScript(toPascalCase(config.moduleName))
+        )
     }
 }
