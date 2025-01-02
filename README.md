@@ -54,8 +54,4 @@ pnpm create nitro-module@latest my-nitro-module
 
 # Using yarn
 yarn create nitro-module@latest my-nitro-module
-
-# Using global install
-npm install -g create-nitro-module@latest
-nitro-module create my-nitro-module
 ```

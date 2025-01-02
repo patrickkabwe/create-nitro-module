@@ -15,7 +15,7 @@ export class NitroSpinner {
     private isSpinning: boolean
     private spinnerInterval: NodeJS.Timeout | null
     private readonly stdout: NodeJS.WriteStream
-    private currentText: string
+    public text: string  = ""
 
     constructor(options: LoggerOptions = {}) {
         this.frames = options.frames ?? [
@@ -48,7 +48,7 @@ export class NitroSpinner {
         this.isSpinning = false
         this.spinnerInterval = null
         this.stdout = process.stdout
-        this.currentText = ''
+        this.text = ''
     }
 
     private write(text: string, clearLine = true): void {
@@ -68,7 +68,7 @@ export class NitroSpinner {
 
     public start(text: string): this {
         this.stopSpinner()
-        this.currentText = text
+        this.text = text
         this.isSpinning = true
 
         this.spinnerInterval = setInterval(() => {
@@ -83,19 +83,19 @@ export class NitroSpinner {
     }
 
     public update(text: string): this {
-        if (this.currentText) {
-            this.succeed(this.currentText)
+        if (this.text) {
+            this.succeed(this.text)
         }
         return this.start(text)
     }
 
-    public succeed(text: string): this {
+    public succeed(text?: string): this {
         this.stopSpinner()
         this.write(
-            `${this.colors.green}${this.symbols.success}${this.colors.reset} ${text}\n`
+            `${this.colors.green}${this.symbols.success}${this.colors.reset} ${text ?? this.text}\n`
         )
         this.isSpinning = false
-        this.currentText = ''
+        this.text = ''
         return this
     }
 
@@ -105,7 +105,7 @@ export class NitroSpinner {
             `${this.colors.yellow}${this.symbols.warning}${this.colors.reset} ${text}\n`
         )
         this.isSpinning = false
-        this.currentText = ''
+        this.text = ''
         return this
     }
 
@@ -115,7 +115,7 @@ export class NitroSpinner {
             `${this.colors.red}${this.symbols.error}${this.colors.reset} ${text}\n`
         )
         this.isSpinning = false
-        this.currentText = ''
+        this.text = ''
         return this
     }
 
@@ -125,13 +125,13 @@ export class NitroSpinner {
             `${this.colors.cyan}${this.symbols.info}${this.colors.reset} ${text}\n`
         )
         this.isSpinning = false
-        this.currentText = ''
+        this.text = ''
         return this
     }
 
     public stop(finalText?: string): this {
-        if (this.currentText) {
-            this.succeed(this.currentText)
+        if (this.text) {
+            this.succeed(this.text)
         }
 
         if (finalText) {
@@ -140,7 +140,7 @@ export class NitroSpinner {
 
         this.stopSpinner()
         this.isSpinning = false
-        this.currentText = ''
+        this.text = ''
         return this
     }
 }

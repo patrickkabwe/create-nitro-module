@@ -41,7 +41,7 @@ export type GenerateModuleConfig = {
     moduleType: NitroModuleType
     moduleName: string
     finalModuleName: string
-} & CreateModuleOptions
+} & Omit<CreateModuleOptions, 'moduleDir'>
 
 export interface FileGenerator {
     /**

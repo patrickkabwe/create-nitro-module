@@ -17,7 +17,7 @@ export const createModule = async (
     name: string,
     options: CreateModuleOptions
 ) => {
-    const spinner = ora().start()
+    const spinner = ora()
     try {
         if (typeof name !== 'string') {
             name = ''

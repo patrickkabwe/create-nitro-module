@@ -40,15 +40,6 @@ Yarn is a package manager that doubles down as a project manager. To create a Ni
 yarn create nitro-module@latest my-awesome-module
 ```
 
-### Using Global Install
-
-You can also install the Nitro Module CLI globally and use it to create a new module:
-
-```bash
-npm install -g create-nitro-module@latest
-nitro-module create my-awesome-module
-```
-
 ## Next Steps
 
 Once you've created your Nitro Module, you can start developing your React Native module with ease. Check out the [Commands](../commands) section for more details on how to use the CLI.

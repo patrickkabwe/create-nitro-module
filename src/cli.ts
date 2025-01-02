@@ -18,17 +18,4 @@ program
     .option('-si, --skip-install', 'Skip installing dependencies')
     .action(createModule)
 
-program
-    .command('create [moduleName]')
-    .description(
-        'create a new nitro module. If no moduleName is provided, you will be prompted for one.'
-    )
-    .action(createModule)
-    .option(
-        '-d, --module-dir <moduleDirectory>',
-        'Directory to create the module in'
-    )
-    .option('-s, --skip-example', 'Skip example app generation')
-    .option('-si, --skip-install', 'Skip installing dependencies')
-
 program.allowUnknownOption().parse(process.argv)

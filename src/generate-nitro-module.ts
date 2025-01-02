@@ -1,7 +1,8 @@
 import { readFile, writeFile } from 'fs/promises'
-import { execSync } from 'node:child_process'
+import { exec } from 'node:child_process'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import util from 'util'
 import { androidSettingsGradleCode } from './code-snippets/code.android.js'
 import {
     appExampleCode,
@@ -33,6 +34,7 @@ import {
     toPascalCase
 } from './utils'
 
+const execAsync = util.promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -63,7 +65,7 @@ export class NitroModuleFactory {
     async createNitroModule() {
         await createFolder(this.config.cwd)
         const supportedLanguages = [...this.config.langs, SupportedLang.JS]
-        this.config.spinner.text = messages.creating
+        this.config.spinner.start(messages.creating)
         for (const lang of supportedLanguages) {
             const generator = this.generators.get(lang)
             if (!generator) {
@@ -75,9 +77,11 @@ export class NitroModuleFactory {
         await this.replaceNitroJsonPlaceholders()
         await this.updatePackageJsonConfig(this.config.skipExample)
         if (!this.config.skipExample) {
+            this.config.spinner.text = messages.generating
             await this.createExampleApp()
             await this.configureExamplePackageJson()
             await this.syncExampleAppConfigurations()
+            this.config.spinner.succeed(messages.generating)
         }
         if (!this.config.skipInstall && !this.config.skipExample) {
             await this.runCodegenAndInstallDependencies()
@@ -158,7 +162,6 @@ export class NitroModuleFactory {
     }
 
     private async createExampleApp() {
-        this.config.spinner.text = messages.generating
         const pmMap = {
             npm: 'npx',
             yarn: 'npx',
@@ -169,7 +172,7 @@ export class NitroModuleFactory {
 
         const args = `${packageManager} -y @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example --directory example --skip-install --version 0.76.5`
 
-        execSync(args, { cwd: this.config.cwd, stdio: 'ignore' })
+        await execAsync(args, { cwd: this.config.cwd })
 
         // Setup App.tsx
         const appPath = path.join(this.config.cwd, 'example', 'App.tsx')
@@ -182,8 +185,6 @@ export class NitroModuleFactory {
             ),
             { encoding: 'utf8' }
         )
-
-        this.config.spinner.succeed(messages.generating)
     }
 
     private async configureExamplePackageJson() {
@@ -316,10 +317,10 @@ export class NitroModuleFactory {
     private async runCodegenAndInstallDependencies() {
         this.config.spinner.text = messages.installing
 
-        execSync(`${this.config.pm} install`, { cwd: this.config.cwd, stdio: 'ignore' })
+        await execAsync(`${this.config.pm} install`, { cwd: this.config.cwd })
         this.config.spinner.succeed()
 
         this.config.spinner.text = messages.runningCodegen
-        execSync(`${this.config.pm} codegen`, { cwd: this.config.cwd, stdio: 'ignore' })
+        await execAsync(`${this.config.pm} codegen`, { cwd: this.config.cwd })
     }
 }

@@ -88,3 +88,4 @@ tsconfig.tsbuildinfo
 .ccache
 *.exp
 *test-module
+*awesome-library
