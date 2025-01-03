@@ -38,11 +38,10 @@ fi
 cat << 'EOF' > test-module.exp
 #!/usr/bin/expect -f
 set timeout 30
-spawn bun create nitro-module test-module
+spawn bun create nitro-module --skip-install
 
 # Module name
-expect "📝 What is the name of your module?"
-send "test-module\r"
+expect "📝 What is the name of your module?" {send "test-module\r"}
 
 # Platform selection
 expect "🎯 Select target platforms:"
@@ -65,12 +64,10 @@ send \x20
 send \r
 
 # Package manager
-expect "📦 Select package manager:"
-send \r
+expect "📦 Select package manager:" {send \r}
 
 # Confirm package name
-expect "✨ Your package name will be called:"
-send "y\r"
+expect "✨ Your package name will be called:" {send "y\r"}
 
 expect eof
 EOF
@@ -88,20 +85,21 @@ echo -e "${BLUE}🎯 Generating module...${NC}"
 
 # Build iOS/Android
 if [ -d "react-native-test-module" ]; then
-    ls -la react-native-test-module
-    cd react-native-test-module/example
-    bun pod
-    cd ios
-    xcodebuild -workspace TestModuleExample.xcworkspace \
-        -scheme TestModuleExample \
-        -sdk iphonesimulator \
-        -configuration Debug \
-        -destination 'platform=iOS Simulator,name=iPhone 16' build
+    if [ -d "react-native-test-module/example" ] && [ -d "react-native-test-module/node_modules" ]; then
+        cd react-native-test-module/example
+        bun pod
+        cd ios
+        xcodebuild -workspace TestModuleExample.xcworkspace \
+            -scheme TestModuleExample \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 16' build
 
-    cd ../android
-    ./gradlew assembleDebug --no-daemon
-    ./gradlew --stop
-    cd ../../..
+        cd ../android
+        ./gradlew assembleDebug --no-daemon
+        ./gradlew --stop
+        cd ../../..
+    fi
 else
     echo -e "${RED}❌ Module generation failed${NC}"
     cleanup

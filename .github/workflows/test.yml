@@ -48,9 +48,13 @@ jobs:
       - name: Lint and Format
         run: bun lint && bun format
 
-  test-module-generation:
+  module-generation:
+    name: Module Generation
     needs: lint-and-format
     runs-on: macOS-15
+    strategy:
+      matrix:
+        args: ['--skip-example', '--module-dir test-module', '--skip-install']
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -65,12 +69,6 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-
-      - name: Setup Ruby and Cocoapods
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
 
       - name: Cache npm dependencies
         id: bun-cache
@@ -89,16 +87,15 @@ jobs:
           bun run build
           bun link
 
-      - name: Create expect script
+      - name: Create expect script ${{ matrix.args }}
         run: |
           cat << 'EOF' > test-module.exp
           #!/usr/bin/expect -f
           set timeout 30
-          spawn bun create nitro-module test-module
+          spawn bun create nitro-module ${{ matrix.args }}
 
           # Module name
-          expect "📝 What is the name of your module?"
-          send "test-module\r"
+          expect "📝 What is the name of your module?" {send "test-module\r"}
 
           # Platform selection
           expect "🎯 Select target platforms:"
@@ -121,20 +118,70 @@ jobs:
           send \r
 
           # Package manager
-          expect "📦 Select package manager:"
-          send \r
+          expect "📦 Select package manager:" {send \r}
 
           # Confirm package name
-          expect "✨ Your package name will be called:"
-          send "y\r"
+          expect "✨ Your package name will be called:" {send "y\r"}
 
           expect eof
           EOF
           chmod +x test-module.exp
-          ls -la test-module.exp
 
-      - name: Generate New Module
+      - name: Generate New Module ${{ matrix.args }}
+        continue-on-error: false
         run: ./test-module.exp
+
+      - name: Upload generated module
+        uses: actions/upload-artifact@v4
+        if: strategy.job-index == 2
+        with:
+          name: test-module
+          path: react-native-test-module/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  build-ios:
+    name: Build iOS
+    needs: module-generation
+    runs-on: macOS-15
+    defaults:
+      run:
+        working-directory: react-native-test-module
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download generated module
+        uses: actions/download-artifact@v4
+        with:
+          name: test-module
+          path: react-native-test-module
+
+      - name: Setup Ruby and Cocoapods
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Setup Bun.js
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache npm dependencies
+        id: bun-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install npm dependencies (bun)
+        run: bun install
+
+      - name: Codegen
+        run: bun codegen
 
       - name: Cache CocoaPods
         id: pods-cache
@@ -160,12 +207,52 @@ jobs:
           build \
           CODE_SIGNING_ALLOWED=NO"
 
+  build-android:
+    name: Build Android
+    needs: module-generation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: react-native-test-module
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download generated module
+        uses: actions/download-artifact@v4
+        with:
+          name: test-module
+          path: react-native-test-module
+
+      - name: Setup Bun.js
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache npm dependencies
+        id: bun-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install npm dependencies (bun)
+        run: bun install
+
+      - name: Codegen
+        run: bun codegen
+
       - name: Install Java for Android builds
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
           cache: gradle
+
+      - name: Make gradlew executable
+        working-directory: react-native-test-module/example/android
+        run: chmod +x ./gradlew
 
       - name: Run Gradle Build
         working-directory: react-native-test-module/example/android
