@@ -44,7 +44,9 @@ export interface ${toPascalCase(
   ${funcName}(num1: number, num2: number): number
 }`
 
-export const exportCode = (moduleName: string) => `export {} from './specs/${moduleName}.nitro'
+export const exportCode = (
+    moduleName: string
+) => `export {} from './specs/${moduleName}.nitro'
 import { NitroModules } from 'react-native-nitro-modules'
 import type { ${toPascalCase(moduleName)} as ${toPascalCase(
     moduleName
@@ -52,8 +54,8 @@ import type { ${toPascalCase(moduleName)} as ${toPascalCase(
 
 export const ${toPascalCase(moduleName)} =
   NitroModules.createHybridObject<${toPascalCase(
-    moduleName
-)}Spec>('${toPascalCase(moduleName)}')`
+      moduleName
+  )}Spec>('${toPascalCase(moduleName)}')`
 
 export const metroConfig = `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
 const path = require('path')
