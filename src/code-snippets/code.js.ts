@@ -57,9 +57,9 @@ export const ${toPascalCase(moduleName)} =
       moduleName
   )}Spec>('${toPascalCase(moduleName)}')`
 
-export const metroConfig = `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
-const path = require('path')
-const root = path.resolve(__dirname, '..')
+export const metroConfig = `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const path = require('path');
+const root = path.resolve(__dirname, '..');
 
 /**
  * Metro configuration
@@ -72,9 +72,9 @@ const config = {
   resolver: {
     unstable_enablePackageExports: true,
   },
-}
+};
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config)`
+module.exports = mergeConfig(getDefaultConfig(__dirname), config);`
 
 export const babelConfig = `const path = require('path');
 const pak = require('../package.json');
