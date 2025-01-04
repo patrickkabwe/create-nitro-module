@@ -52,7 +52,7 @@ export class IOSFileGenerator implements FileGenerator {
         // Create a podspec file
         const replacements = {
             [IOS_MODULE_NAME_TAG]: toPascalCase(config.moduleName),
-            'mrousavy/nitro':
+            'patrickkabwe/create-nitro-module':
                 `${name.replaceAll(' ', '')}/${config.finalModuleName}`.toLowerCase(),
         }
 
