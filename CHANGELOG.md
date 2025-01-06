@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 1.0.1
+
+### Patch Changes
+
+- 614095c: fix - failed to copy .gitignore
+
 ## 1.0.0
 
 ### Major Changes
