@@ -4,7 +4,7 @@ import kleur from 'kleur'
 import ora from 'ora'
 import path from 'path'
 import projectPackageJsonFile from '../package.json'
-import { nosIcon, SUPPORTED_PLATFORMS } from './constants'
+import { generateInstructions, SUPPORTED_PLATFORMS } from './constants'
 import { NitroModuleFactory } from './generate-nitro-module'
 import {
     CreateModuleOptions,
@@ -48,7 +48,12 @@ export const createModule = async (
 
         await moduleFactory.createNitroModule()
 
-        console.log(nosIcon(`react-native-${name.toLowerCase()}`, answers.pm))
+        console.log(generateInstructions({
+            moduleName: `react-native-${name.toLowerCase()}`,
+            pm: answers.pm,
+            skipExample: options.skipExample,
+            skipInstall: options.skipInstall,
+        }))
         spinner.succeed(
             kleur.dim(
                 `Create Nitro Module - ${projectPackageJsonFile.description}\n`
