@@ -184,13 +184,7 @@ export class NitroModuleFactory {
     }
 
     private async createExampleApp() {
-        const pmMap = {
-            npm: 'npx',
-            yarn: 'npx',
-            bun: 'bunx',
-            pnpm: 'pnpx',
-        } as const
-        const packageManager = pmMap[this.config.pm]
+        const packageManager = this.config.pm === 'bun' ? 'bunx' : 'npx'
 
         const args = `${packageManager} -y @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example --directory example --skip-install --skip-git-init --version 0.76.5`
 
