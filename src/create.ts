@@ -54,6 +54,7 @@ export const createModule = async (
             skipExample: options.skipExample,
             skipInstall: options.skipInstall,
         }))
+
         spinner.succeed(
             kleur.dim(
                 `Create Nitro Module - ${projectPackageJsonFile.description}\n`
