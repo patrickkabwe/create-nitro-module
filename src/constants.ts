@@ -43,7 +43,7 @@ ${kleur.yellow('2)')} Begin development:
    ${kleur.green(`${pm} ios|android`)}    ${kleur.dim('# Run your example app')}
    
    ${kleur.cyan('Define your module:')}
-   ${kleur.white('src/specs/')}         ${kleur.dim('# Define your module specifications')}
+   ${kleur.white('src/specs/')}         ${kleur.dim('# Define your module specifications. e.g. src/specs/myModule.nitro.ts')}
    ${kleur.green(`${pm} codegen`)}        ${kleur.dim('# Generates native interfaces from TypeScript definitions')}
    
    ${kleur.cyan('Implement native code:')}

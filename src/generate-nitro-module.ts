@@ -27,6 +27,7 @@ import {
     copyTemplateFiles,
     createFolder,
     createModuleFile,
+    dirExist,
     generateAutolinking,
     getGitUserInfo,
     replaceHyphen,
@@ -63,6 +64,10 @@ export class NitroModuleFactory {
     }
 
     async createNitroModule() {
+        const dirExists = await dirExist(this.config.cwd)
+        if (dirExists) {
+            throw new Error("Looks like the directory with the same name already exists.")
+        }
         await createFolder(this.config.cwd)
         const supportedLanguages = [...this.config.langs, SupportedLang.JS]
         this.config.spinner.start(messages.creating)
@@ -82,7 +87,6 @@ export class NitroModuleFactory {
             await this.configureExamplePackageJson()
             await this.syncExampleAppConfigurations()
             await this.gitInit()
-            this.config.spinner.succeed(messages.generating)
         }
         if (!this.config.skipInstall && !this.config.skipExample) {
             this.config.spinner.text = messages.installing
@@ -204,7 +208,6 @@ export class NitroModuleFactory {
         })
         const packageJson = JSON.parse(packageJsonStr)
 
-        this.config.spinner.text = 'Configuring example package.json'
         packageJson.scripts = {
             ...packageJson.scripts,
             ios: "react-native run-ios --simulator='iPhone 16'",
