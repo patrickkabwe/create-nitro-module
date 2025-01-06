@@ -23,13 +23,12 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 ```
 .
 ├── example
-├── react-native-awesome-library
-│   ├── AwesomeLibrary.podspec
-│   ├── android
-│   ├── ios
-│   ├── src
-│       ├── index.ts
-│       └── specs
+├── AwesomeLibrary.podspec
+├── android
+├── ios
+├── src
+│    ├── index.ts
+│    └── specs
 │         └── awesome-library.nitro.ts
 │   ├── nitrogen
 │   ├── nitro.json
