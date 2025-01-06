@@ -17,23 +17,14 @@ Usage: create-nitro-module [options] [command] [name]
 A CLI tool that simplifies creating React Native modules powered by Nitro Modules.
 
 Arguments:
-  name                                Name of the module to create
+  name                                name of the module to create
 
 Options:
-  -v, --version                       Output the version number
-  -d, --module-dir <moduleDirectory>  Directory to create the module in
-  -s, --skip-example                  Skip example app generation
-  -h, --help                          Display help for command
-```
-
-## Commands
-
-### create
-
-Create a new Nitro Module. If no module name is provided, you will be prompted for one.
-
-```bash
-create [moduleName]
+  -v, --version                       output the version number
+  -d, --module-dir <moduleDirectory>  directory to create the module in
+  -s, --skip-example                  skip example app generation
+  -si, --skip-install                 skip installing dependencies
+  -h, --help                          display help for command
 ```
 
 #### Example

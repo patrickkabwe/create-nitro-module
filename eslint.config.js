@@ -26,6 +26,7 @@ export default [
       ...ts.configs.recommended.rules,
       'n/hashbang': 'off',
       'n/no-process-exit': 'off',
+      'n/no-missing-import': 'off',
     },
   },
   {

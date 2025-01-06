@@ -34,16 +34,6 @@ To create a Nitro Module along with an example app, use the following command. T
   yarn create nitro-module@latest my-awesome-module
   ```
   </TabItem>
-  <TabItem value="global" label="Global" default>
-  ```bash
-  nitro-module create my-awesome-module
-  ```
-  :::warning
-
-  Make sure you have installed the Nitro Module CLI globally to use the `nitro-module` command. You can install it using the following command:
-  `npm install -g create-nitro-module@latest`
-  :::
-  </TabItem>
 </Tabs>
 
 ## Without example app
@@ -69,11 +59,6 @@ If you prefer to create a Nitro Module without an example app, use the following
   <TabItem value="yarn" label="Yarn">
   ```bash
   yarn create nitro-module@latest my-awesome-module --skip-example
-  ```
-  </TabItem>
-  <TabItem value="global" label="Global">
-  ```bash
-  nitro-module create my-awesome-module --skip-example
   ```
   </TabItem>
 </Tabs>
@@ -103,11 +88,6 @@ If you prefer to create a Nitro Module within a specific directory, use the foll
   <TabItem value="yarn" label="Yarn">
   ```bash
   yarn create nitro-module@latest my-awesome-module --module-dir packages
-  ```
-  </TabItem>
-  <TabItem value="global" label="Global">
-  ```bash
-  nitro-module create my-awesome-module --module-dir packages
   ```
   </TabItem>
 </Tabs>
