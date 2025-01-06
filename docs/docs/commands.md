@@ -50,11 +50,6 @@ Options:
     yarn create nitro-module@latest my-awesome-module
     ```
     </TabItem>
-    <TabItem value="global" label="Global">
-    ```bash
-    nitro-module@latest create my-awesome-module
-    ```
-    </TabItem>
 </Tabs>
 
 <!-- ### generate
@@ -79,9 +74,6 @@ pnpm create nitro-module@latest generate my-awesome-module
 
 # Using yarn
 yarn create nitro-module@latest generate my-awesome-module
-
-# Using global install
-nitro-module@latest generate my-awesome-module
 ``` -->
 
 For additional support, please [open an issue](https://github.com/patrickkabwe/create-nitro-module/issues) on our GitHub repository.
