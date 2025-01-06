@@ -54,13 +54,13 @@ ${skipExample ? '' : `Run your example app:
    ${kleur.green(`${pm} android`)}        ${kleur.dim('# Run Android example')}`}
 
 ${skipInstall ? '' : `Install dependencies:
-   ${kleur.green(`${pm} install`)}         ${kleur.dim('# Install dependencies')}`}
-   ${kleur.green(`${pm} codegen`)}          ${kleur.dim('# Generate native interfaces from TypeScript definitions')}
+   ${kleur.green(`${pm} install`)}         ${kleur.dim('# Install dependencies')}
+   ${kleur.green(`${pm} codegen`)}          ${kleur.dim('# Generate native interfaces from TypeScript definitions')}`}
 
 Begin development:
-${skipExample ? '' : `${kleur.green(`cd ${moduleName}/example`)}`}
+${skipExample ? '' : `${kleur.green(`cd ${moduleName}/example`)}
    ${kleur.green(`${pm} pod`)}            ${kleur.dim('# Install CocoaPods dependencies (iOS)')}
-   ${kleur.green(`${pm} ios|android`)}    ${kleur.dim('# Run your example app')}
+   ${kleur.green(`${pm} ios|android`)}    ${kleur.dim('# Run your example app')}`}
  
    
    ${kleur.cyan('Define your module:')}
