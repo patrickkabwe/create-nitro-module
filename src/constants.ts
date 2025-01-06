@@ -1,4 +1,5 @@
 import kleur from 'kleur'
+import type { InstructionsParams } from './types'
 
 export const SUPPORTED_PLATFORMS = ['ios', 'android']
 
@@ -30,13 +31,6 @@ export const packagesToRemoveFromExampleApp = [
 export const foldersToRemoveFromExampleApp = [
    "__tests__",
 ]
-
-type InstructionsParams = {
-   moduleName: string
-   pm: string
-   skipInstall?: boolean
-   skipExample?: boolean
-}
 
 export const generateInstructions = ({ moduleName, pm, skipInstall, skipExample }: InstructionsParams) => `
 ${kleur.cyan().bold(`   
