@@ -51,18 +51,16 @@ ${kleur.red().bold('Next steps:')}
 ${skipExample ? '' : `Run your example app:
    ${kleur.green('cd example')}
    ${kleur.green(`${pm} ios`)}            ${kleur.dim('# Run iOS example')}
-   ${kleur.green(`${pm} android`)}        ${kleur.dim('# Run Android example')}`}
-
-${skipInstall ? '' : `Install dependencies:
+   ${kleur.green(`${pm} android`)}        ${kleur.dim('# Run Android example')}\n`}
+${!skipInstall ? '' : `Install dependencies:
    ${kleur.green(`${pm} install`)}         ${kleur.dim('# Install dependencies')}
-   ${kleur.green(`${pm} codegen`)}          ${kleur.dim('# Generate native interfaces from TypeScript definitions')}`}
-
+   ${kleur.green(`${pm} codegen`)}         ${kleur.dim('# Generate native interfaces from TypeScript definitions')}\n`}
 Begin development:
-${skipExample ? '' : `${kleur.green(`cd ${moduleName}/example`)}
+${skipExample ? '' : `
+   ${kleur.green(`cd ${moduleName}/example`)}
    ${kleur.green(`${pm} pod`)}            ${kleur.dim('# Install CocoaPods dependencies (iOS)')}
    ${kleur.green(`${pm} ios|android`)}    ${kleur.dim('# Run your example app')}`}
  
-   
    ${kleur.cyan('Define your module:')}
    ${kleur.white('src/specs/')}         ${kleur.dim('# Define your module specifications. e.g. src/specs/myModule.nitro.ts')}
    ${kleur.green(`${pm} codegen`)}        ${kleur.dim('# Generates native interfaces from TypeScript definitions')}
