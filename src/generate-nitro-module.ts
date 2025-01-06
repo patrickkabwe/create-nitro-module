@@ -184,9 +184,9 @@ export class NitroModuleFactory {
     }
 
     private async createExampleApp() {
-        const packageManager = this.config.pm === 'bun' ? 'bunx' : 'npx'
+        const packageManager = this.config.pm === 'bun' ? 'bunx' : 'npx -y'
 
-        const args = `${packageManager} -y @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example --directory example --skip-install --skip-git-init --version 0.76.5`
+        const args = `${packageManager} @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example --directory example --skip-install --skip-git-init --version 0.76.5`
 
         await execAsync(args, { cwd: this.config.cwd })
 
