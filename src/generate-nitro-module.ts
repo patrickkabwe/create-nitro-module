@@ -1,9 +1,9 @@
-import { readFile, writeFile } from 'fs/promises'
 import { exec } from 'node:child_process'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import util from 'util'
-import { androidSettingsGradleCode } from './code-snippets/code.android.js'
+import { readFile, rename, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import util from 'node:util'
+import { androidSettingsGradleCode } from './code-snippets/code.android'
 import {
     appExampleCode,
     babelConfig,
@@ -160,7 +160,7 @@ export class NitroModuleFactory {
             'babel.config.js',
             'nitro.json',
             'tsconfig.json',
-            '.gitignore',
+            'gitignore',
             'README.md',
             'package.json',
         ]
@@ -169,6 +169,9 @@ export class NitroModuleFactory {
             [__dirname, '..', 'assets', 'template'],
             filesToCopy
         )
+        const oldGitIgnorePath = path.join(this.config.cwd, 'gitignore')
+        const newGitIgnorePath = path.join(this.config.cwd, '.gitignore')
+        await rename(oldGitIgnorePath, newGitIgnorePath)
     }
 
     private async createExampleApp() {
