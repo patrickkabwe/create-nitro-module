@@ -3,7 +3,7 @@ import { readFile, rename, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import util from 'node:util'
-import { androidSettingsGradleCode } from './code-snippets/code.android.js'
+import { androidSettingsGradleCode } from './code-snippets/code.android'
 import {
     appExampleCode,
     babelConfig,
