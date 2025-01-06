@@ -14,9 +14,11 @@ import {
     ANDROID_CXX_LIB_NAME_TAG,
     ANDROID_NAME_SPACE_TAG,
     CXX_NAME_SPACE_TAG,
+    foldersToRemoveFromExampleApp,
     IOS_MODULE_NAME_TAG,
     JS_PACKAGE_NAME_TAG,
-    messages
+    messages,
+    packagesToRemoveFromExampleApp
 } from './constants'
 import { AndroidFileGenerator } from './file-generators/android-file-generator'
 import { CppFileGenerator } from './file-generators/cpp-file-generator'
@@ -144,6 +146,10 @@ export class NitroModuleFactory {
             postcodegen: `bun run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
         }
 
+        if (this.config.pm === 'yarn') {
+            newWorkspacePackageJsonFile.packageManager = "yarn@3.6.1"
+        }
+
         if (skipExample) {
             delete newWorkspacePackageJsonFile.workspaces
         }
@@ -162,8 +168,11 @@ export class NitroModuleFactory {
             'tsconfig.json',
             'gitignore',
             'README.md',
-            'package.json',
+            'package.json'
         ]
+        if (this.config.pm === 'yarn') {
+            filesToCopy.push('.yarnrc.yml', '.yarn',)
+        }
         await copyTemplateFiles(
             this.config,
             [__dirname, '..', 'assets', 'template'],
@@ -211,6 +220,8 @@ export class NitroModuleFactory {
         })
         const packageJson = JSON.parse(packageJsonStr)
 
+        packageJson.name = `${this.config.finalModuleName}-example`
+
         packageJson.scripts = {
             ...packageJson.scripts,
             ios: "react-native run-ios --simulator='iPhone 16'",
@@ -221,6 +232,10 @@ export class NitroModuleFactory {
             ...packageJson.dependencies,
             'react-native-nitro-modules': '*',
         }
+
+        packagesToRemoveFromExampleApp.forEach((pkg) => {
+            delete packageJson.devDependencies[pkg]
+        })
 
         await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2), {
             encoding: 'utf8',
@@ -324,6 +339,10 @@ export class NitroModuleFactory {
         })
 
         await writeFile(androidBuildGradlePath, toWrite, { encoding: 'utf8' })
+
+        for (const folder of foldersToRemoveFromExampleApp) {
+            await execAsync(`rm -rf ${path.join(this.config.cwd, 'example', folder)}`)
+        }
     }
 
     private async runCodegenAndInstallDependencies() {
@@ -333,5 +352,7 @@ export class NitroModuleFactory {
 
     private async gitInit() {
         await execAsync('git init', { cwd: this.config.cwd })
+        await execAsync('git add .', { cwd: this.config.cwd })
+        await execAsync('git commit -m "initial commit"', { cwd: this.config.cwd })
     }
 }

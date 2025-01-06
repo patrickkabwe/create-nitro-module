@@ -1,6 +1,6 @@
-import { execSync } from 'child_process'
-import { access, copyFile, mkdir, readFile, writeFile } from 'fs/promises'
-import path from 'path'
+import { execSync } from 'node:child_process'
+import { access, cp, mkdir, readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
 import { GenerateModuleConfig, SupportedLang } from './types'
 
 type AutolinkingConfig = {
@@ -169,6 +169,6 @@ export const copyTemplateFiles = async (
     filesToCopy: string[]
 ) => {
     for (const file of filesToCopy) {
-        await copyFile(path.join(...paths, file), path.join(config.cwd, file))
+        await cp(path.join(...paths, file), path.join(config.cwd, file), { recursive: true })
     }
 }
