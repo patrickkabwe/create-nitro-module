@@ -1,9 +1,8 @@
-import { readFile, writeFile } from 'fs/promises'
 import { exec } from 'node:child_process'
-import { rename } from 'node:fs/promises'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import util from 'util'
+import { readFile, rename, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import util from 'node:util'
 import { androidSettingsGradleCode } from './code-snippets/code.android.js'
 import {
     appExampleCode,
