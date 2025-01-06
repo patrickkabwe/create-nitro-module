@@ -12,7 +12,7 @@ This document provides an overview of the commands available in the Nitro Module
 ## Usage
 
 ```bash
-Usage: create-nitro-module [options] [command] [name]
+Usage: create-nitro-module [options] [name]
 
 A CLI tool that simplifies creating React Native modules powered by Nitro Modules.
 
@@ -22,8 +22,8 @@ Arguments:
 Options:
   -v, --version                       output the version number
   -d, --module-dir <moduleDirectory>  directory to create the module in
-  -s, --skip-example                  skip example app generation
-  -si, --skip-install                 skip installing dependencies
+  -e, --skip-example                  skip example app generation
+  -i, --skip-install                  skip installing dependencies
   -h, --help                          display help for command
 ```
 

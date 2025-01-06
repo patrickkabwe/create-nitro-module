@@ -9,13 +9,13 @@ program
     .name(packageJson.name)
     .description(packageJson.description)
     .version(`CLI Version: ${packageJson.version}`, '-v, --version')
-    .argument('[name]', 'Name of the module to create')
+    .argument('[name]', 'name of the module to create')
     .option(
         '-d, --module-dir <moduleDirectory>',
-        'Directory to create the module in'
+        'directory to create the module in'
     )
-    .option('-s, --skip-example', 'Skip example app generation')
-    .option('-si, --skip-install', 'Skip installing dependencies')
+    .option('-e, --skip-example', 'skip example app generation')
+    .option('-i, --skip-install', 'skip installing dependencies')
     .action(createModule)
 
 program.allowUnknownOption().parse(process.argv)
