@@ -38,24 +38,3 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 ├── bun.lockb
 └── package.json
 ```
-
-<!-- ### CLI Commands
-
-```bash
-Usage: create-nitro-module [options] [command] [name]
-
-A CLI tool that simplifies creating React Native modules powered by Nitro Modules.
-
-Arguments:
-  name                                Name of the module to create
-
-Options:
-  -v, --version                       output the version number
-  -d, --module-dir <moduleDirectory>  Directory to create the module in
-  -s, --skip-example                  Skip example app generation
-  -h, --help                          Display help for command
-
-Commands:
-  create [moduleName]    Create a new nitro module. If no moduleName is provided,
-                         you will be prompted for one.
-``` -->
