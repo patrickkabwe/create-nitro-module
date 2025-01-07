@@ -1,5 +1,12 @@
 # create-nitro-module
 
+## 1.0.2
+
+### Patch Changes
+
+- 53da891: fix: support yarn workspaces using yarn v3
+  chore: improve dependency installation
+
 ## 1.0.1
 
 ### Patch Changes
