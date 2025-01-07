@@ -56,3 +56,10 @@ export const PLATFORM_LANGUAGE_MAP: Record<string, string[]> = {
     ios: ['swift', 'cpp'],
     android: ['kotlin', 'cpp'],
 }
+
+export type InstructionsParams = {
+   moduleName: string
+   pm: string
+   skipInstall?: boolean
+   skipExample?: boolean
+}

@@ -1,4 +1,5 @@
 import kleur from 'kleur'
+import type { InstructionsParams } from './types'
 
 export const SUPPORTED_PLATFORMS = ['ios', 'android']
 
@@ -9,14 +10,29 @@ export const IOS_MODULE_NAME_TAG = '$$iosModuleName$$'
 export const JS_PACKAGE_NAME_TAG = '$$packageName$$'
 
 export const messages = {
-	creating: 'Creating your Nitro Module...',
-	generating: 'Generating example app...',
-	installing: 'Installing dependencies...',
-	runningCodegen: '🚀 Running codegen...',
-	success: '✨ Nitro Module created successfully!',
+   creating: 'Creating your Nitro Module...',
+   generating: 'Generating example app...',
+   installing: 'Installing dependencies...',
+   runningCodegen: '🚀 Running codegen...',
+   success: '✨ Nitro Module created successfully!',
 } as const
 
-export const nosIcon = (moduleName: string, pm: string) => `
+export const packagesToRemoveFromExampleApp = [
+   "@types/react",
+   "@types/react-test-renderer",
+   "babel-jest",
+   "eslint",
+   "jest",
+   "prettier",
+   "react-test-renderer",
+   "typescript",
+]
+
+export const foldersToRemoveFromExampleApp = [
+   "__tests__",
+]
+
+export const generateInstructions = ({ moduleName, pm, skipInstall, skipExample }: InstructionsParams) => `
 ${kleur.cyan().bold(`   
    ┌─────┐
    │ ⏲️  |
@@ -32,16 +48,19 @@ ${kleur.cyan().bold(`
      
 ${kleur.red().bold('Next steps:')}
 
-${kleur.yellow('1)')} Run your example app:
+${skipExample ? '' : `Run your example app:
    ${kleur.green('cd example')}
    ${kleur.green(`${pm} ios`)}            ${kleur.dim('# Run iOS example')}
-   ${kleur.green(`${pm} android`)}        ${kleur.dim('# Run Android example')}
-
-${kleur.yellow('2)')} Begin development:
+   ${kleur.green(`${pm} android`)}        ${kleur.dim('# Run Android example')}\n`}
+${!skipInstall ? '' : `Install dependencies:
+   ${kleur.green(`${pm} install`)}         ${kleur.dim('# Install dependencies')}
+   ${kleur.green(`${pm} codegen`)}         ${kleur.dim('# Generate native interfaces from TypeScript definitions')}\n`}
+Begin development:
+${skipExample ? '' : `
    ${kleur.green(`cd ${moduleName}/example`)}
    ${kleur.green(`${pm} pod`)}            ${kleur.dim('# Install CocoaPods dependencies (iOS)')}
-   ${kleur.green(`${pm} ios|android`)}    ${kleur.dim('# Run your example app')}
-   
+   ${kleur.green(`${pm} ios|android`)}    ${kleur.dim('# Run your example app')}`}
+ 
    ${kleur.cyan('Define your module:')}
    ${kleur.white('src/specs/')}         ${kleur.dim('# Define your module specifications. e.g. src/specs/myModule.nitro.ts')}
    ${kleur.green(`${pm} codegen`)}        ${kleur.dim('# Generates native interfaces from TypeScript definitions')}

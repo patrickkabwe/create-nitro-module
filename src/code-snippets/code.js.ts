@@ -19,15 +19,15 @@ function App(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    text: {
-        fontSize: 40, 
-        color: 'green'
-    }
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 40, 
+    color: 'green'
+  }
 });
 
 export default App;`
@@ -46,8 +46,7 @@ export interface ${toPascalCase(
 
 export const exportCode = (
     moduleName: string
-) => `export {} from './specs/${moduleName}.nitro'
-import { NitroModules } from 'react-native-nitro-modules'
+) => `import { NitroModules } from 'react-native-nitro-modules'
 import type { ${toPascalCase(moduleName)} as ${toPascalCase(
     moduleName
 )}Spec } from './specs/${moduleName}.nitro'
