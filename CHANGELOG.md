@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 1.0.3
+
+### Patch Changes
+
+- 97d9762: chore: upgrade to nitro 0.21.0
+
 ## 1.0.2
 
 ### Patch Changes
