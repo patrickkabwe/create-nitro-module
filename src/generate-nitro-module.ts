@@ -83,6 +83,7 @@ export class NitroModuleFactory {
         await this.copyPackageFiles()
         await this.replaceNitroJsonPlaceholders()
         await this.updatePackageJsonConfig(this.config.skipExample)
+        await this.updateReadme()
         if (!this.config.skipExample) {
             this.config.spinner.text = messages.generating
             await this.createExampleApp()
@@ -158,6 +159,27 @@ export class NitroModuleFactory {
             JSON.stringify(newWorkspacePackageJsonFile, null, 2),
             { encoding: 'utf8' }
         )
+    }
+
+    private async updateReadme() {
+        const readmePath = path.join(
+            this.config.cwd,
+            'README.md'
+        )
+
+        const replacements = {
+            [JS_PACKAGE_NAME_TAG]: this.config.finalModuleName,
+            '$$command$$': this.config.pm === 'bun' || this.config.pm === 'yarn' || this.config.pm === 'pnpm' ? `${this.config.pm} add` : 'npm install',
+        }
+
+        const readmeContents = await replacePlaceholder({
+            filePath: readmePath,
+            replacements,
+        })
+
+        await writeFile(readmePath, readmeContents, {
+            encoding: 'utf8',
+        })
     }
 
     private async copyPackageFiles() {
