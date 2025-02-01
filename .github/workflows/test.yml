@@ -153,8 +153,6 @@ jobs:
       run:
         working-directory: react-native-test-module
     steps:
-      - uses: actions/checkout@v4
-
       - name: Download generated module
         uses: actions/download-artifact@v4
         with:
@@ -181,7 +179,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
 
-      - name: Install npm dependencies (bun)
+      - name: Install npm dependencies (${{ matrix.pm }})
         run: ${{ matrix.pm }} install
 
       - name: Codegen
@@ -222,8 +220,6 @@ jobs:
       run:
         working-directory: react-native-test-module
     steps:
-      - uses: actions/checkout@v4
-
       - name: Download generated module
         uses: actions/download-artifact@v4
         with:
@@ -244,7 +240,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
 
-      - name: Install npm dependencies (bun)
+      - name: Install npm dependencies (${{ matrix.pm }})
         run: ${{ matrix.pm }} install
 
       - name: Codegen
