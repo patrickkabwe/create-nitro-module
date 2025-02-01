@@ -134,7 +134,8 @@ jobs:
 
       - name: Upload generated module
         uses: actions/upload-artifact@v4
-        if: strategy.job-index == 2
+				# export based on pm
+        if: matrix.pm == 'bun' || matrix.pm == 'yarn' && matrix.args == '--module-dir test-module'
         with:
           name: test-module-${{ matrix.pm }}
           path: react-native-test-module/
