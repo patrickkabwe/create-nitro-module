@@ -133,7 +133,9 @@ jobs:
         run: ./test-module.exp
 
       - name: List directory contents
-        run: ls -la
+        run: |
+         ls -la
+         ls -la test-module
 
       - name: Upload generated module
         uses: actions/upload-artifact@v4
