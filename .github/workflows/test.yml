@@ -184,8 +184,10 @@ jobs:
         if: matrix.pm == 'yarn'
         run: |
           corepack enable
-          yarn set version 3.6.1
           touch yarn.lock
+          yarn config set enableImmutableInstalls false
+          yarn config set enableGlobalCache true
+          yarn config set enableProgressBars false
 
       - name: Install npm dependencies (${{ matrix.pm }})
         run: ${{ matrix.pm }} install
@@ -252,8 +254,10 @@ jobs:
         if: matrix.pm == 'yarn'
         run: |
           corepack enable
-          yarn set version 3.6.1
           touch yarn.lock
+          yarn config set enableImmutableInstalls false
+          yarn config set enableGlobalCache true
+          yarn config set enableProgressBars false
 
       - name: Install npm dependencies (${{ matrix.pm }})
         run: ${{ matrix.pm }} install
