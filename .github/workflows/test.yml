@@ -54,7 +54,7 @@ jobs:
     runs-on: macOS-15
     strategy:
       matrix:
-        args: ['--skip-example', '--module-dir test-module', '--skip-install']
+        args: ['--skip-example', '--skip-install', '--module-dir test-module']
         pm: ['bun', 'yarn']
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -131,6 +131,9 @@ jobs:
       - name: Generate New Module ${{ matrix.args }}
         continue-on-error: false
         run: ./test-module.exp
+
+      - name: List directory contents
+        run: ls -la
 
       - name: Upload generated module
         uses: actions/upload-artifact@v4
