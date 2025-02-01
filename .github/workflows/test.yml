@@ -179,6 +179,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
 
+
+      - name: Setup Yarn
+        if: matrix.pm == 'yarn'
+        run: |
+          corepack enable
+          yarn set version 3.6.1
+          touch yarn.lock
+
       - name: Install npm dependencies (${{ matrix.pm }})
         run: ${{ matrix.pm }} install
 
@@ -239,6 +247,13 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-bun-
+
+      - name: Setup Yarn
+        if: matrix.pm == 'yarn'
+        run: |
+          corepack enable
+          yarn set version 3.6.1
+          touch yarn.lock
 
       - name: Install npm dependencies (${{ matrix.pm }})
         run: ${{ matrix.pm }} install
