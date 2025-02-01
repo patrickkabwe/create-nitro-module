@@ -67,6 +67,7 @@ android/keystores/debug.keystore
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+.kotlin
 
 # Expo
 .expo/
