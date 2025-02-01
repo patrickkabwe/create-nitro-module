@@ -54,7 +54,7 @@ jobs:
     runs-on: macOS-15
     strategy:
       matrix:
-        args: ['--skip-example', '--skip-install', '--module-dir test-module']
+        args: ['--skip-example', '--module-dir test-module', '--skip-install']
         pm: ['bun', 'yarn']
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -132,14 +132,9 @@ jobs:
         continue-on-error: false
         run: ./test-module.exp
 
-      - name: List directory contents
-        run: |
-         ls -la
-         ls -la test-module
-
       - name: Upload generated module
         uses: actions/upload-artifact@v4
-        if: matrix.args == '--module-dir test-module'
+        if: matrix.args == '--skip-install'
         with:
           name: test-module-${{ matrix.pm }}
           path: react-native-test-module/
