@@ -134,7 +134,7 @@ jobs:
 
       - name: Upload generated module
         uses: actions/upload-artifact@v4
-        if: matrix.pm == 'bun' || matrix.pm == 'yarn' && matrix.args == '--module-dir test-module'
+        if: matrix.args == '--module-dir test-module'
         with:
           name: test-module-${{ matrix.pm }}
           path: react-native-test-module/
