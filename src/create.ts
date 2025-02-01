@@ -11,7 +11,7 @@ import {
     NitroModuleType,
     PLATFORM_LANGUAGE_MAP,
 } from './types'
-import { dirExist } from './utils'
+import { detectPackageManager, dirExist } from './utils'
 
 export const createModule = async (
     name: string,
@@ -30,8 +30,10 @@ export const createModule = async (
             }
         }
 
-        const answers = await getUserAnswers(name)
+        const usedPm = detectPackageManager()
+        const answers = await getUserAnswers(name, usedPm)
         name = answers.moduleName
+        answers.pm = usedPm || answers.pm
 
         const moduleFactory = new NitroModuleFactory({
             langs: answers.langs,
@@ -77,7 +79,7 @@ export const createModule = async (
     }
 }
 
-const getUserAnswers = async (name: string) => {
+const getUserAnswers = async (name: string, usedPm?: string) => {
     const moduleName = await inquirer.prompt({
         type: 'input',
         message: kleur.cyan('📝 What is the name of your module?'),
@@ -160,7 +162,8 @@ const getUserAnswers = async (name: string) => {
         message: kleur.cyan('📦 Select package manager:'),
         name: 'name',
         choices: ['bun', 'yarn', 'pnpm', 'npm'],
-        default: 'bun',
+        default: usedPm || 'yarn',
+        when: usedPm === undefined,
     })
 
     const packageName = await inquirer.prompt({

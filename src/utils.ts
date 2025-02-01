@@ -172,3 +172,13 @@ export const copyTemplateFiles = async (
         await cp(path.join(...paths, file), path.join(config.cwd, file), { recursive: true })
     }
 }
+
+export const detectPackageManager = () => {
+    const userAgent = process.env.npm_config_user_agent;
+    if (!userAgent) return
+    if (userAgent.startsWith('npm')) return 'npm';
+    if (userAgent.startsWith('yarn')) return 'yarn';
+    if (userAgent.startsWith('pnpm')) return 'pnpm';
+    if (userAgent.startsWith('bun')) return 'bun';
+    return 'bun'
+  }

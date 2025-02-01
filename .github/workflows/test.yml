@@ -55,6 +55,7 @@ jobs:
     strategy:
       matrix:
         args: ['--skip-example', '--module-dir test-module', '--skip-install']
+        pm: ['bun', 'yarn']
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -85,14 +86,14 @@ jobs:
       - name: Build CLI and Link Locally
         run: |
           bun run build
-          bun link
+          ${{matrix.pm}} link
 
-      - name: Create expect script ${{ matrix.args }}
+      - name: Create expect script ${{ matrix.args }} with ${{ matrix.pm }}
         run: |
           cat << 'EOF' > test-module.exp
           #!/usr/bin/expect -f
           set timeout 30
-          spawn bun create nitro-module ${{ matrix.args }}
+          spawn ${{ matrix.pm }} create nitro-module ${{ matrix.args }}
 
           # Module name
           expect "📝 What is the name of your module?" {send "test-module\r"}
@@ -135,7 +136,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: strategy.job-index == 2
         with:
-          name: test-module
+          name: test-module-${{ matrix.pm }}
           path: react-native-test-module/
           include-hidden-files: true
           if-no-files-found: error
@@ -145,6 +146,9 @@ jobs:
     name: Build iOS
     needs: module-generation
     runs-on: macOS-15
+    strategy:
+      matrix:
+        pm: ['bun', 'yarn']
     defaults:
       run:
         working-directory: react-native-test-module
@@ -154,7 +158,7 @@ jobs:
       - name: Download generated module
         uses: actions/download-artifact@v4
         with:
-          name: test-module
+          name: test-module-${{ matrix.pm }}
           path: react-native-test-module
 
       - name: Setup Ruby and Cocoapods
@@ -178,10 +182,10 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install npm dependencies (bun)
-        run: bun install
+        run: ${{ matrix.pm }} install
 
       - name: Codegen
-        run: bun codegen
+        run: ${{ matrix.pm }} codegen
 
       - name: Cache CocoaPods
         id: pods-cache
@@ -192,7 +196,7 @@ jobs:
 
       - name: Install CocoaPods dependencies
         working-directory: react-native-test-module/example
-        run: bun pod
+        run: ${{ matrix.pm }} pod
 
       - name: Build iOS
         working-directory: react-native-test-module/example/ios
@@ -211,6 +215,9 @@ jobs:
     name: Build Android
     needs: module-generation
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pm: ['bun', 'yarn']
     defaults:
       run:
         working-directory: react-native-test-module
@@ -220,7 +227,7 @@ jobs:
       - name: Download generated module
         uses: actions/download-artifact@v4
         with:
-          name: test-module
+          name: test-module-${{ matrix.pm }}
           path: react-native-test-module
 
       - name: Setup Bun.js
@@ -238,10 +245,10 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install npm dependencies (bun)
-        run: bun install
+        run: ${{ matrix.pm }} install
 
       - name: Codegen
-        run: bun codegen
+        run: ${{ matrix.pm }} codegen
 
       - name: Install Java for Android builds
         uses: actions/setup-java@v4
