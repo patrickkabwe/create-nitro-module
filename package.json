@@ -1,82 +1,82 @@
 {
-  "name": "create-nitro-module",
-  "version": "1.1.0",
-  "description": "A CLI tool that simplifies creating React Native modules powered by Nitro Modules.",
-  "private": false,
-  "type": "module",
-  "files": [
-    "lib",
-    "assets",
-    "!assets/nitro-module-cli.gif",
-    "README.md"
-  ],
-  "keywords": [
-    "react native",
-    "nitro",
-    "nitro create",
-    "nitro-cli",
-    "nitro modules",
-    "create-nitro-modules",
-    "Native Modules",
-    "Create React Native Modules with Nitro",
-    "Create Nitro Modules"
-  ],
-  "license": "MIT",
-  "bin": {
-    "create-nitro-module": "./lib/cli.js",
-    "nitro-module": "./lib/cli.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/patrickkabwe/create-nitro-module.git"
-  },
-  "author": "Patrick Kabwe (https://github.com/patrickkabwe)",
-  "bugs": {
-    "url": "https://github.com/patrickkabwe/create-nitro-module/issues"
-  },
-  "homepage": "https://patrickkabwe.github.io/create-nitro-module/",
-  "scripts": {
-    "dev": "bun typecheck && tsx src/cli.ts",
-    "build": "rm -rf lib && bun typecheck && tsup src",
-    "typecheck": "tsc --noEmit",
-    "changeset": "changeset",
-    "version": "changeset version",
-    "prerelease": "rm -rf ./lib/assets",
-    "release": "bun run build && bun version && changeset publish",
-    "lint": "eslint src/*.ts",
-    "format": "prettier --write src/**/*.ts"
-  },
-  "dependencies": {
-    "@changesets/cli": "^2.27.10",
-    "commander": "^13.0.0",
-    "inquirer": "^12.1.0",
-    "kleur": "^4.1.5",
-    "ora": "^8.1.1",
-    "tsup": "^8.3.5"
-  },
-  "prettier": {
-    "semi": false,
-    "singleQuote": true,
-    "trailingComma": "es5",
-    "tabWidth": 4,
-    "arrowParens": "avoid"
-  },
-  "devDependencies": {
-    "@types/node": "^22.10.0",
-    "@typescript-eslint/eslint-plugin": "^8.16.0",
-    "@typescript-eslint/parser": "^8.16.0",
-    "eslint": "^9.16.0",
-    "eslint-plugin-n": "^17.14.0",
-    "lefthook": "^1.10.1",
-    "prettier": "^3.4.1",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
-  }
+    "name": "create-nitro-module",
+    "version": "1.1.0",
+    "description": "A CLI tool that simplifies creating React Native modules powered by Nitro Modules.",
+    "private": false,
+    "type": "module",
+    "files": [
+        "lib",
+        "assets",
+        "!assets/nitro-module-cli.gif",
+        "README.md"
+    ],
+    "keywords": [
+        "react native",
+        "nitro",
+        "nitro create",
+        "nitro-cli",
+        "nitro modules",
+        "create-nitro-modules",
+        "Native Modules",
+        "Create React Native Modules with Nitro",
+        "Create Nitro Modules"
+    ],
+    "license": "MIT",
+    "bin": {
+        "create-nitro-module": "./lib/cli.js",
+        "nitro-module": "./lib/cli.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/patrickkabwe/create-nitro-module.git"
+    },
+    "author": "Patrick Kabwe (https://github.com/patrickkabwe)",
+    "bugs": {
+        "url": "https://github.com/patrickkabwe/create-nitro-module/issues"
+    },
+    "homepage": "https://patrickkabwe.github.io/create-nitro-module/",
+    "publishConfig": {
+        "registry": "https://registry.npmjs.org/",
+        "access": "public"
+    },
+    "scripts": {
+        "dev": "bun typecheck && tsx src/cli.ts",
+        "build": "rm -rf lib && bun typecheck && tsup src",
+        "typecheck": "tsc --noEmit",
+        "changeset": "changeset",
+        "version": "changeset version",
+        "prerelease": "rm -rf ./lib/assets",
+        "release": "bun run build && bun version && changeset publish",
+        "lint": "eslint src/*.ts",
+        "format": "prettier --write src/**/*.ts"
+    },
+    "dependencies": {
+        "@changesets/cli": "^2.27.10",
+        "commander": "^13.0.0",
+        "inquirer": "^12.1.0",
+        "kleur": "^4.1.5",
+        "ora": "^8.1.1",
+        "tsup": "^8.3.5"
+    },
+    "prettier": {
+        "semi": false,
+        "singleQuote": true,
+        "trailingComma": "es5",
+        "tabWidth": 4,
+        "arrowParens": "avoid"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.0",
+        "@typescript-eslint/eslint-plugin": "^8.16.0",
+        "@typescript-eslint/parser": "^8.16.0",
+        "eslint": "^9.16.0",
+        "eslint-plugin-n": "^17.14.0",
+        "lefthook": "^1.10.1",
+        "prettier": "^3.4.1",
+        "tsx": "^4.19.2",
+        "typescript": "^5.7.2"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
 }
