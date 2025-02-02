@@ -23,7 +23,7 @@ export type CreateModuleOptions = {
     skipInstall?: boolean
 }
 
-export type PackageManager = 'bun' | 'pnpm' | 'yarn' | 'npm'
+export type PackageManager = 'bun' | 'yarn' | 'npm'
 
 export enum NitroModuleType {
     HybridObject = 'hybrid-object',
@@ -58,8 +58,8 @@ export const PLATFORM_LANGUAGE_MAP: Record<string, string[]> = {
 }
 
 export type InstructionsParams = {
-   moduleName: string
-   pm: string
-   skipInstall?: boolean
-   skipExample?: boolean
+    moduleName: string
+    pm: string
+    skipInstall?: boolean
+    skipExample?: boolean
 }

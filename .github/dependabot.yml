@@ -12,6 +12,7 @@ updates:
     directories:
       - '/'
       - '/assets'
+      - '/assets/template'
     schedule:
       interval: 'daily'
     groups:

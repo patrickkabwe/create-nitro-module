@@ -24,11 +24,6 @@ To create a Nitro Module along with an example app, use the following command. T
   npx create-nitro-module@latest my-awesome-module
   ```
   </TabItem>
-  <TabItem value="pnpm" label="Pnpm" default>
-  ```bash
-  pnpm create nitro-module@latest my-awesome-module
-  ```
-  </TabItem>
   <TabItem value="yarn" label="Yarn" default>
   ```bash
   yarn create nitro-module@latest my-awesome-module
@@ -49,11 +44,6 @@ If you prefer to create a Nitro Module without an example app, use the following
   <TabItem value="npx" label="Npx">
   ```bash
   npx create-nitro-module@latest my-awesome-module --skip-example
-  ```
-  </TabItem>
-  <TabItem value="pnpm" label="Pnpm">
-  ```bash
-  pnpm create nitro-module@latest my-awesome-module --skip-example
   ```
   </TabItem>
   <TabItem value="yarn" label="Yarn">
@@ -78,11 +68,6 @@ If you prefer to create a Nitro Module within a specific directory, use the foll
   <TabItem value="npx" label="Npx">
   ```bash
   npx create-nitro-module@latest my-awesome-module --module-dir packages
-  ```
-  </TabItem>
-  <TabItem value="pnpm" label="Pnpm">
-  ```bash
-  pnpm create nitro-module@latest my-awesome-module --module-dir packages
   ```
   </TabItem>
   <TabItem value="yarn" label="Yarn">

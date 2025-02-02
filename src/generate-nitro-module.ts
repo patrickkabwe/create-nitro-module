@@ -83,6 +83,7 @@ export class NitroModuleFactory {
         await this.copyPackageFiles()
         await this.replaceNitroJsonPlaceholders()
         await this.updatePackageJsonConfig(this.config.skipExample)
+        await this.updateReadme()
         if (!this.config.skipExample) {
             this.config.spinner.text = messages.generating
             await this.createExampleApp()
@@ -92,7 +93,7 @@ export class NitroModuleFactory {
         }
         if (!this.config.skipInstall && !this.config.skipExample) {
             this.config.spinner.text = messages.installing
-            await this.runCodegenAndInstallDependencies()
+            await this.installDependenciesAndRunCodegen()
         }
         this.config.spinner.succeed()
     }
@@ -143,7 +144,7 @@ export class NitroModuleFactory {
         newWorkspacePackageJsonFile.author = name
         newWorkspacePackageJsonFile.scripts = {
             ...newWorkspacePackageJsonFile.scripts,
-            postcodegen: `bun run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
+            codegen: `bun typecheck && nitro-codegen --logLevel=\\"debug\\" && bun run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
         }
 
         if (this.config.pm === 'yarn') {
@@ -158,6 +159,27 @@ export class NitroModuleFactory {
             JSON.stringify(newWorkspacePackageJsonFile, null, 2),
             { encoding: 'utf8' }
         )
+    }
+
+    private async updateReadme() {
+        const readmePath = path.join(
+            this.config.cwd,
+            'README.md'
+        )
+
+        const replacements = {
+            [JS_PACKAGE_NAME_TAG]: this.config.finalModuleName,
+            '$$command$$': this.config.pm === 'bun' || this.config.pm === 'yarn' ? `${this.config.pm} add` : 'npm install',
+        }
+
+        const readmeContents = await replacePlaceholder({
+            filePath: readmePath,
+            replacements,
+        })
+
+        await writeFile(readmePath, readmeContents, {
+            encoding: 'utf8',
+        })
     }
 
     private async copyPackageFiles() {
@@ -186,7 +208,10 @@ export class NitroModuleFactory {
     private async createExampleApp() {
         const packageManager = this.config.pm === 'bun' ? 'bunx' : 'npx -y'
 
-        const args = `${packageManager} @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example --directory example --skip-install --skip-git-init --version latest`
+        const args = `${packageManager} \
+            @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example \
+            --package-name com.${replaceHyphen(this.config.moduleName)}example \
+            --directory example --skip-install --skip-git-init --version latest`
 
         await execAsync(args, { cwd: this.config.cwd })
 
@@ -339,7 +364,7 @@ export class NitroModuleFactory {
         }
     }
 
-    private async runCodegenAndInstallDependencies() {
+    private async installDependenciesAndRunCodegen() {
         await execAsync(`${this.config.pm} install`, { cwd: this.config.cwd })
         await execAsync(`${this.config.pm} codegen`, { cwd: this.config.cwd })
     }

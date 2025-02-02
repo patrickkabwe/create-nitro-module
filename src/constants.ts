@@ -10,27 +10,25 @@ export const IOS_MODULE_NAME_TAG = '$$iosModuleName$$'
 export const JS_PACKAGE_NAME_TAG = '$$packageName$$'
 
 export const messages = {
-   creating: 'Creating your Nitro Module...',
-   generating: 'Generating example app...',
-   installing: 'Installing dependencies...',
-   runningCodegen: '🚀 Running codegen...',
-   success: '✨ Nitro Module created successfully!',
+    creating: 'Creating your Nitro Module...',
+    generating: 'Generating example app...',
+    installing: 'Installing dependencies...',
+    runningCodegen: '🚀 Running codegen...',
+    success: '✨ Nitro Module created successfully!',
 } as const
 
 export const packagesToRemoveFromExampleApp = [
-   "@types/react",
-   "@types/react-test-renderer",
-   "babel-jest",
-   "eslint",
-   "jest",
-   "prettier",
-   "react-test-renderer",
-   "typescript",
+    "@types/react",
+    "@types/react-test-renderer",
+    "babel-jest",
+    "eslint",
+    "jest",
+    "prettier",
+    "react-test-renderer",
+    "typescript",
 ]
 
-export const foldersToRemoveFromExampleApp = [
-   "__tests__",
-]
+export const foldersToRemoveFromExampleApp = []
 
 export const generateInstructions = ({ moduleName, pm, skipInstall, skipExample }: InstructionsParams) => `
 ${kleur.cyan().bold(`   
@@ -48,13 +46,13 @@ ${kleur.cyan().bold(`
      
 ${kleur.red().bold('Next steps:')}
 
+${!skipInstall ? '' : `Install dependencies:
+   ${kleur.green(`${pm} install`)}         ${kleur.dim('# Install dependencies')}
+   ${kleur.green(`${pm} codegen`)}         ${kleur.dim('# Generate native interfaces from TypeScript definitions')}\n`}
 ${skipExample ? '' : `Run your example app:
    ${kleur.green('cd example')}
    ${kleur.green(`${pm} ios`)}            ${kleur.dim('# Run iOS example')}
    ${kleur.green(`${pm} android`)}        ${kleur.dim('# Run Android example')}\n`}
-${!skipInstall ? '' : `Install dependencies:
-   ${kleur.green(`${pm} install`)}         ${kleur.dim('# Install dependencies')}
-   ${kleur.green(`${pm} codegen`)}         ${kleur.dim('# Generate native interfaces from TypeScript definitions')}\n`}
 Begin development:
 ${skipExample ? '' : `
    ${kleur.green(`cd ${moduleName}/example`)}

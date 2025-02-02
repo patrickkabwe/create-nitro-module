@@ -23,12 +23,6 @@ npm install -g create-nitro-module
 bun install -g create-nitro-module
 ```
 
-### Using PNPM
-
-```bash
-pnpm add -g create-nitro-module
-```
-
 ### Using Yarn
 
 ```bash

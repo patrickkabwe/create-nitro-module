@@ -9,49 +9,28 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 
 ![CLI Demo](https://raw.githubusercontent.com/patrickkabwe/nitro-cli/refs/heads/main/assets/nitro-module-cli.gif)
 
-## Features
+## ✨ Features
 
 - 📱 Pre-configured iOS & Android native module templates
 - 📦 Automatic linking and installation
 - 📚 TypeScript support out of the box
+- 🔧 Zero configuration required
 
-## Project Structure
+## 📖 Documentation
 
-```
-.
-├── example
-├── AwesomeLibrary.podspec
-├── android
-├── ios
-├── src
-│    ├── index.ts
-│    └── specs
-│         └── awesome-library.nitro.ts
-│   ├── nitrogen
-│   ├── nitro.json
-│   ├── babel.config.js
-│   ├── package.json
-│   └── tsconfig.json
-├── bun.lockb
-└── package.json
-```
+Ready to supercharge your React Native development? Visit our comprehensive documentation:
 
-## Installation & Usage
+[📚 Explore Nitro Module CLI Documentation](https://patrickkabwe.github.io/create-nitro-module/)
 
-For detailed installation and usage instructions, please visit our [documentation](https://patrickkabwe.github.io/create-nitro-module/).
-
-### Quick Start
+## 🚀 Quick Start
 
 ```bash
 # Using bun
 bun create nitro-module@latest my-nitro-module
 
-# Using npx
-npx create-nitro-module@latest my-nitro-module
-
-# Using pnpm
-pnpm create nitro-module@latest my-nitro-module
-
 # Using yarn
 yarn create nitro-module@latest my-nitro-module
+
+# Using npx
+npx create-nitro-module@latest my-nitro-module
 ```
