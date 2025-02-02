@@ -153,6 +153,9 @@ jobs:
       run:
         working-directory: react-native-test-module
     steps:
+      - name: List files in the directory
+        run: ls -la
+
       - name: Download generated module
         uses: actions/download-artifact@v4
         with:
@@ -234,6 +237,9 @@ jobs:
       run:
         working-directory: react-native-test-module
     steps:
+      - name: List files in the directory
+        run: ls -la
+        
       - name: Download generated module
         uses: actions/download-artifact@v4
         with:
