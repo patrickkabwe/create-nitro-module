@@ -165,6 +165,7 @@ jobs:
                   path: /Users/runner/react-native-test-module
 
             - name: List files in the directory
+              working-directory: /Users/runner/react-native-test-module
               run: ls -la
 
             - name: Setup Ruby and Cocoapods
@@ -173,11 +174,16 @@ jobs:
                   ruby-version: '3.2'
                   bundler-cache: true
 
+            - name: Setup Yarn
+              if: matrix.pm == 'yarn'
+              run: |
+                  corepack enable
+
             - name: Setup Node.js
               if: matrix.pm == 'yarn'
               uses: actions/setup-node@v4
               with:
-                  node-version: 'lts/*'
+                  node-version: 22.x
                   cache: 'yarn'
 
             - name: Setup Yarn
@@ -202,9 +208,11 @@ jobs:
                       ${{ runner.os }}-bun-
 
             - name: Install npm dependencies (${{ matrix.pm }})
+              working-directory: /Users/runner/react-native-test-module
               run: ${{ matrix.pm }} install
 
             - name: Codegen
+              working-directory: /Users/runner/react-native-test-module
               run: ${{ matrix.pm }} codegen
 
             - name: Cache CocoaPods
@@ -249,20 +257,20 @@ jobs:
                   path: /home/runner/react-native-test-module
 
             - name: List files in the directory
+              working-directory: /home/runner/react-native-test-module
               run: ls -la
-
-            - name: Setup Node.js
-              if: matrix.pm == 'yarn'
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 'lts/*'
-                  cache: 'yarn'
 
             - name: Setup Yarn
               if: matrix.pm == 'yarn'
               run: |
                   corepack enable
-                  touch yarn.lock
+
+            - name: Setup Node.js
+              if: matrix.pm == 'yarn'
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+                  cache: 'yarn'
 
             - name: Setup Bun.js
               if: matrix.pm == 'bun'
@@ -280,9 +288,11 @@ jobs:
                       ${{ runner.os }}-bun-
 
             - name: Install npm dependencies (${{ matrix.pm }})
+              working-directory: /home/runner/react-native-test-module
               run: ${{ matrix.pm }} install
 
             - name: Codegen
+              working-directory: /home/runner/react-native-test-module
               run: ${{ matrix.pm }} codegen
 
             - name: Install Java for Android builds
