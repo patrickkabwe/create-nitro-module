@@ -28,9 +28,9 @@ Ready to supercharge your React Native development? Visit our comprehensive docu
 # Using bun
 bun create nitro-module@latest my-nitro-module
 
-# Using npx
-npx create-nitro-module@latest my-nitro-module
-
 # Using yarn
 yarn create nitro-module@latest my-nitro-module
+
+# Using npx
+npx create-nitro-module@latest my-nitro-module
 ```
