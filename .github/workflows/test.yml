@@ -174,17 +174,28 @@ jobs:
                   ruby-version: '3.2'
                   bundler-cache: true
 
-            - name: Setup Yarn
-              if: matrix.pm == 'yarn'
-              run: |
-                  corepack enable
-
             - name: Setup Node.js
               if: matrix.pm == 'yarn'
               uses: actions/setup-node@v4
               with:
                   node-version: 22.x
-                  cache: 'yarn'
+
+            - name: Setup Yarn
+              if: matrix.pm == 'yarn'
+              run: |
+                  corepack enable
+                  cd /Users/runner/react-native-test-module
+                  touch yarn.lock
+                  yarn install
+
+            - name: Setup Node.js cache
+              if: matrix.pm == 'yarn'
+              uses: actions/cache@v4
+              with:
+                  path: /Users/runner/Library/Caches/Yarn/v6
+                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-yarn-
 
             - name: Setup Yarn
               if: matrix.pm == 'yarn'
@@ -260,17 +271,28 @@ jobs:
               working-directory: /home/runner/react-native-test-module
               run: ls -la
 
-            - name: Setup Yarn
-              if: matrix.pm == 'yarn'
-              run: |
-                  corepack enable
-
             - name: Setup Node.js
               if: matrix.pm == 'yarn'
               uses: actions/setup-node@v4
               with:
                   node-version: 22.x
-                  cache: 'yarn'
+
+            - name: Setup Yarn
+              if: matrix.pm == 'yarn'
+              run: |
+                  corepack enable
+                  cd /home/runner/react-native-test-module
+                  touch yarn.lock
+                  yarn install
+
+            - name: Setup Node.js cache
+              if: matrix.pm == 'yarn'
+              uses: actions/cache@v4
+              with:
+                  path: /home/runner/Library/Caches/Yarn/v6
+                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-yarn-
 
             - name: Setup Bun.js
               if: matrix.pm == 'bun'
