@@ -154,9 +154,6 @@ jobs:
         strategy:
             matrix:
                 pm: ['bun', 'yarn']
-        defaults:
-            run:
-                working-directory: /Users/runner/react-native-test-module
         steps:
             - name: Creating and navigating to directory
               run: mkdir -p /Users/runner/react-native-test-module
@@ -241,9 +238,6 @@ jobs:
         strategy:
             matrix:
                 pm: ['bun', 'yarn']
-        defaults:
-            run:
-                working-directory: /home/runner/react-native-test-module
         steps:
             - name: Create directory structure
               run: mkdir -p /home/runner/react-native-test-module
