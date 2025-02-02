@@ -73,7 +73,7 @@ Begin development:
    ${kleur.green('Run your example app to test changes!')}
 
 ${kleur.yellow('Pro Tips:')}
-${kleur.dim('• iOS:')} Open ${kleur.green('example/ios/example.xcworkspace')} in Xcode for native debugging
+${kleur.dim('• iOS:')} Open ${kleur.green('example/ios/example.xcworkspace')} in Xcode for native debugging. Make sure to run ${kleur.green(`${pm} pod`)} first in the example directory
 ${kleur.dim('• Android:')} Open ${kleur.green('example/android')} in Android Studio
 ${kleur.dim('• Metro:')} Clear cache with ${kleur.green(`${pm} start`)} if needed
 
