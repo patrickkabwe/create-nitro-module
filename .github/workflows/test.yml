@@ -156,12 +156,12 @@ jobs:
                 pm: ['bun', 'yarn']
         defaults:
             run:
-                working-directory: ~/generate-module/react-native-test-module
+                working-directory: $GITHUB_WORKSPACE/generate-module/react-native-test-module
         steps:
-            - name: Creating a new directory
+            - name: Creating and navigating to directory
               run: |
-                  mkdir -p ~/generate-module
-                  ~/generate-module
+                  mkdir -p $GITHUB_WORKSPACE/generate-module
+                  cd $GITHUB_WORKSPACE/generate-module
 
             - name: Download generated module
               uses: actions/download-artifact@v4
@@ -245,12 +245,12 @@ jobs:
                 pm: ['bun', 'yarn']
         defaults:
             run:
-                working-directory: ~/generate-module/react-native-test-module
+                working-directory: $GITHUB_WORKSPACE/generate-module/react-native-test-module
         steps:
-            - name: Creating a new directory
+            - name: Creating and navigating to directory
               run: |
-                  mkdir -p ~/generate-module
-                  ~/generate-module
+                  mkdir -p $GITHUB_WORKSPACE/generate-module
+                  cd $GITHUB_WORKSPACE/generate-module
 
             - name: Download generated module
               uses: actions/download-artifact@v4
