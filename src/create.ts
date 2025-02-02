@@ -161,7 +161,7 @@ const getUserAnswers = async (name: string, usedPm?: string) => {
         type: 'list',
         message: kleur.cyan('📦 Select package manager:'),
         name: 'name',
-        choices: ['bun', 'yarn', 'pnpm', 'npm'],
+        choices: ['bun', 'yarn', 'npm'],
         default: usedPm || 'yarn',
         when: usedPm === undefined,
     })

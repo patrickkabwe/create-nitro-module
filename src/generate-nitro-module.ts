@@ -169,7 +169,7 @@ export class NitroModuleFactory {
 
         const replacements = {
             [JS_PACKAGE_NAME_TAG]: this.config.finalModuleName,
-            '$$command$$': this.config.pm === 'bun' || this.config.pm === 'yarn' || this.config.pm === 'pnpm' ? `${this.config.pm} add` : 'npm install',
+            '$$command$$': this.config.pm === 'bun' || this.config.pm === 'yarn' ? `${this.config.pm} add` : 'npm install',
         }
 
         const readmeContents = await replacePlaceholder({

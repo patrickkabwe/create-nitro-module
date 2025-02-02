@@ -40,40 +40,11 @@ Options:
     npx create-nitro-module@latest my-awesome-module
     ```
     </TabItem>
-    <TabItem value="pnpm" label="Pnpm">
-    ```bash
-    pnpm create nitro-module@latest my-awesome-module
-    ```
-    </TabItem>
     <TabItem value="yarn" label="Yarn">
     ```bash
     yarn create nitro-module@latest my-awesome-module
     ```
     </TabItem>
 </Tabs>
-
-<!-- ### generate
-
-Generate a hybrid object into the package directory.
-
-```bash
-generate <moduleName>
-```
-
-#### Example
-
-```bash
-# Using bun
-bun create nitro-module@latest generate my-awesome-module
-
-# Using npx
-npx create-nitro-module@latest generate my-awesome-module
-
-# Using pnpm
-pnpm create nitro-module@latest generate my-awesome-module
-
-# Using yarn
-yarn create nitro-module@latest generate my-awesome-module
-``` -->
 
 For additional support, please [open an issue](https://github.com/patrickkabwe/create-nitro-module/issues) on our GitHub repository.
