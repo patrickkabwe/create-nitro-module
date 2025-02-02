@@ -206,7 +206,6 @@ jobs:
                   touch yarn.lock
 
             - name: Setup Bun.js
-              if: matrix.pm == 'bun'
               uses: oven-sh/setup-bun@v2
               with:
                   bun-version: latest
@@ -299,7 +298,6 @@ jobs:
                       ${{ runner.os }}-yarn-
 
             - name: Setup Bun.js
-              if: matrix.pm == 'bun'
               uses: oven-sh/setup-bun@v2
               with:
                   bun-version: latest
@@ -326,7 +324,6 @@ jobs:
               with:
                   distribution: 'zulu'
                   java-version: '17'
-                  cache: gradle
 
             - name: Make gradlew executable
               working-directory: /home/runner/react-native-test-module/example/android
