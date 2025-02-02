@@ -156,18 +156,16 @@ jobs:
                 pm: ['bun', 'yarn']
         defaults:
             run:
-                working-directory: $GITHUB_WORKSPACE/generate-module/react-native-test-module
+                working-directory: /Users/runner/react-native-test-module
         steps:
             - name: Creating and navigating to directory
-              run: |
-                  mkdir -p $GITHUB_WORKSPACE/generate-module
-                  cd $GITHUB_WORKSPACE/generate-module
+              run: mkdir -p /Users/runner/generate-module
 
             - name: Download generated module
               uses: actions/download-artifact@v4
               with:
                   name: test-module-${{ matrix.pm }}
-                  path: ~/generate-module/react-native-test-module
+                  path: /Users/runner/react-native-test-module
 
             - name: List files in the directory
               run: ls -la
@@ -216,15 +214,15 @@ jobs:
               id: pods-cache
               uses: actions/cache@v4
               with:
-                  path: ~/generate-module/react-native-test-module/example/ios/Pods
+                  path: /Users/runner/react-native-test-module/example/ios/Pods
                   key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
 
             - name: Install CocoaPods dependencies
-              working-directory: ~/generate-module/react-native-test-module/example
+              working-directory: /Users/runner/react-native-test-module/example
               run: ${{ matrix.pm }} pod
 
             - name: Build iOS
-              working-directory: ~/generate-module/react-native-test-module/example/ios
+              working-directory: /Users/runner/react-native-test-module/example/ios
               run: "set -o pipefail && xcodebuild \
                   CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
                   -derivedDataPath build -UseModernBuildSystem=YES \
@@ -245,7 +243,7 @@ jobs:
                 pm: ['bun', 'yarn']
         defaults:
             run:
-                working-directory: $GITHUB_WORKSPACE/generate-module/react-native-test-module
+                working-directory: /home/runner/react-native-test-module
         steps:
             - name: Creating and navigating to directory
               run: |
@@ -256,7 +254,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   name: test-module-${{ matrix.pm }}
-                  path: ~/generate-module/react-native-test-module
+                  path: /home/runner/react-native-test-module
 
             - name: List files in the directory
               run: ls -la
@@ -303,13 +301,13 @@ jobs:
                   cache: gradle
 
             - name: Make gradlew executable
-              working-directory: ~/generate-module/react-native-test-module/example/android
+              working-directory: /home/runner/react-native-test-module/example/android
               run: chmod +x ./gradlew
 
             - name: Run Gradle Build
-              working-directory: ~/generate-module/react-native-test-module/example/android
+              working-directory: /home/runner/react-native-test-module/example/android
               run: ./gradlew assembleDebug --no-daemon --build-cache
 
             - name: Stop Gradle Daemon
-              working-directory: ~/generate-module/react-native-test-module/example/android
+              working-directory: /home/runner/react-native-test-module/example/android
               run: ./gradlew --stop
