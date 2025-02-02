@@ -185,6 +185,8 @@ jobs:
               run: |
                   corepack enable
                   cd /Users/runner/react-native-test-module
+                  yarn config set enableImmutableInstalls false
+                  yarn config set nodeLinker node-modules
                   touch yarn.lock
                   yarn install
 
@@ -282,6 +284,8 @@ jobs:
               run: |
                   corepack enable
                   cd /home/runner/react-native-test-module
+                  yarn config set enableImmutableInstalls false
+                  yarn config set nodeLinker node-modules
                   touch yarn.lock
                   yarn install
 
