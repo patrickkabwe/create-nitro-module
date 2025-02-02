@@ -30,8 +30,7 @@ export const packagesToRemoveFromExampleApp = [
 
 export const foldersToRemoveFromExampleApp = []
 
-export const generateInstructions = ({ moduleName, pm, skipInstall, skipExample }: InstructionsParams) => `
-${kleur.cyan().bold(`   
+export const NITRO_GRAPHIC = `   
    ┌─────┐
    │ ⏲️  |
    │╭───╮│
@@ -42,30 +41,34 @@ ${kleur.cyan().bold(`
    │     │
    └─┬─┬─┘
      │ │
-     └─┘`)}
+     └─┘`
+
+export const generateInstructions = ({ moduleName, pm, skipInstall, skipExample }: InstructionsParams) => `
+${kleur.cyan().bold(NITRO_GRAPHIC)}
      
 ${kleur.red().bold('Next steps:')}
 
 ${!skipInstall ? '' : `Install dependencies:
+
    ${kleur.green(`${pm} install`)}         ${kleur.dim('# Install dependencies')}
    ${kleur.green(`${pm} codegen`)}         ${kleur.dim('# Generate native interfaces from TypeScript definitions')}\n`}
 ${skipExample ? '' : `Run your example app:
+
    ${kleur.green('cd example')}
-   ${kleur.green(`${pm} ios`)}            ${kleur.dim('# Run iOS example')}
-   ${kleur.green(`${pm} android`)}        ${kleur.dim('# Run Android example')}\n`}
-Begin development:
-${skipExample ? '' : `
-   ${kleur.green(`cd ${moduleName}/example`)}
    ${kleur.green(`${pm} pod`)}            ${kleur.dim('# Install CocoaPods dependencies (iOS)')}
    ${kleur.green(`${pm} ios|android`)}    ${kleur.dim('# Run your example app')}`}
+   
+Begin development:
+   ${kleur.green(`cd ${moduleName}`)}
  
    ${kleur.cyan('Define your module:')}
    ${kleur.white('src/specs/')}         ${kleur.dim('# Define your module specifications. e.g. src/specs/myModule.nitro.ts')}
    ${kleur.green(`${pm} codegen`)}        ${kleur.dim('# Generates native interfaces from TypeScript definitions')}
    
    ${kleur.cyan('Implement native code:')}
-   ${kleur.white('ios/')}               ${kleur.dim('# iOS native implementation')}
-   ${kleur.white('android/')}           ${kleur.dim('# Android native implementation')}
+   ${kleur.white('ios/')}               ${kleur.dim('# iOS native implementation using swift')}
+   ${kleur.white('android/')}           ${kleur.dim('# Android native implementation using kotlin')}
+   ${kleur.white('cpp/')}               ${kleur.dim('# C++ native implementation. Shareable between iOS and Android (Will be generated if cpp was selected)')}
    
    ${kleur.green('Run your example app to test changes!')}
 
