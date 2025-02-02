@@ -165,11 +165,25 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
+      - name: Setup Node.js
+        if: matrix.pm == 'yarn'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'yarn'
+  
+      - name: Setup Yarn
+        if: matrix.pm == 'yarn'
+        run: |
+          corepack enable
+          touch yarn.lock
+  
       - name: Setup Bun.js
+        if: matrix.pm == 'bun'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-
+  
       - name: Cache npm dependencies
         id: bun-cache
         uses: actions/cache@v4
@@ -178,20 +192,10 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-bun-
-
-
-      - name: Setup Yarn
-        if: matrix.pm == 'yarn'
-        run: |
-          corepack enable
-          touch yarn.lock
-          yarn config set enableImmutableInstalls false
-          yarn config set enableGlobalCache true
-          yarn config set enableProgressBars false
-
+  
       - name: Install npm dependencies (${{ matrix.pm }})
         run: ${{ matrix.pm }} install
-
+  
       - name: Codegen
         run: ${{ matrix.pm }} codegen
 
@@ -236,7 +240,21 @@ jobs:
           name: test-module-${{ matrix.pm }}
           path: react-native-test-module
 
+      - name: Setup Node.js
+        if: matrix.pm == 'yarn'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'yarn'
+
+      - name: Setup Yarn
+        if: matrix.pm == 'yarn'
+        run: |
+          corepack enable
+          touch yarn.lock
+
       - name: Setup Bun.js
+        if: matrix.pm == 'bun'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -249,15 +267,6 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
             ${{ runner.os }}-bun-
-
-      - name: Setup Yarn
-        if: matrix.pm == 'yarn'
-        run: |
-          corepack enable
-          touch yarn.lock
-          yarn config set enableImmutableInstalls false
-          yarn config set enableGlobalCache true
-          yarn config set enableProgressBars false
 
       - name: Install npm dependencies (${{ matrix.pm }})
         run: ${{ matrix.pm }} install
