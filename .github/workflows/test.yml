@@ -159,7 +159,7 @@ jobs:
                 working-directory: /Users/runner/react-native-test-module
         steps:
             - name: Creating and navigating to directory
-              run: mkdir -p /Users/runner/generate-module
+              run: mkdir -p /Users/runner/react-native-test-module
 
             - name: Download generated module
               uses: actions/download-artifact@v4
@@ -246,7 +246,7 @@ jobs:
                 working-directory: /home/runner/react-native-test-module
         steps:
             - name: Create directory structure
-              run: mkdir -p /home/runner/generate-module
+              run: mkdir -p /home/runner/react-native-test-module
 
             - name: Download generated module
               uses: actions/download-artifact@v4
