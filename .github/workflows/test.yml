@@ -245,10 +245,8 @@ jobs:
             run:
                 working-directory: /home/runner/react-native-test-module
         steps:
-            - name: Creating and navigating to directory
-              run: |
-                  mkdir -p $GITHUB_WORKSPACE/generate-module
-                  cd $GITHUB_WORKSPACE/generate-module
+            - name: Create directory structure
+              run: mkdir -p /home/runner/generate-module
 
             - name: Download generated module
               uses: actions/download-artifact@v4
