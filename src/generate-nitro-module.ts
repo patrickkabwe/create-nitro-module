@@ -89,6 +89,7 @@ export class NitroModuleFactory {
             await this.createExampleApp()
             await this.configureExamplePackageJson()
             await this.syncExampleAppConfigurations()
+            await this.setupWorkflows()
             await this.gitInit()
         }
         if (!this.config.skipInstall && !this.config.skipExample) {
@@ -190,10 +191,11 @@ export class NitroModuleFactory {
             'tsconfig.json',
             'gitignore',
             'README.md',
-            'package.json'
+            'package.json',
+            '.github'
         ]
         if (this.config.pm === 'yarn') {
-            filesToCopy.push('.yarnrc.yml', '.yarn',)
+            filesToCopy.push('.yarnrc.yml', '.yarn')
         }
         await copyTemplateFiles(
             this.config,
@@ -245,7 +247,7 @@ export class NitroModuleFactory {
             ...packageJson.scripts,
             ios: "react-native run-ios --simulator='iPhone 16'",
             start: 'react-native start --reset-cache',
-            pod: 'pod install --project-directory=ios',
+            pod: "bundle install && bundle exec pod install --project-directory=ios",
         }
         packageJson.dependencies = {
             ...packageJson.dependencies,
@@ -373,5 +375,29 @@ export class NitroModuleFactory {
         await execAsync('git init', { cwd: this.config.cwd })
         await execAsync('git add .', { cwd: this.config.cwd })
         await execAsync('git commit -m "initial commit"', { cwd: this.config.cwd })
+    }
+
+    private async setupWorkflows() {
+        const iosBuildWorkflowPath = path.join(
+            this.config.cwd,
+            '.github',
+            'workflows',
+            'ios-build.yml'
+        )
+
+        const iosBuildWorkflow = await readFile(iosBuildWorkflowPath, {
+            encoding: 'utf8',
+        })
+
+        const iosBuildReplacements = {
+            '$$exampleApp$$': `${toPascalCase(this.config.moduleName)}Example`,
+        }
+
+        const iosBuildWorkflowContent = await replacePlaceholder({
+            data: iosBuildWorkflow,
+            replacements: iosBuildReplacements,
+        })
+
+        await writeFile(iosBuildWorkflowPath, iosBuildWorkflowContent, { encoding: 'utf8' })
     }
 }
