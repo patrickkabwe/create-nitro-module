@@ -7,6 +7,8 @@ on:
     paths:
       - '.github/workflows/ios-build.yml'
       - 'example/ios/**'
+      - 'example/Gemfile'
+      - 'example/Gemfile.lock'
       - '**/nitrogen/generated/shared/**'
       - '**/nitrogen/generated/ios/**'
       - 'cpp/**'
@@ -20,6 +22,8 @@ on:
     paths:
       - '.github/workflows/ios-build.yml'
       - 'example/ios/**'
+      - 'example/Gemfile'
+      - 'example/Gemfile.lock'
       - '**/nitrogen/generated/shared/**'
       - '**/nitrogen/generated/ios/**'
       - 'cpp/**'

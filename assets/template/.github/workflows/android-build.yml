@@ -49,7 +49,6 @@ jobs:
         working-directory: example/android
         run: ./gradlew assembleDebug --no-daemon --build-cache
 
-      # Gradle cache doesn't like daemons
       - name: Stop Gradle Daemon
         working-directory: example/android
         run: ./gradlew --stop

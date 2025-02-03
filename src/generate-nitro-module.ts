@@ -247,7 +247,7 @@ export class NitroModuleFactory {
             ...packageJson.scripts,
             ios: "react-native run-ios --simulator='iPhone 16'",
             start: 'react-native start --reset-cache',
-            pod: 'pod install --project-directory=ios',
+            pod: "bundle install && bundle exec pod install --project-directory=ios",
         }
         packageJson.dependencies = {
             ...packageJson.dependencies,
