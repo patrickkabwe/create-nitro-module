@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 1.3.0
+
+### Minor Changes
+
+- 3d18ee1: feat: generates github action for the package
+
 ## 1.2.0
 
 ### Minor Changes
