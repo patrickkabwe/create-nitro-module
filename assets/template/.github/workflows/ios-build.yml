@@ -48,9 +48,6 @@ jobs:
       - name: Install npm dependencies (bun)
         run: bun install
 
-      - name: Restore ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-
       - name: Setup Ruby (bundle)
         uses: ruby/setup-ruby@v1
         with:
