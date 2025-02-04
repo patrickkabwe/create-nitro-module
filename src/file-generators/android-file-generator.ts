@@ -175,7 +175,7 @@ export class AndroidFileGenerator implements FileGenerator {
         )
 
         const replacements = {
-            [`${ANDROID_NAME_SPACE_TAG}`]: replaceHyphen(config.moduleName),
+            [ANDROID_NAME_SPACE_TAG]: replaceHyphen(config.moduleName),
             [`${ANDROID_CXX_LIB_NAME_TAG}Package`]:
                 androidPackageFile.split('.')[0],
             [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(config.moduleName),
