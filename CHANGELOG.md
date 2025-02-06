@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 1.4.0
+
+### Minor Changes
+
+- 56dc616: feat: upgrade to nitro v0.22.0
+
 ## 1.3.0
 
 ### Minor Changes
