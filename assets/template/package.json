@@ -58,7 +58,7 @@
         "@release-it/conventional-changelog": "^10.0.0",
         "@types/jest": "^29.5.12",
         "@types/react": "^18.3.4",
-        "typescript": "5.0.4",
+        "typescript": "5.7.3",
         "@jamesacarr/eslint-formatter-github-actions": "^0.2.0"
     },
     "peerDependencies": {
