@@ -14,10 +14,7 @@ import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
     moduleName
 )}Spec
 
-class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec() {
-    override val memorySize: Long
-        get() = 5
-    
+class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec() {    
     override fun ${funcName}(num1: Double, num2: Double): Double {
         return num1 + num2
     }
