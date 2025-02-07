@@ -202,12 +202,6 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-yarn-
 
-            - name: Setup Yarn
-              if: matrix.pm == 'yarn'
-              run: |
-                  corepack enable
-                  touch yarn.lock
-
             - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
               with:
@@ -226,7 +220,7 @@ jobs:
               working-directory: ${{ env.WORKING_DIR }}
               run: ${{ matrix.pm }} install
 
-            - name: Codegen
+            - name: Nitro Module Codegen
               working-directory: ${{ env.WORKING_DIR }}
               run: ${{ matrix.pm }} codegen
 
@@ -320,7 +314,7 @@ jobs:
               working-directory: ${{ env.WORKING_DIR }}
               run: ${{ matrix.pm }} install
 
-            - name: Codegen
+            - name: Nitro Module Codegen
               working-directory: ${{ env.WORKING_DIR }}
               run: ${{ matrix.pm }} codegen
 
