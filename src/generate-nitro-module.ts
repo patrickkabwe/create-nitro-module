@@ -145,7 +145,7 @@ export class NitroModuleFactory {
         newWorkspacePackageJsonFile.author = name
         newWorkspacePackageJsonFile.scripts = {
             ...newWorkspacePackageJsonFile.scripts,
-            codegen: `bun typecheck && nitro-codegen --logLevel=\\"debug\\" && bun run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
+            codegen: `${this.config.pm} typecheck && nitro-codegen --logLevel=\\"debug\\" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
         }
 
         if (this.config.pm === 'yarn') {
