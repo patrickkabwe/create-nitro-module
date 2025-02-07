@@ -15,6 +15,7 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 - 📦 Automatic linking and installation
 - 📚 TypeScript support out of the box
 - 🔧 Zero configuration required
+- ⚙️ Automated ios/android build with GitHub Actions
 
 ## 📖 Documentation
 
