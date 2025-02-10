@@ -52,7 +52,7 @@
         "react-native": "^0.77.0",
         "nitro-codegen": "^0.22.1",
         "react-native-nitro-modules": "^0.22.1",
-        "react-native-builder-bob": "^0.35.2",
+        "react-native-builder-bob": "^0.37.0",
         "release-it": "^18.1.2",
         "@release-it/bumper": "^7.0.1",
         "@release-it/conventional-changelog": "^10.0.0",
