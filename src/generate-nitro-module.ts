@@ -24,7 +24,7 @@ import { AndroidFileGenerator } from './file-generators/android-file-generator'
 import { CppFileGenerator } from './file-generators/cpp-file-generator'
 import { IOSFileGenerator } from './file-generators/ios-file-generator'
 import { JSFileGenerator } from './file-generators/js-file-generator'
-import { FileGenerator, GenerateModuleConfig, SupportedLang } from './types'
+import { FileGenerator, GenerateModuleConfig, Nitro, SupportedLang } from './types'
 import {
     copyTemplateFiles,
     createFolder,
@@ -224,7 +224,8 @@ export class NitroModuleFactory {
             appExampleCode(
                 this.config.moduleName,
                 this.config.finalModuleName,
-                `${this.config.funcName}`
+                `${this.config.funcName}`,
+                this.config.moduleType === Nitro.View
             ),
             { encoding: 'utf8' }
         )

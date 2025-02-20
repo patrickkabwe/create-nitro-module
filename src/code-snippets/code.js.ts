@@ -3,7 +3,8 @@ import { toPascalCase } from '../utils'
 export const appExampleCode = (
     moduleName: string,
     finalModuleName: string,
-    funcName: string
+    funcName: string,
+    isView: boolean
 ) => `import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import { ${toPascalCase(moduleName)} } from '${finalModuleName}';
@@ -11,9 +12,13 @@ import { ${toPascalCase(moduleName)} } from '${finalModuleName}';
 function App(): React.JSX.Element {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>
+    ${
+        isView
+            ? `<${toPascalCase(moduleName)} backgroundColor="red" style={style.view} />`
+            : `<Text style={styles.text}>
       {${toPascalCase(moduleName)}.${funcName}(1, 2)}
-      </Text>
+      </Text>`
+    }
     </View>
   );
 }
@@ -24,15 +29,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  text: {
-    fontSize: 40, 
-    color: 'green'
-  }
+  ${isView ?`view: {
+    width: 200,
+    height: 200
+  }`: 
+  `text: {
+        fontSize: 40, 
+        color: 'green'
+    }`
 });
 
 export default App;`
 
-export const specCode = (
+export const nitroModuleSpecCode = (
     moduleName: string,
     platformLang: string,
     funcName: string
@@ -44,7 +53,18 @@ export interface ${toPascalCase(
   ${funcName}(num1: number, num2: number): number
 }`
 
-export const exportCode = (
+export const nitroViewSpecCode = (moduleName: string) => `import type {
+  HybridView,
+  HybridViewProps,
+} from 'react-native-nitro-modules'
+
+export interface ${toPascalCase(moduleName)}Props extends HybridViewProps {
+   backgroundColor: string
+}
+
+export type ${toPascalCase(moduleName)} = HybridView<${toPascalCase(moduleName)}Props>`
+
+export const nitroModuleCode = (
     moduleName: string
 ) => `import { NitroModules } from 'react-native-nitro-modules'
 import type { ${toPascalCase(moduleName)} as ${toPascalCase(
@@ -55,6 +75,20 @@ export const ${toPascalCase(moduleName)} =
   NitroModules.createHybridObject<${toPascalCase(
       moduleName
   )}Spec>('${toPascalCase(moduleName)}')`
+
+export const nitroViewCode = (moduleName: string) => `
+import { getHostComponent } from 'react-native-nitro-modules'
+import ${toPascalCase(moduleName)}Config from '../../nitrogen/generated/shared/json/${toPascalCase(moduleName)}Config.json'
+import {
+  type ${toPascalCase(moduleName)}Props,
+} from '../specs/${toPascalCase(moduleName)}.nitro'
+
+
+export const ${toPascalCase(moduleName)} = getHostComponent<${toPascalCase(moduleName)}Props>(
+  '${toPascalCase(moduleName)}',
+  () => ${toPascalCase(moduleName)}Config
+)
+`
 
 export const metroConfig = `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const path = require('path');
