@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 1.5.0
+
+### Minor Changes
+
+- 6f62f69: feat: nitro-upgrade
+
 ## 1.4.0
 
 ### Minor Changes
