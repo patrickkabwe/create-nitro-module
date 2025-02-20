@@ -68,8 +68,7 @@ expect "📦 Select package manager:" {send \r}
 
                   
 # Module type (Default to Nitro Module)
-expect "📦 Select module type:"
-send \r
+expect "📦 Select module type:" {send \r}
 
 # Confirm package name
 expect "✨ Your package name will be called:" {send "y\r"}
@@ -111,5 +110,5 @@ else
     exit 1
 fi
 
-# cleanup
+cleanup
 echo -e "${GREEN}✅ Test completed${NC}"
