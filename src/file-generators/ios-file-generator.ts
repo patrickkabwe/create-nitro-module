@@ -1,9 +1,10 @@
 import { cp } from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { getSwiftCode } from '../code-snippets/code.ios'
+import { getSwiftCode, getSwiftViewCode } from '../code-snippets/code.ios'
 import { IOS_MODULE_NAME_TAG } from '../constants'
 import {
+    Nitro,
     SupportedLang,
     type FileGenerator,
     type GenerateModuleConfig,
@@ -82,10 +83,13 @@ export class IOSFileGenerator implements FileGenerator {
             })
         )
         if (config.langs.includes(SupportedLang.SWIFT)) {
+            const isHybridView = config.moduleType === Nitro.View
             await createModuleFile(
                 config.cwd,
                 `ios/Hybrid${toPascalCase(config.moduleName)}.swift`,
-                getSwiftCode(config.moduleName, `${config.funcName}`)
+                isHybridView
+                    ? getSwiftViewCode(config.moduleName)
+                    : getSwiftCode(config.moduleName, `${config.funcName}`)
             )
         }
     }
