@@ -29,15 +29,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  ${isView ?`view: {
+  ${
+      isView
+          ? `view: {
     width: 200,
     height: 200
-  }`: 
-  `text: {
+  }`
+          : `text: {
         fontSize: 40, 
         color: 'green'
     }`
-});
+  });
 
 export default App;`
 
