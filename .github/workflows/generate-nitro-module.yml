@@ -1,4 +1,4 @@
-name: Integration Test
+name: Generate Nitro Module
 
 permissions:
     contents: write
@@ -126,6 +126,9 @@ jobs:
 
                   # Package manager
                   expect "📦 Select package manager:" {send \r}
+
+                  # Module type
+                  expect "📦 Select module type:" {send \r}
 
                   # Confirm package name
                   expect "✨ Your package name will be called:" {send "y\r"}
