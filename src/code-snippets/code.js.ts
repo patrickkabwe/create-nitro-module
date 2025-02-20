@@ -58,14 +58,18 @@ export interface ${toPascalCase(
 export const nitroViewSpecCode = (moduleName: string) => `import type {
   HybridView,
   HybridViewProps,
+  HybridViewMethods,
 } from 'react-native-nitro-modules'
 
 export interface ${toPascalCase(moduleName)}Props extends HybridViewProps {
    backgroundColor: string
 }
 
-export type ${toPascalCase(moduleName)} = HybridView<${toPascalCase(moduleName)}Props>`
+export interface ${toPascalCase(moduleName)}Methods extends HybridViewMethods {}
 
+export type ${toPascalCase(moduleName)} = HybridView<${toPascalCase(moduleName)}Props, ${toPascalCase(moduleName)}Methods>`
+
+// Nitro Module index.ts code
 export const nitroModuleCode = (
     moduleName: string
 ) => `import { NitroModules } from 'react-native-nitro-modules'
@@ -78,18 +82,23 @@ export const ${toPascalCase(moduleName)} =
       moduleName
   )}Spec>('${toPascalCase(moduleName)}')`
 
-export const nitroViewCode = (moduleName: string) => `
-import { getHostComponent } from 'react-native-nitro-modules'
-import ${toPascalCase(moduleName)}Config from '../../nitrogen/generated/shared/json/${toPascalCase(moduleName)}Config.json'
-import {
-  type ${toPascalCase(moduleName)}Props,
-} from '../specs/${toPascalCase(moduleName)}.nitro'
+// Nitro View index.ts code
+export const nitroViewCode = (
+    moduleName: string
+) => `import { getHostComponent, type HybridRef } from 'react-native-nitro-modules'
+import ${toPascalCase(moduleName)}Config from '../nitrogen/generated/shared/json/${toPascalCase(moduleName)}Config.json'
+import type {
+  ${toPascalCase(moduleName)}Props,
+  ${toPascalCase(moduleName)}Methods,
+} from './specs/${moduleName}.nitro'
 
 
 export const ${toPascalCase(moduleName)} = getHostComponent<${toPascalCase(moduleName)}Props>(
   '${toPascalCase(moduleName)}',
   () => ${toPascalCase(moduleName)}Config
 )
+
+export type ${toPascalCase(moduleName)}Ref = HybridRef<${toPascalCase(moduleName)}Props, ${toPascalCase(moduleName)}Methods>
 `
 
 export const metroConfig = `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
