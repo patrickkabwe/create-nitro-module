@@ -14,7 +14,7 @@ function App(): React.JSX.Element {
     <View style={styles.container}>
     ${
         isView
-            ? `<${toPascalCase(moduleName)} backgroundColor="red" style={styles.view} />`
+            ? `<${toPascalCase(moduleName)} isRed={true} style={styles.view} />`
             : `<Text style={styles.text}>
       {${toPascalCase(moduleName)}.${funcName}(1, 2)}
       </Text>`
