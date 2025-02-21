@@ -49,8 +49,8 @@ jobs:
             - name: Lint and Format
               run: bun lint && bun format
 
-    module-generation:
-        name: Module Generation
+    view-generation:
+        name: View Generation
         needs: lint-and-format
         runs-on: macOS-15
         strategy:
@@ -96,13 +96,13 @@ jobs:
 
             - name: Create expect script ${{ matrix.args }} with ${{ matrix.pm }}
               run: |
-                  cat << 'EOF' > test-module.exp
+                  cat << 'EOF' > test-view.exp
                   #!/usr/bin/expect -f
                   set timeout 30
                   spawn ${{ matrix.pm }} create nitro-module ${{ matrix.args }}
 
                   # Module name
-                  expect "📝 What is the name of your module?" {send "test-module\r"}
+                  expect "📝 What is the name of your module?" {send "test-view\r"}
 
                   # Platform selection
                   expect "🎯 Select target platforms:"
@@ -137,28 +137,28 @@ jobs:
 
                   expect eof
                   EOF
-                  chmod +x test-module.exp
+                  chmod +x test-view.exp
 
             - name: Generate New Module ${{ matrix.args }}
               continue-on-error: false
-              run: ./test-module.exp
+              run: ./test-view.exp
 
             - name: Upload generated module
               uses: actions/upload-artifact@v4
               if: matrix.args == '--skip-install'
               with:
-                  name: test-module-${{ matrix.pm }}
-                  path: react-native-test-module/
+                  name: test-view-${{ matrix.pm }}
+                  path: react-native-test-view/
                   include-hidden-files: true
                   if-no-files-found: error
                   retention-days: 1
 
     build-ios:
         name: Build iOS
-        needs: module-generation
+        needs: view-generation
         runs-on: macOS-15
         env:
-            WORKING_DIR: /Users/runner/react-native-test-module
+            WORKING_DIR: /Users/runner/react-native-test-view
         strategy:
             matrix:
                 pm: ['bun', 'yarn']
@@ -166,10 +166,10 @@ jobs:
             - name: Creating and navigating to directory
               run: mkdir -p ${{ env.WORKING_DIR }}
 
-            - name: Download generated module
+            - name: Download generated view
               uses: actions/download-artifact@v4
               with:
-                  name: test-module-${{ matrix.pm }}
+                  name: test-view-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
 
             - name: List files in the directory
@@ -251,8 +251,8 @@ jobs:
               run: "set -o pipefail && xcodebuild \
                   CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
                   -derivedDataPath build -UseModernBuildSystem=YES \
-                  -workspace TestModuleExample.xcworkspace \
-                  -scheme TestModuleExample \
+                  -workspace TestViewExample.xcworkspace \
+                  -scheme TestViewExample \
                   -sdk iphonesimulator \
                   -configuration Debug \
                   -destination 'platform=iOS Simulator,name=iPhone 16' \
@@ -261,10 +261,10 @@ jobs:
 
     build-android:
         name: Build Android
-        needs: module-generation
+        needs: view-generation
         runs-on: ubuntu-latest
         env:
-            WORKING_DIR: /home/runner/react-native-test-module
+            WORKING_DIR: /home/runner/react-native-test-view
         strategy:
             matrix:
                 pm: ['bun', 'yarn']
