@@ -236,7 +236,6 @@ export class NitroModuleFactory {
     private async configureTsConfig() {
         const tsConfigPath = path.join(
             this.config.cwd,
-            'example',
             'tsconfig.json'
         )
         const tsConfig = await readFile(tsConfigPath, { encoding: 'utf8' })

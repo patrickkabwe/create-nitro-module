@@ -48,13 +48,14 @@ ${kleur.cyan().bold(NITRO_GRAPHIC)}
      
 ${kleur.red().bold('Next steps:')}
 
+${kleur.green(`cd ${moduleName}`)}
+
 ${!skipInstall ? '' : `Install dependencies:
 
    ${kleur.green(`${pm} install`)}         ${kleur.dim('# Install dependencies')}
    ${kleur.green(`${pm} codegen`)}         ${kleur.dim('# Generate native interfaces from TypeScript definitions')}\n`}
    
 Begin development:
-   ${kleur.green(`cd ${moduleName}`)}
  
    ${kleur.cyan('Define your module:')}
    ${kleur.white('src/specs/')}         ${kleur.dim('# Define your module specifications. e.g. src/specs/myModule.nitro.ts')}

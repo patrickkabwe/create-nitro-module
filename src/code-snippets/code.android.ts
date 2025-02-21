@@ -43,21 +43,24 @@ import com.facebook.proguard.annotations.DoNotStrip
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
     moduleName
-)}ViewSpec
+)}Spec
 
 @Keep
 @DoNotStrip
-class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}ViewSpec() {
+class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec() {
     // View
     override val view: View = View(NitroModules.applicationContext)
 
     // Props
-    private var _backgroundColor: String = ""
-    override var backgroundColor: String
-        get() = _backgroundColor
+    private var _isRed: Bool = false
+    override var backgroundColor: Bool
+        get() = _isRed
         set(value) {
-            _backgroundColor = value
-            view.setBackgroundColor(Color.parseColor(value))
+            _isRed = value
+            view.setBackgroundColor(
+                if (value) Color.RED
+                else Color.BLACK
+            )
         }
 }
 `

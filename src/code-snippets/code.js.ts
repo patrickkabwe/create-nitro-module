@@ -62,7 +62,7 @@ export const nitroViewSpecCode = (moduleName: string) => `import type {
 } from 'react-native-nitro-modules'
 
 export interface ${toPascalCase(moduleName)}Props extends HybridViewProps {
-   backgroundColor: string
+   isRed: boolean
 }
 
 export interface ${toPascalCase(moduleName)}Methods extends HybridViewMethods {}
