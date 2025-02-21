@@ -14,7 +14,7 @@ function App(): React.JSX.Element {
     <View style={styles.container}>
     ${
         isView
-            ? `<${toPascalCase(moduleName)} backgroundColor="red" style={style.view} />`
+            ? `<${toPascalCase(moduleName)} backgroundColor="red" style={styles.view} />`
             : `<Text style={styles.text}>
       {${toPascalCase(moduleName)}.${funcName}(1, 2)}
       </Text>`
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
         fontSize: 40, 
         color: 'green'
     }`
-  });
+  }});
 
 export default App;`
 
@@ -93,7 +93,7 @@ import type {
 } from './specs/${moduleName}.nitro'
 
 
-export const ${toPascalCase(moduleName)} = getHostComponent<${toPascalCase(moduleName)}Props>(
+export const ${toPascalCase(moduleName)} = getHostComponent<${toPascalCase(moduleName)}Props, ${toPascalCase(moduleName)}Methods>(
   '${toPascalCase(moduleName)}',
   () => ${toPascalCase(moduleName)}Config
 )

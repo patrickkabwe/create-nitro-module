@@ -15,14 +15,14 @@ class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
 export const getSwiftViewCode = (moduleName: string) => `import Foundation
 import UIKit
 
-class Hybrid${toPascalCase(moduleName)}View : Hybrid${toPascalCase(moduleName)}ViewSpec {
+class Hybrid${toPascalCase(moduleName)} : Hybrid${toPascalCase(moduleName)}Spec {
   // UIView
   var view: UIView = UIView()
 
   // Props
-  var backgroundColor: Bool = String {
+  var isRed: Bool = false {
     didSet {
-      view.backgroundColor = UIColor(hex: backgroundColor)
+      view.backgroundColor = isRed ? .red : .black
     }
   }
 }
