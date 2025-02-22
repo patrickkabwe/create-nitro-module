@@ -172,7 +172,7 @@ const androidWorkaround = async () => {
  const viewManagerFile = path.join(
    process.cwd(),
    'nitrogen/generated/android/kotlin/com/margelo/nitro/${moduleName.toLowerCase()}/views',
-   'Hybrid${toPascalCase(moduleName)}Manager.kt'
+   'Hybrid${moduleName}Manager.kt'
  )
 
  const viewManagerStr = await readFile(viewManagerFile, { encoding: 'utf8' })
