@@ -2,6 +2,14 @@ pre-commit:
   parallel: true
   commands:
     lint:
-      run: bun lint
+      glob:
+        - "*.json"
+        - "*.ts"
+        - "*.tsx"
+      run: bun lint {staged_files}
     format:
-      run: bun format
+      glob:
+        - "*.json"
+        - "*.ts"
+        - "*.tsx"
+      run: bun format {staged_files}
