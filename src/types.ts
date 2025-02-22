@@ -25,9 +25,9 @@ export type CreateModuleOptions = {
 
 export type PackageManager = 'bun' | 'yarn' | 'npm'
 
-export enum NitroModuleType {
-    HybridObject = 'hybrid-object',
-    HybridView = 'hybrid-view',
+export enum Nitro {
+    Module = 'module',
+    View = 'view',
 }
 
 export type GenerateModuleConfig = {
@@ -38,7 +38,7 @@ export type GenerateModuleConfig = {
     spinner: Ora
     funcName?: string
     platforms: SupportedPlatform[]
-    moduleType: NitroModuleType
+    moduleType: Nitro
     moduleName: string
     finalModuleName: string
 } & Omit<CreateModuleOptions, 'moduleDir'>

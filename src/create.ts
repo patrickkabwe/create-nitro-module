@@ -8,7 +8,7 @@ import { generateInstructions, SUPPORTED_PLATFORMS } from './constants'
 import { NitroModuleFactory } from './generate-nitro-module'
 import {
     CreateModuleOptions,
-    NitroModuleType,
+    Nitro,
     PLATFORM_LANGUAGE_MAP,
 } from './types'
 import { detectPackageManager, dirExist } from './utils'
@@ -42,7 +42,7 @@ export const createModule = async (
             pm: answers.pm,
             cwd: options.moduleDir || process.cwd(),
             spinner,
-            moduleType: NitroModuleType.HybridObject,
+            moduleType: answers.moduleType,
             finalModuleName: 'react-native-' + name.toLowerCase(),
             skipInstall: options.skipInstall,
             skipExample: options.skipExample,
@@ -157,6 +157,15 @@ const getUserAnswers = async (name: string, usedPm?: string) => {
         },
     })
 
+    const moduleType = await inquirer.prompt({
+        type: 'list',
+        message: kleur.cyan('📦 Select module type:'),
+        name: 'name',
+        choices: ['Nitro Module', 'Nitro View'],
+        default: 'Nitro Module',
+        when: !langs.names.includes('cpp'),
+    })
+
     const pm = await inquirer.prompt({
         type: 'list',
         message: kleur.cyan('📦 Select package manager:'),
@@ -185,5 +194,6 @@ const getUserAnswers = async (name: string, usedPm?: string) => {
         platforms: platforms.names,
         langs: langs.names.includes('cpp') ? ['c++'] : langs.names,
         pm: pm.name,
+        moduleType: moduleType.name === 'Nitro Module' ? Nitro.Module : Nitro.View,
     }
 }

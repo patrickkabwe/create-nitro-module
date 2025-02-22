@@ -4,10 +4,16 @@ import { fileURLToPath } from 'url'
 import {
     androidManifestCode,
     getKotlinCode,
+    getKotlinViewCode,
 } from '../code-snippets/code.android'
 import { postScript } from '../code-snippets/code.js'
 import { ANDROID_CXX_LIB_NAME_TAG, ANDROID_NAME_SPACE_TAG } from '../constants'
-import { FileGenerator, GenerateModuleConfig, SupportedLang } from '../types'
+import {
+    FileGenerator,
+    GenerateModuleConfig,
+    Nitro,
+    SupportedLang,
+} from '../types'
 import {
     createFolder,
     createModuleFile,
@@ -67,16 +73,22 @@ export class AndroidFileGenerator implements FileGenerator {
         // Only generate Kotlin file(s) if Kotlin is supported
         if (config.langs.includes(SupportedLang.KOTLIN)) {
             // Generate HybridObject file
+            const isHybridView = config.moduleType === Nitro.View
             await createModuleFile(
                 config.cwd,
                 `android/src/main/java/${this.androidPackageName
                     .split('.')
                     .join('/')}/Hybrid${toPascalCase(config.moduleName)}.kt`,
-                getKotlinCode(
-                    config.moduleName,
-                    this.androidPackageName,
-                    `${config.funcName}`
-                )
+                isHybridView
+                    ? getKotlinViewCode(
+                          config.moduleName,
+                          this.androidPackageName
+                      )
+                    : getKotlinCode(
+                          config.moduleName,
+                          this.androidPackageName,
+                          `${config.funcName}`
+                      )
             )
             this.applyCustomAndroidPackageNameWorkaround(config)
         }
@@ -168,10 +180,13 @@ export class AndroidFileGenerator implements FileGenerator {
     private async generatePackageFile(config: GenerateModuleConfig) {
         const androidPackageFile = `${toPascalCase(config.moduleName)}Package.java`
         const prefixPath = `android/src/main/java`
+        const isHybridView = config.moduleType === Nitro.View
         const androidPackageFilePath = path.join(
             config.cwd,
             prefixPath + `/com/${ANDROID_NAME_SPACE_TAG}`,
-            `${ANDROID_CXX_LIB_NAME_TAG}Package.java`
+            isHybridView
+                ? `${ANDROID_CXX_LIB_NAME_TAG}Package_view.java`
+                : `${ANDROID_CXX_LIB_NAME_TAG}Package.java`
         )
 
         const replacements = {
@@ -201,7 +216,10 @@ export class AndroidFileGenerator implements FileGenerator {
         const androidWorkaroundPath = path.join(config.cwd, 'post-script.js')
         await writeFile(
             androidWorkaroundPath,
-            postScript(toPascalCase(config.moduleName))
+            postScript(
+                toPascalCase(config.moduleName),
+                config.moduleType === Nitro.View
+            )
         )
     }
 }

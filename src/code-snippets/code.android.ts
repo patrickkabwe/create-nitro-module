@@ -30,3 +30,37 @@ rootProject.name = '${moduleName}Example'
 include ':app'
 includeBuild('../../node_modules/@react-native/gradle-plugin')
 `
+
+export const getKotlinViewCode = (
+    moduleName: string,
+    packageName: string
+) => `package ${packageName}
+
+import android.graphics.Color
+import android.view.View
+import androidx.annotation.Keep
+import com.facebook.proguard.annotations.DoNotStrip
+import com.margelo.nitro.NitroModules
+import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
+    moduleName
+)}Spec
+
+@Keep
+@DoNotStrip
+class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec() {
+    // View
+    override val view: View = View(NitroModules.applicationContext)
+
+    // Props
+    private var _isRed = false
+    override var isRed: Boolean
+        get() = _isRed
+        set(value) {
+            _isRed = value
+            view.setBackgroundColor(
+                if (value) Color.RED
+                else Color.BLACK
+            )
+        }
+}
+`

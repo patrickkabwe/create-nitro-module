@@ -8,7 +8,7 @@ import {
     appExampleCode,
     babelConfig,
     exampleTsConfig,
-    metroConfig
+    metroConfig,
 } from './code-snippets/code.js'
 import {
     ANDROID_CXX_LIB_NAME_TAG,
@@ -18,13 +18,18 @@ import {
     IOS_MODULE_NAME_TAG,
     JS_PACKAGE_NAME_TAG,
     messages,
-    packagesToRemoveFromExampleApp
+    packagesToRemoveFromExampleApp,
 } from './constants'
 import { AndroidFileGenerator } from './file-generators/android-file-generator'
 import { CppFileGenerator } from './file-generators/cpp-file-generator'
 import { IOSFileGenerator } from './file-generators/ios-file-generator'
 import { JSFileGenerator } from './file-generators/js-file-generator'
-import { FileGenerator, GenerateModuleConfig, SupportedLang } from './types'
+import {
+    FileGenerator,
+    GenerateModuleConfig,
+    Nitro,
+    SupportedLang,
+} from './types'
 import {
     copyTemplateFiles,
     createFolder,
@@ -34,7 +39,7 @@ import {
     getGitUserInfo,
     replaceHyphen,
     replacePlaceholder,
-    toPascalCase
+    toPascalCase,
 } from './utils'
 
 const execAsync = util.promisify(exec)
@@ -68,7 +73,9 @@ export class NitroModuleFactory {
     async createNitroModule() {
         const dirExists = await dirExist(this.config.cwd)
         if (dirExists) {
-            throw new Error("Looks like the directory with the same name already exists.")
+            throw new Error(
+                'Looks like the directory with the same name already exists.'
+            )
         }
         await createFolder(this.config.cwd)
         const supportedLanguages = [...this.config.langs, SupportedLang.JS]
@@ -80,10 +87,11 @@ export class NitroModuleFactory {
             }
             await generator.generate(this.config)
         }
-        await this.copyPackageFiles()
+        await this.copyNitroTemplateFiles()
         await this.replaceNitroJsonPlaceholders()
         await this.updatePackageJsonConfig(this.config.skipExample)
         await this.updateReadme()
+
         if (!this.config.skipExample) {
             this.config.spinner.text = messages.generating
             await this.createExampleApp()
@@ -145,11 +153,19 @@ export class NitroModuleFactory {
         newWorkspacePackageJsonFile.author = name
         newWorkspacePackageJsonFile.scripts = {
             ...newWorkspacePackageJsonFile.scripts,
-            codegen: `${this.config.pm} typecheck && nitro-codegen --logLevel=\\"debug\\" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
+            codegen: `nitro-codegen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`,
         }
 
         if (this.config.pm === 'yarn') {
-            newWorkspacePackageJsonFile.packageManager = "yarn@3.6.1"
+            await execAsync('corepack enable', { cwd: this.config.cwd })
+            await execAsync('yarn set version 4.6.0', { cwd: this.config.cwd })
+            await execAsync('yarn config set enableImmutableInstalls false', {
+                cwd: this.config.cwd,
+            })
+            await execAsync('yarn config set nodeLinker node-modules', {
+                cwd: this.config.cwd,
+            })
+            await execAsync('corepack disable', { cwd: this.config.cwd })
         }
 
         if (skipExample) {
@@ -163,14 +179,14 @@ export class NitroModuleFactory {
     }
 
     private async updateReadme() {
-        const readmePath = path.join(
-            this.config.cwd,
-            'README.md'
-        )
+        const readmePath = path.join(this.config.cwd, 'README.md')
 
         const replacements = {
             [JS_PACKAGE_NAME_TAG]: this.config.finalModuleName,
-            '$$command$$': this.config.pm === 'bun' || this.config.pm === 'yarn' ? `${this.config.pm} add` : 'npm install',
+            $$command$$:
+                this.config.pm === 'bun' || this.config.pm === 'yarn'
+                    ? `${this.config.pm} add`
+                    : 'npm install',
         }
 
         const readmeContents = await replacePlaceholder({
@@ -183,7 +199,7 @@ export class NitroModuleFactory {
         })
     }
 
-    private async copyPackageFiles() {
+    private async copyNitroTemplateFiles() {
         const filesToCopy = [
             '.watchmanconfig',
             'babel.config.js',
@@ -192,11 +208,9 @@ export class NitroModuleFactory {
             'gitignore',
             'README.md',
             'package.json',
-            '.github'
+            '.github',
         ]
-        if (this.config.pm === 'yarn') {
-            filesToCopy.push('.yarnrc.yml', '.yarn')
-        }
+
         await copyTemplateFiles(
             this.config,
             [__dirname, '..', 'assets', 'template'],
@@ -224,7 +238,8 @@ export class NitroModuleFactory {
             appExampleCode(
                 this.config.moduleName,
                 this.config.finalModuleName,
-                `${this.config.funcName}`
+                `${this.config.funcName}`,
+                this.config.moduleType === Nitro.View
             ),
             { encoding: 'utf8' }
         )
@@ -247,14 +262,14 @@ export class NitroModuleFactory {
             ...packageJson.scripts,
             ios: "react-native run-ios --simulator='iPhone 16'",
             start: 'react-native start --reset-cache',
-            pod: "bundle install && bundle exec pod install --project-directory=ios",
+            pod: 'bundle install && bundle exec pod install --project-directory=ios',
         }
         packageJson.dependencies = {
             ...packageJson.dependencies,
             'react-native-nitro-modules': '*',
         }
 
-        packagesToRemoveFromExampleApp.forEach((pkg) => {
+        packagesToRemoveFromExampleApp.forEach(pkg => {
             delete packageJson.devDependencies[pkg]
         })
 
@@ -362,7 +377,9 @@ export class NitroModuleFactory {
         await writeFile(androidBuildGradlePath, toWrite, { encoding: 'utf8' })
 
         for (const folder of foldersToRemoveFromExampleApp) {
-            await execAsync(`rm -rf ${path.join(this.config.cwd, 'example', folder)}`)
+            await execAsync(
+                `rm -rf ${path.join(this.config.cwd, 'example', folder)}`
+            )
         }
     }
 
@@ -374,7 +391,9 @@ export class NitroModuleFactory {
     private async gitInit() {
         await execAsync('git init', { cwd: this.config.cwd })
         await execAsync('git add .', { cwd: this.config.cwd })
-        await execAsync('git commit -m "initial commit"', { cwd: this.config.cwd })
+        await execAsync('git commit -m "initial commit"', {
+            cwd: this.config.cwd,
+        })
     }
 
     private async setupWorkflows() {
@@ -390,7 +409,7 @@ export class NitroModuleFactory {
         })
 
         const iosBuildReplacements = {
-            '$$exampleApp$$': `${toPascalCase(this.config.moduleName)}Example`,
+            $$exampleApp$$: `${toPascalCase(this.config.moduleName)}Example`,
         }
 
         const iosBuildWorkflowContent = await replacePlaceholder({
@@ -398,6 +417,8 @@ export class NitroModuleFactory {
             replacements: iosBuildReplacements,
         })
 
-        await writeFile(iosBuildWorkflowPath, iosBuildWorkflowContent, { encoding: 'utf8' })
+        await writeFile(iosBuildWorkflowPath, iosBuildWorkflowContent, {
+            encoding: 'utf8',
+        })
     }
 }

@@ -19,7 +19,11 @@
         "create-nitro-modules",
         "Native Modules",
         "Create React Native Modules with Nitro",
-        "Create Nitro Modules"
+        "Create Nitro Modules",
+        "create react native module",
+        "create react native module",
+        "create react native library",
+        "react native library"
     ],
     "license": "MIT",
     "bin": {
@@ -47,8 +51,8 @@
         "version": "changeset version",
         "prerelease": "rm -rf ./lib/assets",
         "release": "bun run build && bun version && changeset publish",
-        "lint": "eslint src/*.ts",
-        "format": "prettier --write src/**/*.ts"
+        "lint": "eslint --fix ",
+        "format": "prettier --write "
     },
     "dependencies": {
         "@changesets/cli": "^2.27.10",
