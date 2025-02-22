@@ -12,11 +12,11 @@ import { ${toPascalCase(moduleName)} } from '${finalModuleName}';
 function App(): React.JSX.Element {
   return (
     <View style={styles.container}>
-    ${isHybridView
+        ${isHybridView
         ? `<${toPascalCase(moduleName)} isRed={true} style={styles.view} />`
         : `<Text style={styles.text}>
-      {${toPascalCase(moduleName)}.${funcName}(1, 2)}
-      </Text>`
+        {${toPascalCase(moduleName)}.${funcName}(1, 2)}
+        </Text>`
     }
     </View>
   );

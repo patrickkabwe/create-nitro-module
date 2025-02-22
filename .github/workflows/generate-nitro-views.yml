@@ -269,14 +269,15 @@ jobs:
         strategy:
             matrix:
                 pm: ['bun', 'yarn']
+                mode: ['Debug', 'Release']
         steps:
             - name: Create directory structure
               run: mkdir -p ${{ env.WORKING_DIR }}
 
-            - name: Download generated module
+            - name: Download generated view
               uses: actions/download-artifact@v4
               with:
-                  name: test-module-${{ matrix.pm }}
+                  name: test-view-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR}}
 
             - name: List files in the directory
@@ -342,7 +343,7 @@ jobs:
 
             - name: Run Gradle Build
               working-directory: ${{ env.WORKING_DIR }}/example/android
-              run: ./gradlew assemble${{ matrix.pm }} --no-daemon --build-cache
+              run: ./gradlew assemble${{ matrix.mode }} --no-daemon --build-cache
 
             - name: Stop Gradle Daemon
               working-directory: ${{ env.WORKING_DIR }}/example/android
