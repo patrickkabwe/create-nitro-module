@@ -4,7 +4,7 @@ export const appExampleCode = (
     moduleName: string,
     finalModuleName: string,
     funcName: string,
-    isView: boolean
+    isHybridView: boolean
 ) => `import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import { ${toPascalCase(moduleName)} } from '${finalModuleName}';
@@ -12,7 +12,7 @@ import { ${toPascalCase(moduleName)} } from '${finalModuleName}';
 function App(): React.JSX.Element {
   return (
     <View style={styles.container}>
-    ${isView
+    ${isHybridView
         ? `<${toPascalCase(moduleName)} isRed={true} style={styles.view} />`
         : `<Text style={styles.text}>
       {${toPascalCase(moduleName)}.${funcName}(1, 2)}
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  ${isView
+  ${isHybridView
         ? `view: {
     width: 200,
     height: 200
@@ -167,7 +167,8 @@ const androidWorkaround = async () => {
    'nitrogen/generated/android',
    '${moduleName}OnLoad.cpp'
  )
- ${isHybridView ? `
+ ${isHybridView
+        ? `
  const viewManagerFile = path.join(
    process.cwd(),
    'nitrogen/generated/android/kotlin/com/margelo/nitro/${moduleName.toLowerCase()}/views',
@@ -176,7 +177,9 @@ const androidWorkaround = async () => {
 
  const viewManagerStr = await readFile(viewManagerFile, { encoding: 'utf8' })
  await writeFile(viewManagerFile, viewManagerStr.replace('com.margelo.nitro.${moduleName.toLowerCase()}.*', 'com.${moduleName.toLowerCase()}.*'))
-`: ''}
+`
+        : ''
+    }
  
  const str = await readFile(androidOnLoadFile, { encoding: 'utf8' })
  await writeFile(androidOnLoadFile, str.replace('margelo/nitro/', ''))

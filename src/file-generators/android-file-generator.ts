@@ -216,7 +216,10 @@ export class AndroidFileGenerator implements FileGenerator {
         const androidWorkaroundPath = path.join(config.cwd, 'post-script.js')
         await writeFile(
             androidWorkaroundPath,
-            postScript(toPascalCase(config.moduleName), config.moduleType === Nitro.View)
+            postScript(
+                toPascalCase(config.moduleName),
+                config.moduleType === Nitro.View
+            )
         )
     }
 }
