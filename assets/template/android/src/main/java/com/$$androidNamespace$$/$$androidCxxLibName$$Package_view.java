@@ -1,18 +1,19 @@
 package com.$$androidNamespace$$;
 
-import android.util.Log;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.module.model.ReactModuleInfoProvider;
 import com.facebook.react.TurboReactPackage;
-import com.margelo.nitro.core.HybridObject;
-import com.margelo.nitro.core.HybridObjectRegistry;
-import com.margelo.nitro.$$androidNamespace$$.$$androidCxxLibName$$OnLoad;
+import com.facebook.react.uimanager.ViewManager;
+import com.margelo.nitro.$$androidNamespace$$.*;
+import com.margelo.nitro.$$androidNamespace$$.views.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.function.Supplier;
+import java.util.List;
 
 public class $$androidCxxLibName$$Package extends TurboReactPackage {
   @Nullable
@@ -25,6 +26,14 @@ public class $$androidCxxLibName$$Package extends TurboReactPackage {
   @Override
   public ReactModuleInfoProvider getReactModuleInfoProvider() {
     return HashMap::new;
+  }
+
+  @NonNull
+  @Override
+  public List<ViewManager> createViewManagers(@NonNull ReactApplicationContext reactContext) {
+    List<ViewManager> viewManagers = new ArrayList<>();
+    viewManagers.add(new Hybrid$$androidCxxLibName$$Manager());
+    return viewManagers;
   }
 
   static {
