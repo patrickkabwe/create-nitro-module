@@ -170,6 +170,15 @@ const androidWorkaround = async () => {
    '${moduleName}OnLoad.cpp'
  )
 
+ const viewManagerFile = path.join(
+    process.cwd(),
+    'nitrogen/generated/android/kotlin/com/margelo/nitro/${moduleName.toLowerCase()}/views',
+    'Hybrid${toPascalCase(moduleName)}Manager.kt'
+  )
+
+ const viewManagerStr = await readFile(viewManagerFile, { encoding: 'utf8' })
+ await writeFile(viewManagerFile, viewManagerStr.replace('com.margelo.nitro.${moduleName.toLowerCase()}.*', 'com.${moduleName.toLowerCase()}.*'))
+
  const str = await readFile(androidOnLoadFile, { encoding: 'utf8' })
  await writeFile(androidOnLoadFile, str.replace('margelo/nitro/', ''))
 }
