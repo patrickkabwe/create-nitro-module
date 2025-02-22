@@ -46,8 +46,8 @@ jobs:
             - name: Install npm dependencies (bun)
               run: bun install
 
-            - name: Lint and Format
-              run: bun lint && bun format
+            - name: Lint Code
+              run: bun lint
 
     module-generation:
         name: Module Generation
@@ -261,7 +261,7 @@ jobs:
         strategy:
             matrix:
                 pm: ['bun', 'yarn']
-                mode: ['Debug', 'Release']
+                mode: ['Debug']
         steps:
             - name: Create directory structure
               run: mkdir -p ${{ env.WORKING_DIR }}

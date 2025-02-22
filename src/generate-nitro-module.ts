@@ -80,7 +80,7 @@ export class NitroModuleFactory {
             }
             await generator.generate(this.config)
         }
-        await this.copyPackageFiles()
+        await this.copyNitroTemplateFiles()
         await this.replaceNitroJsonPlaceholders()
         await this.updatePackageJsonConfig(this.config.skipExample)
         await this.updateReadme()
@@ -88,7 +88,6 @@ export class NitroModuleFactory {
         if (!this.config.skipExample) {
             this.config.spinner.text = messages.generating
             await this.createExampleApp()
-            await this.configureTsConfig()
             await this.configureExamplePackageJson()
             await this.syncExampleAppConfigurations()
             await this.setupWorkflows()
@@ -185,7 +184,7 @@ export class NitroModuleFactory {
         })
     }
 
-    private async copyPackageFiles() {
+    private async copyNitroTemplateFiles() {
         const filesToCopy = [
             '.watchmanconfig',
             'babel.config.js',
@@ -231,20 +230,6 @@ export class NitroModuleFactory {
             ),
             { encoding: 'utf8' }
         )
-    }
-
-    private async configureTsConfig() {
-        const tsConfigPath = path.join(
-            this.config.cwd,
-            'tsconfig.json'
-        )
-        const tsConfig = await readFile(tsConfigPath, { encoding: 'utf8' })
-        const toWrite = JSON.stringify({
-            ...JSON.parse(tsConfig),
-            "include": ["src/**/*", "nitrogen/**/*.json"]
-        }, null, 2)
-
-        await writeFile(tsConfigPath, toWrite, { encoding: 'utf8' })
     }
 
     private async configureExamplePackageJson() {
