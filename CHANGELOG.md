@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 1.6.0
+
+### Minor Changes
+
+- 70b8c55: feat: support generation of nitro views 🚀
+
 ## 1.5.0
 
 ### Minor Changes
