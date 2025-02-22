@@ -2,6 +2,7 @@ package com.$$androidNamespace$$;
 
 import android.util.Log;
 import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
