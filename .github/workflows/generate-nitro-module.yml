@@ -192,6 +192,7 @@ jobs:
               run: |
                   corepack enable
                   cd ${{ env.WORKING_DIR }}
+                  yarn set version 4.6.0
                   yarn config set enableImmutableInstalls false
                   yarn config set nodeLinker node-modules
                   touch yarn.lock
@@ -287,6 +288,7 @@ jobs:
               run: |
                   corepack enable
                   cd ${{ env.WORKING_DIR }}
+                  yarn set version 4.6.0
                   yarn config set enableImmutableInstalls false
                   yarn config set nodeLinker node-modules
                   touch yarn.lock

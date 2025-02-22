@@ -194,6 +194,7 @@ jobs:
               run: |
                   corepack enable
                   cd ${{ env.WORKING_DIR }}
+                  yarn set version 4.6.0
                   yarn config set enableImmutableInstalls false
                   yarn config set nodeLinker node-modules
                   touch yarn.lock
@@ -207,12 +208,6 @@ jobs:
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
-
-            - name: Setup Yarn
-              if: matrix.pm == 'yarn'
-              run: |
-                  corepack enable
-                  touch yarn.lock
 
             - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
@@ -295,6 +290,7 @@ jobs:
               run: |
                   corepack enable
                   cd ${{ env.WORKING_DIR }}
+                  yarn set version 4.6.0
                   yarn config set enableImmutableInstalls false
                   yarn config set nodeLinker node-modules
                   touch yarn.lock
