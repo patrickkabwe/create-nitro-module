@@ -52,7 +52,7 @@ class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec()
     override val view: View = View(NitroModules.applicationContext)
 
     // Props
-    private var _isRed: Boolean = false
+    private var _isRed = false
     override var isRed: Boolean
         get() = _isRed
         set(value) {
