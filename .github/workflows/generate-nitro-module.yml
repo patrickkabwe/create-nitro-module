@@ -160,6 +160,7 @@ jobs:
         strategy:
             matrix:
                 pm: ['bun', 'yarn']
+                mode: ['Debug', 'Release']
         steps:
             - name: Creating and navigating to directory
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -196,7 +197,7 @@ jobs:
                   touch yarn.lock
                   yarn install
 
-            - name: Setup Node.js cache
+            - name: Setup Yarn cache
               if: matrix.pm == 'yarn'
               uses: actions/cache@v4
               with:
@@ -246,7 +247,7 @@ jobs:
                   -workspace TestModuleExample.xcworkspace \
                   -scheme TestModuleExample \
                   -sdk iphonesimulator \
-                  -configuration Debug \
+                  -configuration ${{ matrix.mode }} \
                   -destination 'platform=iOS Simulator,name=iPhone 16' \
                   build \
                   CODE_SIGNING_ALLOWED=NO"
@@ -260,6 +261,7 @@ jobs:
         strategy:
             matrix:
                 pm: ['bun', 'yarn']
+                mode: ['Debug', 'Release']
         steps:
             - name: Create directory structure
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -290,7 +292,7 @@ jobs:
                   touch yarn.lock
                   yarn install
 
-            - name: Setup Node.js cache
+            - name: Setup yarn cache
               if: matrix.pm == 'yarn'
               uses: actions/cache@v4
               with:
@@ -333,7 +335,7 @@ jobs:
 
             - name: Run Gradle Build
               working-directory: ${{ env.WORKING_DIR }}/example/android
-              run: ./gradlew assembleDebug --no-daemon --build-cache
+              run: ./gradlew assemble${{matrix.mode}} --no-daemon --build-cache
 
             - name: Stop Gradle Daemon
               working-directory: ${{ env.WORKING_DIR }}/example/android
