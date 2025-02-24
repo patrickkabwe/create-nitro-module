@@ -224,6 +224,8 @@ export class NitroModuleFactory {
     private async createExampleApp() {
         const packageManager = this.config.pm === 'bun' ? 'bunx' : 'npx -y'
 
+        // TODO: generate expo example app
+        
         const args = `${packageManager} \
             @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example \
             --package-name com.${replaceHyphen(this.config.moduleName)}example \
