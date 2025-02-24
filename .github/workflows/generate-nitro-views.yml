@@ -61,7 +61,7 @@ jobs:
                         '--module-dir test-module',
                         '--skip-install',
                     ]
-                pm: ['bun', 'yarn']
+                pm: ['bun', 'yarn', 'npm']
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         steps:
