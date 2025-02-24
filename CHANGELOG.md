@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 1.6.1
+
+### Patch Changes
+
+- 1d18cd3: fix: npm support
+
 ## 1.6.0
 
 ### Minor Changes
