@@ -6,11 +6,7 @@ import path from 'path'
 import projectPackageJsonFile from '../package.json'
 import { generateInstructions, SUPPORTED_PLATFORMS } from './constants'
 import { NitroModuleFactory } from './generate-nitro-module'
-import {
-    CreateModuleOptions,
-    Nitro,
-    PLATFORM_LANGUAGE_MAP,
-} from './types'
+import { CreateModuleOptions, Nitro, PLATFORM_LANGUAGE_MAP } from './types'
 import { detectPackageManager, dirExist } from './utils'
 
 export const createModule = async (
@@ -50,12 +46,14 @@ export const createModule = async (
 
         await moduleFactory.createNitroModule()
 
-        console.log(generateInstructions({
-            moduleName: `react-native-${name.toLowerCase()}`,
-            pm: answers.pm,
-            skipExample: options.skipExample,
-            skipInstall: options.skipInstall,
-        }))
+        console.log(
+            generateInstructions({
+                moduleName: `react-native-${name.toLowerCase()}`,
+                pm: answers.pm,
+                skipExample: options.skipExample,
+                skipInstall: options.skipInstall,
+            })
+        )
 
         spinner.succeed(
             kleur.dim(
@@ -194,6 +192,7 @@ const getUserAnswers = async (name: string, usedPm?: string) => {
         platforms: platforms.names,
         langs: langs.names.includes('cpp') ? ['c++'] : langs.names,
         pm: pm.name,
-        moduleType: moduleType.name === 'Nitro View' ? Nitro.View : Nitro.Module,
+        moduleType:
+            moduleType.name === 'Nitro View' ? Nitro.View : Nitro.Module,
     }
 }
