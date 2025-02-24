@@ -385,7 +385,7 @@ export class NitroModuleFactory {
 
     private async installDependenciesAndRunCodegen() {
         await execAsync(`${this.config.pm} install`, { cwd: this.config.cwd })
-        await execAsync(`${this.config.pm} codegen`, { cwd: this.config.cwd })
+        await execAsync(`${this.config.pm} run codegen`, { cwd: this.config.cwd })
     }
 
     private async gitInit() {
