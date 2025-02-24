@@ -54,7 +54,8 @@ ${kleur.cyan().bold(NITRO_GRAPHIC)}
 ${kleur.red().bold('Next steps:')}
 
 ${kleur.green(`cd ${moduleName}`)}
-${!skipInstall
+${
+    !skipInstall
         ? ''
         : `\nInstall dependencies:
 
