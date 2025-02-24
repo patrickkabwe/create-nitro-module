@@ -194,6 +194,6 @@ const getUserAnswers = async (name: string, usedPm?: string) => {
         platforms: platforms.names,
         langs: langs.names.includes('cpp') ? ['c++'] : langs.names,
         pm: pm.name,
-        moduleType: moduleType.name === 'Nitro Module' ? Nitro.Module : Nitro.View,
+        moduleType: moduleType.name === 'Nitro View' ? Nitro.View : Nitro.Module,
     }
 }
