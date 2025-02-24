@@ -18,14 +18,14 @@ export const messages = {
 } as const
 
 export const packagesToRemoveFromExampleApp = [
-    "@types/react",
-    "@types/react-test-renderer",
-    "babel-jest",
-    "eslint",
-    "jest",
-    "prettier",
-    "react-test-renderer",
-    "typescript",
+    '@types/react',
+    '@types/react-test-renderer',
+    'babel-jest',
+    'eslint',
+    'jest',
+    'prettier',
+    'react-test-renderer',
+    'typescript',
 ]
 
 export const foldersToRemoveFromExampleApp = []
@@ -43,17 +43,26 @@ export const NITRO_GRAPHIC = `
      │ │
      └─┘`
 
-export const generateInstructions = ({ moduleName, pm, skipInstall, skipExample }: InstructionsParams) => `
+export const generateInstructions = ({
+    moduleName,
+    pm,
+    skipInstall,
+    skipExample,
+}: InstructionsParams) => `
 ${kleur.cyan().bold(NITRO_GRAPHIC)}
      
 ${kleur.red().bold('Next steps:')}
 
 ${kleur.green(`cd ${moduleName}`)}
 
-${!skipInstall ? '' : `Install dependencies:
+${
+    !skipInstall
+        ? ''
+        : `Install dependencies:
 
    ${kleur.green(`${pm} install`)}         ${kleur.dim('# Install dependencies')}
-   ${kleur.green(`${pm} run codegen`)}         ${kleur.dim('# Generate native interfaces from TypeScript definitions')}\n`}
+   ${kleur.green(`${pm} run codegen`)}         ${kleur.dim('# Generate native interfaces from TypeScript definitions')}\n`
+}
    
 Begin development:
  
@@ -66,11 +75,15 @@ Begin development:
    ${kleur.white('android/')}           ${kleur.dim('# Android native implementation using kotlin')}
    ${kleur.white('cpp/')}               ${kleur.dim('# C++ native implementation. Shareable between iOS and Android (Will be generated if cpp was selected)')}
    
-${skipExample ? '' : `Run your example app to test the package:
+${
+    skipExample
+        ? ''
+        : `Run your example app to test the package:
 
    ${kleur.green('cd example')}
    ${kleur.green(`${pm} run pod`)}            ${kleur.dim('# Install CocoaPods dependencies (iOS)')}
-   ${kleur.green(`${pm} run ios|android`)}    ${kleur.dim('# Run your example app')}`}
+   ${kleur.green(`${pm} run ios|android`)}    ${kleur.dim('# Run your example app')}`
+}
 
 ${kleur.yellow('Pro Tips:')}
 ${kleur.dim('• iOS:')} Open ${kleur.green('example/ios/example.xcworkspace')} in Xcode for native debugging. Make sure to run ${kleur.green(`${pm} pod`)} first in the example directory
