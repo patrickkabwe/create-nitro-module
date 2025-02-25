@@ -40,16 +40,16 @@ import android.graphics.Color
 import android.view.View
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.NitroModules
+import com.facebook.react.uimanager.ThemedReactContext
 import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
     moduleName
 )}Spec
 
 @Keep
 @DoNotStrip
-class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec() {
+class Hybrid${toPascalCase(moduleName)}(val context: ThemedReactContext): Hybrid${toPascalCase(moduleName)}Spec() {
     // View
-    override val view: View = View(NitroModules.applicationContext)
+    override val view: View = View(context)
 
     // Props
     private var _isRed = false

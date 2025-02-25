@@ -264,9 +264,11 @@ export class NitroModuleFactory {
             start: 'react-native start --reset-cache',
             pod: 'bundle install && bundle exec pod install --project-directory=ios',
         }
+
+        const nitroKey = `react-native-nitro-modules`
         packageJson.dependencies = {
             ...packageJson.dependencies,
-            'react-native-nitro-modules': '*',
+            [nitroKey]: packageJson.devDependencies[nitroKey] ?? "*",
         }
 
         packagesToRemoveFromExampleApp.forEach(pkg => {
