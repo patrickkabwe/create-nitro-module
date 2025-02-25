@@ -268,7 +268,7 @@ export class NitroModuleFactory {
         const nitroKey = `react-native-nitro-modules`
         packageJson.dependencies = {
             ...packageJson.dependencies,
-            [nitroKey]: packageJson.devDependencies[nitroKey] ?? "*",
+            [nitroKey]: packageJson.devDependencies[nitroKey] ?? '*',
         }
 
         packagesToRemoveFromExampleApp.forEach(pkg => {
