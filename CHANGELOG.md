@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 1.7.0
+
+### Minor Changes
+
+- f93105b: feat: support nitro v0.24.1
+
 ## 1.6.1
 
 ### Patch Changes
