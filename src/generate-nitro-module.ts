@@ -41,6 +41,7 @@ import {
     replacePlaceholder,
     toPascalCase,
 } from './utils'
+import templatePackageJson from '../assets/template/package.json'
 
 const execAsync = util.promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
@@ -268,7 +269,7 @@ export class NitroModuleFactory {
         const nitroKey = `react-native-nitro-modules`
         packageJson.dependencies = {
             ...packageJson.dependencies,
-            [nitroKey]: packageJson.devDependencies[nitroKey] ?? '*',
+            [nitroKey]: templatePackageJson.devDependencies[nitroKey] ?? "*",
         }
 
         packagesToRemoveFromExampleApp.forEach(pkg => {
