@@ -9,6 +9,30 @@ type AutolinkingConfig = {
 
 export const LANGS = ['c++', 'swift', 'kotlin'] as const
 
+export const validateModuleName = (input: string): string | true => {
+    if (input.trim().length < 1) {
+        return 'Module name cannot be empty'
+    }
+
+    if (/[A-Z]/.test(input)) {
+        return 'Module name should be lowercase'
+    }
+
+    if (input.startsWith('react-native-')) {
+        return 'Do not include "react-native-" prefix, it will be added automatically'
+    }
+
+    if (input.includes('@') || input.includes('/')) {
+        return 'Namespaced packages (e.g., @org/module) are not supported'
+    }
+
+    if (!/^[a-z0-9-]+$/.test(input)) {
+        return 'Module name can only contain lowercase letters, numbers, and hyphens'
+    }
+
+    return true
+}
+
 export const replaceTag = (tag: string, oldValue: string, newValue: string) => {
     return oldValue?.replaceAll(tag, newValue)
 }
