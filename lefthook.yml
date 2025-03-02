@@ -12,4 +12,4 @@ pre-commit:
         - "*.json"
         - "*.ts"
         - "*.tsx"
-      run: bun format {staged_files}
+      run: bun format {staged_files} && git add {staged_files}
