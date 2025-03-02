@@ -53,7 +53,7 @@ export interface ${toPascalCase(
   ${funcName}(num1: number, num2: number): number
 }`
 
-export const nitroViewSpecCode = (moduleName: string) => `import type {
+export const nitroViewSpecCode = (moduleName: string, platformLang: string) => `import type {
   HybridView,
   HybridViewProps,
   HybridViewMethods,
@@ -65,7 +65,7 @@ export interface ${toPascalCase(moduleName)}Props extends HybridViewProps {
 
 export interface ${toPascalCase(moduleName)}Methods extends HybridViewMethods {}
 
-export type ${toPascalCase(moduleName)} = HybridView<${toPascalCase(moduleName)}Props, ${toPascalCase(moduleName)}Methods>`
+export type ${toPascalCase(moduleName)} = HybridView<${toPascalCase(moduleName)}Props, ${toPascalCase(moduleName)}Methods, { ${platformLang} }>`
 
 // Nitro Module index.ts code
 export const nitroModuleCode = (
