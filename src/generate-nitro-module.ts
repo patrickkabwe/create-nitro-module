@@ -25,6 +25,7 @@ import { CppFileGenerator } from './file-generators/cpp-file-generator'
 import { IOSFileGenerator } from './file-generators/ios-file-generator'
 import { JSFileGenerator } from './file-generators/js-file-generator'
 import {
+    ExampleType,
     FileGenerator,
     GenerateModuleConfig,
     Nitro,
@@ -225,16 +226,23 @@ export class NitroModuleFactory {
         const packageManager = this.config.pm === 'bun' ? 'bunx' : 'npx -y'
 
         // TODO: generate expo example app
+        const expoCmd = 'npx create-expo-app@latest'
 
-        const args = `${packageManager} \
+        const cliCmd = `${packageManager} \
             @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example \
             --package-name com.${replaceHyphen(this.config.moduleName)}example \
-            --directory example --skip-install --skip-git-init --version latest`
+            --directory example --skip-install --skip-git-init --version 0.78.0`
 
-        await execAsync(args, { cwd: this.config.cwd })
+        let appPath = ''
+        if (this.config.exampleType === ExampleType.Expo) {
+            await execAsync(expoCmd, { cwd: this.config.cwd })
+            appPath = path.join(this.config.cwd, 'example', 'App.tsx')
+        } else {
+            await execAsync(cliCmd, { cwd: this.config.cwd })
+            // Setup App.tsx
+            appPath = path.join(this.config.cwd, 'example', 'App.tsx')
+        }
 
-        // Setup App.tsx
-        const appPath = path.join(this.config.cwd, 'example', 'App.tsx')
         await writeFile(
             appPath,
             appExampleCode(

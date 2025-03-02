@@ -6,7 +6,12 @@ import path from 'path'
 import projectPackageJsonFile from '../package.json'
 import { generateInstructions, SUPPORTED_PLATFORMS } from './constants'
 import { NitroModuleFactory } from './generate-nitro-module'
-import { CreateModuleOptions, Nitro, PLATFORM_LANGUAGE_MAP } from './types'
+import {
+    CreateModuleOptions,
+    ExampleType,
+    Nitro,
+    PLATFORM_LANGUAGE_MAP,
+} from './types'
 import { detectPackageManager, dirExist } from './utils'
 
 export const createModule = async (
@@ -42,6 +47,7 @@ export const createModule = async (
             finalModuleName: 'react-native-' + name.toLowerCase(),
             skipInstall: options.skipInstall,
             skipExample: options.skipExample,
+            exampleType: answers.exampleType,
         })
 
         await moduleFactory.createNitroModule()
@@ -90,6 +96,14 @@ const getUserAnswers = async (name: string, usedPm?: string) => {
             }
             return true
         },
+    })
+
+    const exampleType = await inquirer.prompt({
+        type: 'list',
+        message: kleur.cyan('What type of module would you like to create?'),
+        name: 'name',
+        choices: ['expo', 'cli', 'both'], // Thinking if i should have this?
+        default: 'cli',
     })
 
     const platforms = await inquirer.prompt({
@@ -194,5 +208,7 @@ const getUserAnswers = async (name: string, usedPm?: string) => {
         pm: pm.name,
         moduleType:
             moduleType.name === 'Nitro View' ? Nitro.View : Nitro.Module,
+        exampleType:
+            exampleType.name === 'expo' ? ExampleType.Expo : ExampleType.CLI,
     }
 }
