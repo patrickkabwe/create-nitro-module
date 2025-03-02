@@ -90,11 +90,11 @@ const getUserAnswers = async (name: string, usedPm?: string) => {
         when: !name,
         default: 'awesome-library',
         validate: (input: string) => {
-            const result = validateModuleName(input);
+            const result = validateModuleName(input)
             if (result !== true) {
-                return kleur.red(`⚠️  ${result}`);
+                return kleur.red(`⚠️  ${result}`)
             }
-            return true;
+            return true
         },
     })
 
