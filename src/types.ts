@@ -30,6 +30,11 @@ export enum Nitro {
     View = 'view',
 }
 
+export enum ExampleType {
+    Expo = 'expo',
+    CLI = 'cli',
+}
+
 export type GenerateModuleConfig = {
     pm: PackageManager
     cwd: string
@@ -41,6 +46,7 @@ export type GenerateModuleConfig = {
     moduleType: Nitro
     moduleName: string
     finalModuleName: string
+    exampleType: ExampleType
 } & Omit<CreateModuleOptions, 'moduleDir'>
 
 export interface FileGenerator {

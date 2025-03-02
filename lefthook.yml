@@ -6,10 +6,10 @@ pre-commit:
         - "*.json"
         - "*.ts"
         - "*.tsx"
-      run: bun lint {staged_files}
+      run: bun lint {staged_files} && git add {staged_files}
     format:
       glob:
         - "*.json"
         - "*.ts"
         - "*.tsx"
-      run: bun format {staged_files}
+      run: bun format {staged_files} && git add {staged_files}
