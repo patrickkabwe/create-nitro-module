@@ -53,7 +53,10 @@ export interface ${toPascalCase(
   ${funcName}(num1: number, num2: number): number
 }`
 
-export const nitroViewSpecCode = (moduleName: string, platformLang: string) => `import type {
+export const nitroViewSpecCode = (
+    moduleName: string,
+    platformLang: string
+) => `import type {
   HybridView,
   HybridViewProps,
   HybridViewMethods,
