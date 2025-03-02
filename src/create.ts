@@ -7,7 +7,7 @@ import projectPackageJsonFile from '../package.json'
 import { generateInstructions, SUPPORTED_PLATFORMS } from './constants'
 import { NitroModuleFactory } from './generate-nitro-module'
 import { CreateModuleOptions, Nitro, PLATFORM_LANGUAGE_MAP } from './types'
-import { detectPackageManager, dirExist } from './utils'
+import { detectPackageManager, dirExist, validateModuleName } from './utils'
 
 export const createModule = async (
     name: string,
@@ -17,6 +17,11 @@ export const createModule = async (
     try {
         if (typeof name !== 'string') {
             name = ''
+        } else {
+            const validationResult = validateModuleName(name)
+            if (validationResult !== true) {
+                throw new Error(`Invalid module name: ${validationResult}`)
+            }
         }
 
         if (options.moduleDir) {
@@ -85,8 +90,9 @@ const getUserAnswers = async (name: string, usedPm?: string) => {
         when: !name,
         default: 'awesome-library',
         validate: (input: string) => {
-            if (input.trim().length < 1) {
-                return kleur.red('⚠️  Module name cannot be empty')
+            const result = validateModuleName(input)
+            if (result !== true) {
+                return kleur.red(`⚠️  ${result}`)
             }
             return true
         },

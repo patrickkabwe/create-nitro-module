@@ -9,6 +9,30 @@ type AutolinkingConfig = {
 
 export const LANGS = ['c++', 'swift', 'kotlin'] as const
 
+export const validateModuleName = (input: string): string | true => {
+    if (input.trim().length < 1) {
+        return 'Module name cannot be empty'
+    }
+
+    if (/[A-Z]/.test(input)) {
+        return 'Module name should be lowercase'
+    }
+
+    if (input.startsWith('react-native-')) {
+        return 'Do not include "react-native-" prefix, it will be added automatically'
+    }
+
+    if (input.includes('@') || input.includes('/')) {
+        return 'Namespaced packages (e.g., @org/module) are not supported'
+    }
+
+    if (!/^[a-z0-9-]+$/.test(input)) {
+        return 'Module name can only contain lowercase letters, numbers, and hyphens'
+    }
+
+    return true
+}
+
 export const replaceTag = (tag: string, oldValue: string, newValue: string) => {
     return oldValue?.replaceAll(tag, newValue)
 }
@@ -169,15 +193,17 @@ export const copyTemplateFiles = async (
     filesToCopy: string[]
 ) => {
     for (const file of filesToCopy) {
-        await cp(path.join(...paths, file), path.join(config.cwd, file), { recursive: true })
+        await cp(path.join(...paths, file), path.join(config.cwd, file), {
+            recursive: true,
+        })
     }
 }
 
 export const detectPackageManager = () => {
-    const userAgent = process.env.npm_config_user_agent;
+    const userAgent = process.env.npm_config_user_agent
     if (!userAgent) return
-    if (userAgent.startsWith('npm')) return 'npm';
-    if (userAgent.startsWith('yarn')) return 'yarn';
-    if (userAgent.startsWith('bun')) return 'bun';
+    if (userAgent.startsWith('npm')) return 'npm'
+    if (userAgent.startsWith('yarn')) return 'yarn'
+    if (userAgent.startsWith('bun')) return 'bun'
     return 'bun'
 }
