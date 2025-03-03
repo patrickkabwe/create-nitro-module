@@ -14,6 +14,7 @@ export const createModule = async (
     options: CreateModuleOptions
 ) => {
     const spinner = ora()
+    let moduleType = Nitro.Module
     try {
         if (typeof name !== 'string') {
             name = ''
@@ -35,6 +36,7 @@ export const createModule = async (
         const answers = await getUserAnswers(name, usedPm)
         name = answers.moduleName
         answers.pm = usedPm || answers.pm
+        moduleType = answers.moduleType
 
         const moduleFactory = new NitroModuleFactory({
             langs: answers.langs,
@@ -43,7 +45,7 @@ export const createModule = async (
             pm: answers.pm,
             cwd: options.moduleDir || process.cwd(),
             spinner,
-            moduleType: answers.moduleType,
+            moduleType,
             finalModuleName: 'react-native-' + name.toLowerCase(),
             skipInstall: options.skipInstall,
             skipExample: options.skipExample,
@@ -68,7 +70,7 @@ export const createModule = async (
     } catch (error) {
         spinner.fail(
             kleur.red(
-                `Failed to create Nitro module: ${(error as Error).message}`
+                `Failed to create Nitro ${moduleType}: ${(error as Error).message}`
             )
         )
         if (name) {
