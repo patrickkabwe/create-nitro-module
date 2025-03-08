@@ -1,8 +1,9 @@
 import { exec } from 'node:child_process'
-import { readFile, rename, writeFile } from 'node:fs/promises'
+import { readFile, rename, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import util from 'node:util'
+import templatePackageJson from '../assets/template/package.json'
 import { androidSettingsGradleCode } from './code-snippets/code.android'
 import {
     appExampleCode,
@@ -41,7 +42,6 @@ import {
     replacePlaceholder,
     toPascalCase,
 } from './utils'
-import templatePackageJson from '../assets/template/package.json'
 
 const execAsync = util.promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
@@ -380,8 +380,9 @@ export class NitroModuleFactory {
         await writeFile(androidBuildGradlePath, toWrite, { encoding: 'utf8' })
 
         for (const folder of foldersToRemoveFromExampleApp) {
-            await execAsync(
-                `rm -rf ${path.join(this.config.cwd, 'example', folder)}`
+            await rm(
+                path.join(this.config.cwd, 'example', folder),
+                { recursive: true, force: true }
             )
         }
     }
