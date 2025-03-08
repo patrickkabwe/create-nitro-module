@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 1.7.1
+
+### Patch Changes
+
+- 9dbb316: fix: view platform specific gen
+
 ## 1.7.0
 
 ### Minor Changes
