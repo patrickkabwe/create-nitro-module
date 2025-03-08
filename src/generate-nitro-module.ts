@@ -380,10 +380,10 @@ export class NitroModuleFactory {
         await writeFile(androidBuildGradlePath, toWrite, { encoding: 'utf8' })
 
         for (const folder of foldersToRemoveFromExampleApp) {
-            await rm(
-                path.join(this.config.cwd, 'example', folder),
-                { recursive: true, force: true }
-            )
+            await rm(path.join(this.config.cwd, 'example', folder), {
+                recursive: true,
+                force: true,
+            })
         }
     }
 
