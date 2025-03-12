@@ -275,7 +275,7 @@ export class NitroModuleFactory {
 
         exampleAppPackageJson.devDependencies = {
             ...exampleAppPackageJson.devDependencies,
-            "babel-plugin-module-resolver": "^5.0.2"
+            'babel-plugin-module-resolver': '^5.0.2',
         }
 
         packagesToRemoveFromExampleApp.forEach(pkg => {

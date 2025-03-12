@@ -30,9 +30,7 @@ export const packagesToRemoveFromExampleApp = [
     'typescript',
 ]
 
-export const foldersToRemoveFromExampleApp = [
-    '__tests__',
-]
+export const foldersToRemoveFromExampleApp = ['__tests__']
 
 export const NITRO_GRAPHIC = `   
    ┌─────┐
