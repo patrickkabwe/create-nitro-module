@@ -17,6 +17,8 @@ export const messages = {
     success: '✨ Nitro Module created successfully!',
 } as const
 
+export const SUPPORTED_REACT_NATIVE_VERSION = '0.78.0'
+
 export const packagesToRemoveFromExampleApp = [
     '@types/react',
     '@types/react-test-renderer',
@@ -28,7 +30,9 @@ export const packagesToRemoveFromExampleApp = [
     'typescript',
 ]
 
-export const foldersToRemoveFromExampleApp = []
+export const foldersToRemoveFromExampleApp = [
+    '__tests__',
+]
 
 export const NITRO_GRAPHIC = `   
    ┌─────┐
