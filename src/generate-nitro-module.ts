@@ -20,6 +20,7 @@ import {
     JS_PACKAGE_NAME_TAG,
     messages,
     packagesToRemoveFromExampleApp,
+    SUPPORTED_REACT_NATIVE_VERSION,
 } from './constants'
 import { AndroidFileGenerator } from './file-generators/android-file-generator'
 import { CppFileGenerator } from './file-generators/cpp-file-generator'
@@ -228,7 +229,7 @@ export class NitroModuleFactory {
         const args = `${packageManager} \
             @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example \
             --package-name com.${replaceHyphen(this.config.moduleName)}example \
-            --directory example --skip-install --skip-git-init --version latest`
+            --directory example --skip-install --skip-git-init --version ${SUPPORTED_REACT_NATIVE_VERSION}`
 
         await execAsync(args, { cwd: this.config.cwd })
 
@@ -252,33 +253,40 @@ export class NitroModuleFactory {
             'example',
             'package.json'
         )
-        const packageJsonStr = await readFile(packageJsonPath, {
+        const examplePackageJsonStr = await readFile(packageJsonPath, {
             encoding: 'utf8',
         })
-        const packageJson = JSON.parse(packageJsonStr)
+        const exampleAppPackageJson = JSON.parse(examplePackageJsonStr)
 
-        packageJson.name = `${this.config.finalModuleName}-example`
+        exampleAppPackageJson.name = `${this.config.finalModuleName}-example`
 
-        packageJson.scripts = {
-            ...packageJson.scripts,
+        exampleAppPackageJson.scripts = {
+            ...exampleAppPackageJson.scripts,
             ios: "react-native run-ios --simulator='iPhone 16'",
             start: 'react-native start --reset-cache',
             pod: 'bundle install && bundle exec pod install --project-directory=ios',
         }
 
         const nitroKey = `react-native-nitro-modules`
-        packageJson.dependencies = {
-            ...packageJson.dependencies,
+        exampleAppPackageJson.dependencies = {
+            ...exampleAppPackageJson.dependencies,
             [nitroKey]: templatePackageJson.devDependencies[nitroKey] ?? '*',
         }
 
+        exampleAppPackageJson.devDependencies = {
+            ...exampleAppPackageJson.devDependencies,
+            'babel-plugin-module-resolver': '^5.0.2',
+        }
+
         packagesToRemoveFromExampleApp.forEach(pkg => {
-            delete packageJson.devDependencies[pkg]
+            delete exampleAppPackageJson.devDependencies[pkg]
         })
 
-        await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2), {
-            encoding: 'utf8',
-        })
+        await writeFile(
+            packageJsonPath,
+            JSON.stringify(exampleAppPackageJson, null, 2),
+            { encoding: 'utf8' }
+        )
     }
 
     private async syncExampleAppConfigurations() {
