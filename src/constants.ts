@@ -1,7 +1,7 @@
 import kleur from 'kleur'
 import type { InstructionsParams } from './types'
 
-export const SUPPORTED_PLATFORMS = ['ios', 'android']
+export const SUPPORTED_PLATFORMS = ['ios', 'android'] as const
 
 export const ANDROID_NAME_SPACE_TAG = '$$androidNamespace$$'
 export const ANDROID_CXX_LIB_NAME_TAG = '$$androidCxxLibName$$'

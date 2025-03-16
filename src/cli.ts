@@ -19,13 +19,28 @@ program
     .option('-i, --skip-install', 'skip installing dependencies')
     .action(createModule)
 
-program.command('new')
-    .description('generates files and autolinking config for a nitro module or view with the given name within the current directory')
+program
+    .command('new')
+    .description(
+        'generates files and autolinking config for a nitro module or view with the given name within the current directory'
+    )
     .argument('<type>', 'type of the module to create. (module, view)')
-    .argument('<name>', 'name of the module to create. (e.g. CameraView or camera-view)')
-    .option('-d, --module-dir <moduleDirectory>', 'directory to create the module in')
-    .option('-p, --platform <platform>', 'platform to create the module for. (android, ios)')
-    .option('-l, --language <language>', 'language to create the module for. (swift, kotlin, cpp)')
+    .argument(
+        '<name>',
+        'name of the module to create. (e.g. CameraView or camera-view)'
+    )
+    .option(
+        '-d, --module-dir <moduleDirectory>',
+        'directory to create the module in'
+    )
+    .option(
+        '-p, --platform <platform>',
+        'platform to create the module for. (android, ios)'
+    )
+    .option(
+        '-l, --language <language>',
+        'language to create the module for. (swift, kotlin, cpp)'
+    )
     .action(newModule)
 
 // nitro-module new view BackCamera
