@@ -17,10 +17,7 @@ const moduleDir = {
     [Nitro.View]: 'views',
 }
 
-export const newModule = async (
-    type: string,
-    name: string
-) => {
+export const newModule = async (type: string, name: string) => {
     const spinner = ora()
     try {
         if (!name || !type) {
@@ -75,20 +72,20 @@ export const newModule = async (
         autolinkingConfig[moduleName] =
             isIOS && isAndroid
                 ? {
-                    swift: `Hybrid${toPascalCase(name)}`,
-                    kotlin: `Hybrid${toPascalCase(name)}`,
-                }
+                      swift: `Hybrid${toPascalCase(name)}`,
+                      kotlin: `Hybrid${toPascalCase(name)}`,
+                  }
                 : isIOS
-                    ? {
+                  ? {
                         swift: `Hybrid${toPascalCase(name)}`,
                     }
-                    : isAndroid
-                        ? {
-                            kotlin: `Hybrid${toPascalCase(name)}`,
-                        }
-                        : {
-                            cpp: `Hybrid${toPascalCase(name)}`,
-                        }
+                  : isAndroid
+                    ? {
+                          kotlin: `Hybrid${toPascalCase(name)}`,
+                      }
+                    : {
+                          cpp: `Hybrid${toPascalCase(name)}`,
+                      }
         nitroJsonObj.autolinking = autolinkingConfig
         await writeFile(
             path.join(process.cwd(), 'nitro.json'),
