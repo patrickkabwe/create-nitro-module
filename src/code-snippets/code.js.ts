@@ -91,7 +91,7 @@ import ${toPascalCase(moduleName)}Config from '../nitrogen/generated/shared/json
 import type {
   ${toPascalCase(moduleName)}Props,
   ${toPascalCase(moduleName)}Methods,
-} from './specs/${moduleName}.nitro'
+} from './views/${moduleName}.nitro'
 
 
 export const ${toPascalCase(moduleName)} = getHostComponent<${toPascalCase(moduleName)}Props, ${toPascalCase(moduleName)}Methods>(
