@@ -176,12 +176,12 @@ const androidWorkaround = async () => {
  )
 
  const viewManagerStr = await readFile(viewManagerFile, { encoding: 'utf8' })
- await writeFile(viewManagerFile, viewManagerStr.replace('com.margelo.nitro.${moduleName.toLowerCase()}.*', 'com.${moduleName.toLowerCase()}.*'))
+ await writeFile(viewManagerFile, viewManagerStr.replace(/com\\.margelo\\.nitro\\.${moduleName.toLowerCase()}\\.\\*/g, 'com.${moduleName.toLowerCase()}.*'))
 `
         : ''
     }
  
  const str = await readFile(androidOnLoadFile, { encoding: 'utf8' })
- await writeFile(androidOnLoadFile, str.replace('margelo/nitro/', ''))
+ await writeFile(androidOnLoadFile, str.replace(/margelo\\/nitro\\//g, ''))
 }
 androidWorkaround()`
