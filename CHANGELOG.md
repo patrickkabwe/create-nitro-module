@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 1.7.2
+
+### Patch Changes
+
+- ad0494d: fix: intero require default issue
+
 ## 1.7.1
 
 ### Patch Changes
