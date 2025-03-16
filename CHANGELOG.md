@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 1.7.3
+
+### Patch Changes
+
+- c6d46e6: post-script support for multiple auto linking config in nitro.json
+
 ## 1.7.2
 
 ### Patch Changes
