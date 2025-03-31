@@ -17,8 +17,6 @@ export const messages = {
     success: '✨ Nitro Module created successfully!',
 } as const
 
-export const SUPPORTED_REACT_NATIVE_VERSION = '0.78.0'
-
 export const packagesToRemoveFromExampleApp = [
     '@types/react',
     '@types/react-test-renderer',
@@ -56,14 +54,13 @@ ${kleur.cyan().bold(NITRO_GRAPHIC)}
 ${kleur.red().bold('Next steps:')}
 
 ${kleur.green(`cd ${moduleName}`)}
-${
-    !skipInstall
+${!skipInstall
         ? ''
         : `\nInstall dependencies:
 
    ${kleur.green(`${pm} install`)}             ${kleur.dim('# Install dependencies')}
    ${kleur.green(`${pm} run codegen`)}         ${kleur.dim('# Generate native interfaces from TypeScript definitions')}\n`
-}
+    }
 Begin development:
  
    ${kleur.cyan('Define your module:')}
@@ -75,15 +72,14 @@ Begin development:
    ${kleur.white('android/')}                 ${kleur.dim('# Android native implementation using kotlin')}
    ${kleur.white('cpp/')}                     ${kleur.dim('# C++ native implementation. Shareable between iOS and Android (Will be generated if cpp was selected)')}
    
-${
-    skipExample
+${skipExample
         ? ''
         : `Run your example app to test the package:
 
    ${kleur.green('cd example')}
    ${kleur.green(`${pm} run pod`)}             ${kleur.dim('# Install CocoaPods dependencies (iOS)')}
    ${kleur.green(`${pm} run ios|android`)}     ${kleur.dim('# Run your example app')}`
-}
+    }
 
 ${kleur.yellow('Pro Tips:')}
 ${kleur.dim('• iOS:')} Open ${kleur.green('example/ios/example.xcworkspace')} in Xcode for native debugging. Make sure to run ${kleur.green(`${pm} pod`)} first in the example directory
