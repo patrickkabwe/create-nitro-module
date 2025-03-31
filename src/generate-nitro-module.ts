@@ -225,7 +225,8 @@ export class NitroModuleFactory {
     private async createExampleApp() {
         const packageManager = this.config.pm === 'bun' ? 'bunx' : 'npx -y'
 
-        const reactNativeVersion = templatePackageJson.devDependencies['react-native']
+        const reactNativeVersion =
+            templatePackageJson.devDependencies['react-native']
 
         const args = `${packageManager} \
             @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example \
