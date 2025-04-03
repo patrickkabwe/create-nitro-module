@@ -20,7 +20,6 @@ import {
     JS_PACKAGE_NAME_TAG,
     messages,
     packagesToRemoveFromExampleApp,
-    SUPPORTED_REACT_NATIVE_VERSION,
 } from './constants'
 import { AndroidFileGenerator } from './file-generators/android-file-generator'
 import { CppFileGenerator } from './file-generators/cpp-file-generator'
@@ -227,10 +226,13 @@ export class NitroModuleFactory {
     private async createExampleApp() {
         const packageManager = this.config.pm === 'bun' ? 'bunx' : 'npx -y'
 
+        const reactNativeVersion =
+            templatePackageJson.devDependencies['react-native']
+
         const args = `${packageManager} \
             @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example \
             --package-name com.${replaceHyphen(this.config.moduleName)}example \
-            --directory example --skip-install --skip-git-init --version ${SUPPORTED_REACT_NATIVE_VERSION}`
+            --directory example --skip-install --skip-git-init --version ${reactNativeVersion}`
 
         await execAsync(args, { cwd: this.config.cwd })
 
