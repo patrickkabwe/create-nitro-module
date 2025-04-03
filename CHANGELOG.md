@@ -1,5 +1,11 @@
 # create-nitro-module
 
+## 1.7.4
+
+### Patch Changes
+
+- bf522ef: fix(win): rm not supported
+
 ## 1.7.3
 
 ### Patch Changes
