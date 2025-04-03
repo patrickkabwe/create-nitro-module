@@ -8,16 +8,10 @@ Welcome to the Nitro Module CLI! This tool helps you create React Native modules
 
 ### Prerequisites
 
-- Node.js 16 or higher
+- Node.js 22 or higher
 - React Native development environment
 
-### Using NPM (Recommended)
-
-```bash
-npm install -g create-nitro-module
-```
-
-### Using Bun
+### Using Bun (Recommended)
 
 ```bash
 bun install -g create-nitro-module
@@ -27,6 +21,12 @@ bun install -g create-nitro-module
 
 ```bash
 yarn global add create-nitro-module
+```
+
+### Using NPM
+
+```bash
+npm install -g create-nitro-module
 ```
 
 ## Next Steps

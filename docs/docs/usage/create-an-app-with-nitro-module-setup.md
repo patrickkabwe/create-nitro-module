@@ -20,7 +20,7 @@ This command initializes a new React Native app named `MyNitroApp` using the `re
 
 After running the command, your project structure will look like this:
 
-```
+```bash
 MyNitroApp
 ├── android/              # Android application source
 ├── ios/                  # iOS application source

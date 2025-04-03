@@ -22,7 +22,7 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 
 ## Project Structure
 
-```
+```bash
 .
 ├── example
 ├── AwesomeLibrary.podspec
@@ -30,7 +30,7 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 ├── ios
 ├── src
 │    ├── index.ts
-│    └── specs
+│    └── specs|views
 │         └── awesome-library.nitro.ts
 │   ├── nitrogen
 │   ├── nitro.json
