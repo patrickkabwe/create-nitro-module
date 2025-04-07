@@ -55,7 +55,7 @@
         "nitro-codegen": "0.25.2",
         "react": "19.0.0",
         "react-native": "0.78.2",
-        "react-native-builder-bob": "^0.39.1",
+        "react-native-builder-bob": "^0.40.0",
         "react-native-nitro-modules": "0.25.2",
         "release-it": "^18.1.2",
         "typescript": "5.0.4"
