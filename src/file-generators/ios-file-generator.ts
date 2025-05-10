@@ -89,7 +89,11 @@ export class IOSFileGenerator implements FileGenerator {
                 `ios/Hybrid${toPascalCase(config.moduleName)}.swift`,
                 isHybridView
                     ? getSwiftViewCode(config.moduleName, name)
-                    : getSwiftCode(config.moduleName, `${config.funcName}`, name)
+                    : getSwiftCode(
+                          config.moduleName,
+                          `${config.funcName}`,
+                          name
+                      )
             )
         }
     }

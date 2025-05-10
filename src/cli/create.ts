@@ -1,12 +1,19 @@
-import * as p from '@clack/prompts';
-import { mkdirSync, rmSync } from 'fs';
-import kleur from 'kleur';
-import path from 'path';
-import projectPackageJsonFile from '../../package.json';
-import { generateInstructions } from '../constants';
-import { NitroModuleFactory } from '../generate-nitro-module';
-import { CreateModuleOptions, Nitro, PackageManager, PLATFORM_LANGUAGE_MAP, SupportedLang, SupportedPlatform } from '../types';
-import { detectPackageManager, dirExist, validateModuleName } from '../utils';
+import * as p from '@clack/prompts'
+import { mkdirSync, rmSync } from 'fs'
+import kleur from 'kleur'
+import path from 'path'
+import projectPackageJsonFile from '../../package.json'
+import { generateInstructions } from '../constants'
+import { NitroModuleFactory } from '../generate-nitro-module'
+import {
+    CreateModuleOptions,
+    Nitro,
+    PackageManager,
+    PLATFORM_LANGUAGE_MAP,
+    SupportedLang,
+    SupportedPlatform,
+} from '../types'
+import { detectPackageManager, dirExist, validateModuleName } from '../utils'
 
 export const createModule = async (
     name: string,
@@ -319,7 +326,6 @@ const getUserAnswers = async (name: string, usedPm?: PackageManager) => {
     if (!packageName) {
         process.exit(0)
     }
-
 
     return {
         moduleName: group.moduleName,

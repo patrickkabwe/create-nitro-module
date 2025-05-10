@@ -37,7 +37,7 @@ export type GenerateModuleConfig = {
     langs: SupportedLang[]
     prefix?: string
     spinner: ReturnType<typeof p.spinner>
-    
+
     funcName?: string
     platforms: SupportedPlatform[]
     moduleType: Nitro
