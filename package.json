@@ -67,10 +67,7 @@
         "arrowParens": "avoid"
     },
     "devDependencies": {
-        "@semantic-release/commit-analyzer": "^13.0.1",
-        "@semantic-release/github": "^11.0.2",
-        "@semantic-release/npm": "^12.0.1",
-        "@semantic-release/release-notes-generator": "^14.0.3",
+        "@semantic-release/changelog": "^6.0.3",
         "@types/node": "^22.10.0",
         "@typescript-eslint/eslint-plugin": "^8.16.0",
         "@typescript-eslint/parser": "^8.16.0",
@@ -96,6 +93,13 @@
         "plugins": [
             "@semantic-release/commit-analyzer",
             "@semantic-release/release-notes-generator",
+            [
+                "@semantic-release/changelog",
+                {
+                    "changelogTitle": "# create-nitro-module",
+                    "changelogFile": "CHANGELOG.md"
+                }
+            ],
             "@semantic-release/npm",
             "@semantic-release/github"
         ]
