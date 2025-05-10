@@ -49,25 +49,3 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
         run: bun release
-
-    #   - name: Get Version
-    #     id: get-version
-    #     run: |
-    #       VERSION=$(node -p "require('./package.json').version")
-    #       echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-    #   - name: Create Release Pull Request or Publish to npm
-    #     id: changesets
-    #     uses: changesets/action@v1
-    #     with:
-    #       publish: bun release
-    #       commit: 'chore(release): version package v${{ steps.get-version.outputs.version }}'
-    #       title: 'chore(release): version package v${{ steps.get-version.outputs.version }}'
-    #     env:
-    #       GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-    #       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-    #   - name: Release Status
-    #     if: steps.changesets.outputs.published == 'true'
-    #     run: |
-    #       echo "🎉 Published version ${{ steps.get-version.outputs.version }}"
