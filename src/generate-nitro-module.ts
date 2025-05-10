@@ -94,7 +94,7 @@ export class NitroModuleFactory {
         await this.updateReadme()
 
         if (!this.config.skipExample) {
-            this.config.spinner.text = messages.generating
+            this.config.spinner.message(messages.generating)
             await this.createExampleApp()
             await this.configureExamplePackageJson()
             await this.syncExampleAppConfigurations()
@@ -102,10 +102,10 @@ export class NitroModuleFactory {
             await this.gitInit()
         }
         if (!this.config.skipInstall && !this.config.skipExample) {
-            this.config.spinner.text = messages.installing
+            this.config.spinner.message(messages.installing)
             await this.installDependenciesAndRunCodegen()
         }
-        this.config.spinner.succeed()
+        this.config.spinner.stop()
     }
 
     private async replaceNitroJsonPlaceholders() {

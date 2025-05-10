@@ -2,8 +2,16 @@ import { toPascalCase } from '../utils'
 
 export const getSwiftCode = (
     moduleName: string,
-    funcName: string
-) => `import Foundation
+    funcName: string,
+    userName: string
+) => `//
+//  Hybrid${toPascalCase(moduleName)}.swift
+//  Pods
+//
+//  Created by ${userName} on ${new Date().toLocaleDateString()}.
+//
+
+import Foundation
 
 class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
     func ${funcName}(num1: Double, num2: Double) throws -> Double {
@@ -12,7 +20,14 @@ class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
 }
 `
 
-export const getSwiftViewCode = (moduleName: string) => `import Foundation
+export const getSwiftViewCode = (moduleName: string, userName: string) => `//
+//  Hybrid${toPascalCase(moduleName)}.swift
+//  Pods
+//
+//  Created by ${userName} on ${new Date().toLocaleDateString()}.
+//
+
+import Foundation
 import UIKit
 
 class Hybrid${toPascalCase(moduleName)} : Hybrid${toPascalCase(moduleName)}Spec {

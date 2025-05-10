@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander'
-import packageJson from '../package.json'
+import packageJson from '../../package.json'
 import { createModule } from './create'
 
 const program = new Command()

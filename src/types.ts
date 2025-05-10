@@ -1,4 +1,5 @@
-import { Ora } from 'ora'
+// import { Ora } from 'ora'
+import * as p from '@clack/prompts'
 
 export enum SupportedLang {
     SWIFT = 'swift',
@@ -35,7 +36,8 @@ export type GenerateModuleConfig = {
     cwd: string
     langs: SupportedLang[]
     prefix?: string
-    spinner: Ora
+    spinner: ReturnType<typeof p.spinner>
+    
     funcName?: string
     platforms: SupportedPlatform[]
     moduleType: Nitro
