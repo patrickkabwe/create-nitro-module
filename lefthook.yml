@@ -1,3 +1,12 @@
+commit-msg:
+  commands:
+    commitlint:
+      glob:
+        - "*.json"
+        - "*.ts"
+        - "*.tsx"
+      run: bun commitlint {1}
+      
 pre-commit:
   parallel: true
   commands:
