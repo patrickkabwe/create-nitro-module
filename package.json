@@ -4,6 +4,16 @@
     "description": "A CLI tool that simplifies creating React Native modules powered by Nitro Modules.",
     "private": false,
     "type": "module",
+    "scripts": {
+        "dev": "bun typecheck && tsx src/cli.ts",
+        "build": "rm -rf lib && bun typecheck && tsup src",
+        "typecheck": "tsc --noEmit",
+        "prerelease": "rm -rf ./lib/assets",
+        "release": "bun run build && bun semantic-release",
+        "lint": "eslint --fix ",
+        "format": "prettier --write ",
+        "commitlint": "commitlint --edit"
+    },
     "files": [
         "lib",
         "assets",
@@ -43,15 +53,6 @@
         "registry": "https://registry.npmjs.org/",
         "access": "public"
     },
-    "scripts": {
-        "dev": "bun typecheck && tsx src/cli.ts",
-        "build": "rm -rf lib && bun typecheck && tsup src",
-        "typecheck": "tsc --noEmit",
-        "prerelease": "rm -rf ./lib/assets",
-        "release": "bun run build && bun semantic-release",
-        "lint": "eslint --fix ",
-        "format": "prettier --write "
-    },
     "dependencies": {
         "commander": "^13.0.0",
         "inquirer": "^12.1.0",
@@ -67,6 +68,8 @@
         "arrowParens": "avoid"
     },
     "devDependencies": {
+        "@commitlint/cli": "^19.8.1",
+        "@commitlint/config-conventional": "^19.8.1",
         "@semantic-release/changelog": "^6.0.3",
         "@types/node": "^22.10.0",
         "@typescript-eslint/eslint-plugin": "^8.16.0",
@@ -81,27 +84,5 @@
     },
     "engines": {
         "node": ">=18"
-    },
-    "release": {
-        "branches": [
-            "main",
-            {
-                "name": "next",
-                "prerelease": "next"
-            }
-        ],
-        "plugins": [
-            "@semantic-release/commit-analyzer",
-            "@semantic-release/release-notes-generator",
-            [
-                "@semantic-release/changelog",
-                {
-                    "changelogTitle": "# create-nitro-module",
-                    "changelogFile": "CHANGELOG.md"
-                }
-            ],
-            "@semantic-release/npm",
-            "@semantic-release/github"
-        ]
     }
 }

@@ -1,3 +1,8 @@
+commit-msg:
+  commands:
+    commitlint:
+      run: bun commitlint {1}
+      
 pre-commit:
   parallel: true
   commands:
