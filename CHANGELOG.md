@@ -1,3 +1,14 @@
+## [1.8.6](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.5...v1.8.6) (2025-05-19)
+
+### 🐛 Bug Fixes
+
+* release workflow ([2f8ddb8](https://github.com/patrickkabwe/create-nitro-module/commit/2f8ddb83c3b556754d704c24c19e8653303c2c53))
+* release workflow ([1d76a6f](https://github.com/patrickkabwe/create-nitro-module/commit/1d76a6faa971c2c490c6484bffe565941917d826))
+
+### 🛠️ Other changes
+
+* update semantic-release configuration and dependencies ([f20c459](https://github.com/patrickkabwe/create-nitro-module/commit/f20c459c1b7db87b543edf28b6ff619b6816fc5d))
+
 # create-nitro-module
 
 ## 1.7.4
