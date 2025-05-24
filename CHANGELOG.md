@@ -1,3 +1,9 @@
+## [1.8.7](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.6...v1.8.7) (2025-05-24)
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump @types/node from 22.15.17 to 22.15.21 ([422f1b9](https://github.com/patrickkabwe/create-nitro-module/commit/422f1b9cae7382d9ab5d4c823bb65bfd65b9d52b))
+
 ## [1.8.6](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.5...v1.8.6) (2025-05-19)
 
 ### 🐛 Bug Fixes
