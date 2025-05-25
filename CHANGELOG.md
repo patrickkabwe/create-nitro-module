@@ -1,3 +1,10 @@
+## [1.8.8](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.7...v1.8.8) (2025-05-25)
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump eslint from 9.26.0 to 9.27.0 ([5849ca4](https://github.com/patrickkabwe/create-nitro-module/commit/5849ca45b9539400306968ad6e4b63d69a991604))
+* **deps-dev:** bump semantic-release from 24.2.3 to 24.2.4 ([04db9cc](https://github.com/patrickkabwe/create-nitro-module/commit/04db9cc93df7a860ac25953c4e0b6cd26c1c5a08))
+
 ## [1.8.7](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.6...v1.8.7) (2025-05-24)
 
 ### 🛠️ Other changes
