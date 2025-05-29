@@ -1,3 +1,9 @@
+## [1.8.11-next.2](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.11-next.1...v1.8.11-next.2) (2025-05-29)
+
+### 🛠️ Other changes
+
+* **deps:** update multiple dependencies ([dcb6810](https://github.com/patrickkabwe/create-nitro-module/commit/dcb6810ab5769061700445b2af593f2de9e10af4))
+
 ## [1.8.11-next.1](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.10...v1.8.11-next.1) (2025-05-29)
 
 ### 🐛 Bug Fixes
