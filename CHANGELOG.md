@@ -1,3 +1,13 @@
+## [2.0.0-next.1](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.11-next.3...v2.0.0-next.1) (2025-05-29)
+
+### ⚠ BREAKING CHANGES
+
+* use `@clack/prompts` to handle prompts
+
+### ✨ Features
+
+* use `@clack/prompts` to handle prompts ([31d414c](https://github.com/patrickkabwe/create-nitro-module/commit/31d414c376084d06afe181e01cff985870340524))
+
 ## [1.8.10](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.9...v1.8.10) (2025-05-29)
 
 ### 🛠️ Other changes
