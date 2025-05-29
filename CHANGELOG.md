@@ -1,3 +1,13 @@
+## [1.8.11-next.1](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.10...v1.8.11-next.1) (2025-05-29)
+
+### 🐛 Bug Fixes
+
+* Clean up code formatting and ensure newline at end of file ([1fa81a1](https://github.com/patrickkabwe/create-nitro-module/commit/1fa81a1f4678db0cfc578f0ecb5655ffc24dc80d))
+
+### 🛠️ Other changes
+
+* Update dependencies and refactor module creation process ([9b57577](https://github.com/patrickkabwe/create-nitro-module/commit/9b57577bfe3c08c280bb82db4f804402c41400bf))
+
 ## [1.8.10](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.9...v1.8.10) (2025-05-29)
 
 ### 🛠️ Other changes
