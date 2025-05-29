@@ -54,7 +54,7 @@
         "access": "public"
     },
     "dependencies": {
-        "commander": "^13.0.0",
+        "commander": "^14.0.0",
         "inquirer": "^12.1.0",
         "kleur": "^4.1.5",
         "ora": "^8.1.1",
