@@ -1,3 +1,9 @@
+## [1.8.9](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.8...v1.8.9) (2025-05-29)
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump conventional-changelog-conventionalcommits ([e09671d](https://github.com/patrickkabwe/create-nitro-module/commit/e09671d0ba48809ab67a79b8aa7b17eb89b9bff2))
+
 ## [1.8.8](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.7...v1.8.8) (2025-05-25)
 
 ### 🛠️ Other changes
