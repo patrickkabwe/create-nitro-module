@@ -1,3 +1,11 @@
+## [1.8.10](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.9...v1.8.10) (2025-05-29)
+
+### 🛠️ Other changes
+
+* **deps:** bump commander from 13.1.0 to 14.0.0 ([fefc5a7](https://github.com/patrickkabwe/create-nitro-module/commit/fefc5a7ffe2123745f91bb690e6ad6d8e5d89b69))
+* **deps:** bump inquirer from 12.6.1 to 12.6.3 ([3635eb6](https://github.com/patrickkabwe/create-nitro-module/commit/3635eb696f69d3183d6f8625d8e0fe4776fb5aab))
+* **deps:** bump tsup from 8.4.0 to 8.5.0 ([ae53634](https://github.com/patrickkabwe/create-nitro-module/commit/ae53634dd4f68a65299ba10d26027f404cb4855e))
+
 ## [1.8.9](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.8...v1.8.9) (2025-05-29)
 
 ### 🛠️ Other changes
