@@ -1,3 +1,9 @@
+## [1.8.11-next.3](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.11-next.2...v1.8.11-next.3) (2025-05-29)
+
+### 🛠️ Other changes
+
+* **release:** bump version to 2.0.0 ([0b99243](https://github.com/patrickkabwe/create-nitro-module/commit/0b9924394707296889a20c2af9e99c309325f6b7))
+
 ## [1.8.10](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.9...v1.8.10) (2025-05-29)
 
 ### 🛠️ Other changes
