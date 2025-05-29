@@ -1,3 +1,41 @@
+## [1.8.10](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.9...v1.8.10) (2025-05-29)
+
+### 🛠️ Other changes
+
+* **deps:** bump commander from 13.1.0 to 14.0.0 ([fefc5a7](https://github.com/patrickkabwe/create-nitro-module/commit/fefc5a7ffe2123745f91bb690e6ad6d8e5d89b69))
+* **deps:** bump inquirer from 12.6.1 to 12.6.3 ([3635eb6](https://github.com/patrickkabwe/create-nitro-module/commit/3635eb696f69d3183d6f8625d8e0fe4776fb5aab))
+* **deps:** bump tsup from 8.4.0 to 8.5.0 ([ae53634](https://github.com/patrickkabwe/create-nitro-module/commit/ae53634dd4f68a65299ba10d26027f404cb4855e))
+
+## [1.8.9](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.8...v1.8.9) (2025-05-29)
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump conventional-changelog-conventionalcommits ([e09671d](https://github.com/patrickkabwe/create-nitro-module/commit/e09671d0ba48809ab67a79b8aa7b17eb89b9bff2))
+
+## [1.8.8](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.7...v1.8.8) (2025-05-25)
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump eslint from 9.26.0 to 9.27.0 ([5849ca4](https://github.com/patrickkabwe/create-nitro-module/commit/5849ca45b9539400306968ad6e4b63d69a991604))
+* **deps-dev:** bump semantic-release from 24.2.3 to 24.2.4 ([04db9cc](https://github.com/patrickkabwe/create-nitro-module/commit/04db9cc93df7a860ac25953c4e0b6cd26c1c5a08))
+
+## [1.8.7](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.6...v1.8.7) (2025-05-24)
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump @types/node from 22.15.17 to 22.15.21 ([422f1b9](https://github.com/patrickkabwe/create-nitro-module/commit/422f1b9cae7382d9ab5d4c823bb65bfd65b9d52b))
+
+## [1.8.6](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.5...v1.8.6) (2025-05-19)
+
+### 🐛 Bug Fixes
+
+* release workflow ([2f8ddb8](https://github.com/patrickkabwe/create-nitro-module/commit/2f8ddb83c3b556754d704c24c19e8653303c2c53))
+* release workflow ([1d76a6f](https://github.com/patrickkabwe/create-nitro-module/commit/1d76a6faa971c2c490c6484bffe565941917d826))
+
+### 🛠️ Other changes
+
+* update semantic-release configuration and dependencies ([f20c459](https://github.com/patrickkabwe/create-nitro-module/commit/f20c459c1b7db87b543edf28b6ff619b6816fc5d))
+
 # create-nitro-module
 
 ## 1.7.4

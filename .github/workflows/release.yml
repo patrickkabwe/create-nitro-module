@@ -1,66 +1,56 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'docs/**'
+    push:
+      branches:
+        - main
+        - next
+      paths-ignore:
+        - 'docs/**'
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
     steps:
-      - name: Checkout Repo
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN }}
-
       - name: Setup Bun.js
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-
-      - name: Install npm dependencies (bun)
-        run: bun install
-
-      - name: Cache npm dependencies
+      - name: Cache bun dependencies
         id: bun-cache
         uses: actions/cache@v4
         with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
+            path: ~/.bun/install/cache
+            key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+            restore-keys: |
+                ${{ runner.os }}-bun-
+        
+      - name: Install npm dependencies (bun)
+        run: bun install
 
-      - name: Get Version
-        id: get-version
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Create Release Pull Request or Publish to npm
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          publish: bun release
-          commit: 'chore(release): version package v${{ steps.get-version.outputs.version }}'
-          title: 'chore(release): version package v${{ steps.get-version.outputs.version }}'
+      - name: Build lib
+        run: bun run build
+        
+      - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Release Status
-        if: steps.changesets.outputs.published == 'true'
-        run: |
-          echo "🎉 Published version ${{ steps.get-version.outputs.version }}"
+          NPM_CONFIG_PROVENANCE: true
+        run: bun release
