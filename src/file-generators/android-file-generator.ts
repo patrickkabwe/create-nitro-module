@@ -29,7 +29,7 @@ export class AndroidFileGenerator implements FileGenerator {
     private androidPackageName: string = ''
 
     async generate(config: GenerateModuleConfig): Promise<void> {
-        this.androidPackageName = `com.${replaceHyphen(config.moduleName)}`
+        this.androidPackageName = `com.${replaceHyphen(config.packageName)}`
         await this.copyAndroidFiles(config)
         await this.generateAndroidFiles(config)
     }
@@ -53,7 +53,7 @@ export class AndroidFileGenerator implements FileGenerator {
             'main',
             'java',
             'com',
-            replaceHyphen(config.moduleName)
+            replaceHyphen(config.packageName)
         )
         await createFolder(config.cwd, androidNamespacePath)
 
@@ -73,19 +73,19 @@ export class AndroidFileGenerator implements FileGenerator {
         // Only generate Kotlin file(s) if Kotlin is supported
         if (config.langs.includes(SupportedLang.KOTLIN)) {
             // Generate HybridObject file
-            const isHybridView = config.moduleType === Nitro.View
+            const isHybridView = config.packageType === Nitro.View
             await createModuleFile(
                 config.cwd,
                 `android/src/main/java/${this.androidPackageName
                     .split('.')
-                    .join('/')}/Hybrid${toPascalCase(config.moduleName)}.kt`,
+                    .join('/')}/Hybrid${toPascalCase(config.packageName)}.kt`,
                 isHybridView
                     ? getKotlinViewCode(
-                          config.moduleName,
+                          config.packageName,
                           this.androidPackageName
                       )
                     : getKotlinCode(
-                          config.moduleName,
+                          config.packageName,
                           this.androidPackageName,
                           `${config.funcName}`
                       )
@@ -111,7 +111,7 @@ export class AndroidFileGenerator implements FileGenerator {
 
         const replacements = {
             [`com.${ANDROID_NAME_SPACE_TAG}`]: this.androidPackageName,
-            [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(config.moduleName),
+            [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(config.packageName),
         }
 
         await createModuleFile(
@@ -141,7 +141,7 @@ export class AndroidFileGenerator implements FileGenerator {
             cmakeListFile
         )
         const replacements = {
-            [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(config.moduleName),
+            [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(config.packageName),
         }
         await createModuleFile(
             config.cwd,
@@ -163,8 +163,8 @@ export class AndroidFileGenerator implements FileGenerator {
         )
 
         const replacements = {
-            [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(config.moduleName),
-            [ANDROID_NAME_SPACE_TAG]: replaceHyphen(config.moduleName),
+            [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(config.packageName),
+            [ANDROID_NAME_SPACE_TAG]: replaceHyphen(config.packageName),
         }
 
         await createModuleFile(
@@ -178,9 +178,9 @@ export class AndroidFileGenerator implements FileGenerator {
     }
 
     private async generatePackageFile(config: GenerateModuleConfig) {
-        const androidPackageFile = `${toPascalCase(config.moduleName)}Package.java`
+        const androidPackageFile = `${toPascalCase(config.packageName)}Package.java`
         const prefixPath = `android/src/main/java`
-        const isHybridView = config.moduleType === Nitro.View
+        const isHybridView = config.packageType === Nitro.View
         const androidPackageFilePath = path.join(
             config.cwd,
             prefixPath + `/com/${ANDROID_NAME_SPACE_TAG}`,
@@ -190,10 +190,10 @@ export class AndroidFileGenerator implements FileGenerator {
         )
 
         const replacements = {
-            [ANDROID_NAME_SPACE_TAG]: replaceHyphen(config.moduleName),
+            [ANDROID_NAME_SPACE_TAG]: replaceHyphen(config.packageName),
             [`${ANDROID_CXX_LIB_NAME_TAG}Package`]:
                 androidPackageFile.split('.')[0],
-            [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(config.moduleName),
+            [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(config.packageName),
         }
 
         await createModuleFile(
@@ -217,8 +217,8 @@ export class AndroidFileGenerator implements FileGenerator {
         await writeFile(
             androidWorkaroundPath,
             postScript(
-                toPascalCase(config.moduleName),
-                config.moduleType === Nitro.View
+                toPascalCase(config.packageName),
+                config.packageType === Nitro.View
             )
         )
     }

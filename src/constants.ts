@@ -10,7 +10,7 @@ export const IOS_MODULE_NAME_TAG = '$$iosModuleName$$'
 export const JS_PACKAGE_NAME_TAG = '$$packageName$$'
 
 export const messages = {
-    creating: 'Creating your Nitro Module...',
+    creating: `Creating your Nitro {packageType}...`,
     generating: 'Generating example app...',
     installing: 'Installing dependencies...',
     runningCodegen: '🚀 Running codegen...',

@@ -40,7 +40,7 @@ export class CppFileGenerator implements FileGenerator {
                 cmakeListsContent = cmakeListsContent.replace(
                     'add_library(${PACKAGE_NAME} SHARED',
                     'add_library(${PACKAGE_NAME} SHARED \n\t' +
-                        `src/main/cpp/cpp-adapter.cpp\n\t../cpp/Hybrid${toPascalCase(config.moduleName)}.cpp\n\t../cpp/Hybrid${toPascalCase(config.moduleName)}.hpp`
+                        `src/main/cpp/cpp-adapter.cpp\n\t../cpp/Hybrid${toPascalCase(config.packageName)}.cpp\n\t../cpp/Hybrid${toPascalCase(config.packageName)}.hpp`
                 )
 
                 await createModuleFile(
@@ -62,22 +62,22 @@ export class CppFileGenerator implements FileGenerator {
     async generateCppCodeFiles(config: GenerateModuleConfig) {
         const cppPath = path.join(
             'cpp',
-            `Hybrid${toPascalCase(config.moduleName)}.cpp`
+            `Hybrid${toPascalCase(config.packageName)}.cpp`
         )
         const hppPath = path.join(
             'cpp',
-            `Hybrid${toPascalCase(config.moduleName)}.hpp`
+            `Hybrid${toPascalCase(config.packageName)}.hpp`
         )
         await createModuleFile(
             config.cwd,
             cppPath,
-            cppCode(toPascalCase(config.moduleName), `${config.funcName}`)
+            cppCode(toPascalCase(config.packageName), `${config.funcName}`)
         )
 
         await createModuleFile(
             config.cwd,
             hppPath,
-            hppCode(toPascalCase(config.moduleName), `${config.funcName}`)
+            hppCode(toPascalCase(config.packageName), `${config.funcName}`)
         )
     }
 }

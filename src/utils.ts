@@ -1,3 +1,4 @@
+import kleur from 'kleur'
 import { execSync } from 'node:child_process'
 import { access, cp, mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -9,17 +10,20 @@ type AutolinkingConfig = {
 
 export const LANGS = ['c++', 'swift', 'kotlin'] as const
 
-export const validateModuleName = (input: string): string | true => {
-    if (input.trim().length < 1) {
-        return 'Module name cannot be empty'
+export const validatePackageName = (input: string): string => {
+    if (input.length === 0) {
+        return 'Package name is required'
     }
 
     if (/[A-Z]/.test(input)) {
-        return 'Module name should be lowercase'
+        return 'Package name should be lowercase'
     }
 
-    if (input.startsWith('react-native-')) {
-        return 'Do not include "react-native-" prefix, it will be added automatically'
+    if (
+        input.toLowerCase().includes('react-native') ||
+        input.toLowerCase().includes('react')
+    ) {
+        return `Package name cannot contain ${kleur.red('react-native')} or ${kleur.red('react')}`
     }
 
     if (input.includes('@') || input.includes('/')) {
@@ -27,10 +31,10 @@ export const validateModuleName = (input: string): string | true => {
     }
 
     if (!/^[a-z0-9-]+$/.test(input)) {
-        return 'Module name can only contain lowercase letters, numbers, and hyphens'
+        return 'Package name can only contain lowercase letters, numbers, and hyphens'
     }
 
-    return true
+    return ''
 }
 
 export const replaceTag = (tag: string, oldValue: string, newValue: string) => {
@@ -206,4 +210,8 @@ export const detectPackageManager = () => {
     if (userAgent.startsWith('yarn')) return 'yarn'
     if (userAgent.startsWith('bun')) return 'bun'
     return 'bun'
+}
+
+export const capitalize = (str: string) => {
+    return str.charAt(0).toUpperCase() + str.slice(1)
 }

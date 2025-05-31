@@ -1,0 +1,20 @@
+# Act configuration file for Nitro CLI project
+
+# This configures act to use appropriate container images and settings
+
+# Use Ubuntu image for both Ubuntu and macOS (since act can't run real macOS)
+
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+-P macos-latest=catthehacker/ubuntu:act-latest
+
+# Set container architecture for M1 Macs
+
+--container-architecture linux/amd64
+
+# Use .gitignore to respect ignored files
+
+--use-gitignore
+
+# Default to verbose output for better debugging
+
+-v

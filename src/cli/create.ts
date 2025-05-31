@@ -3,8 +3,8 @@ import { mkdirSync, rmSync } from 'fs'
 import kleur from 'kleur'
 import path from 'path'
 import projectPackageJsonFile from '../../package.json'
-import { generateInstructions } from '../constants'
-import { NitroModuleFactory } from '../generate-nitro-module'
+import { generateInstructions, messages } from '../constants'
+import { NitroModuleFactory } from '../generate-nitro-package'
 import {
     CreateModuleOptions,
     Nitro,
@@ -12,25 +12,22 @@ import {
     PLATFORM_LANGUAGE_MAP,
     SupportedLang,
     SupportedPlatform,
+    UserAnswers,
 } from '../types'
-import { detectPackageManager, dirExist, validateModuleName } from '../utils'
+import {
+    capitalize,
+    detectPackageManager,
+    dirExist,
+    validatePackageName,
+} from '../utils'
 
 export const createModule = async (
-    name: string,
+    packageName: string,
     options: CreateModuleOptions
 ) => {
-    let moduleType = Nitro.Module
+    let packageType = Nitro.Module
     const spinner = p.spinner()
     try {
-        if (typeof name !== 'string') {
-            name = ''
-        } else {
-            const validationResult = validateModuleName(name)
-            if (validationResult !== true) {
-                throw new Error(`Invalid module name: ${validationResult}`)
-            }
-        }
-
         if (options.moduleDir) {
             const moduleDirExists = await dirExist(options.moduleDir)
             if (!moduleDirExists) {
@@ -39,204 +36,164 @@ export const createModule = async (
         }
 
         const usedPm = detectPackageManager()
-        const answers = await getUserAnswers(name, usedPm)
-        name = answers.moduleName
-        moduleType = answers.moduleType
+        const answers = await getUserAnswers(packageName, usedPm, options.ci)
+        packageName = answers.packageName
+        packageType = answers.packageType
 
         const moduleFactory = new NitroModuleFactory({
             langs: answers.langs,
-            moduleName: name,
+            packageName,
             platforms: answers.platforms,
             pm: answers.pm,
             cwd: options.moduleDir || process.cwd(),
-            spinner: p.spinner(),
-            moduleType,
-            finalModuleName: 'react-native-' + name.toLowerCase(),
+            spinner,
+            packageType,
+            finalPackageName: 'react-native-' + packageName.toLowerCase(),
             skipInstall: options.skipInstall,
             skipExample: options.skipExample,
         })
+        spinner.start(
+            messages.creating.replace('{packageType}', capitalize(packageType))
+        )
 
         await moduleFactory.createNitroModule()
 
         console.log(
             generateInstructions({
-                moduleName: `react-native-${name.toLowerCase()}`,
+                moduleName: `react-native-${packageName.toLowerCase()}`,
                 pm: answers.pm,
                 skipExample: options.skipExample,
                 skipInstall: options.skipInstall,
             })
         )
 
-        spinner.start(
+        spinner.stop(
             kleur.dim(
                 `Create Nitro Module - ${projectPackageJsonFile.description}\n`
             )
         )
     } catch (error) {
-        spinner.stop()
-        console.log(
-            kleur.red(
-                `Failed to create Nitro ${moduleType}: ${(error as Error).message}`
-            )
-        )
-
-        if (name) {
+        if (packageName) {
             const modulePath = path.join(
                 process.cwd(),
-                'react-native-' + name.toLowerCase()
+                'react-native-' + packageName.toLowerCase()
             )
             rmSync(modulePath, { recursive: true, force: true })
         }
-        process.exit(1)
+        spinner.stop(
+            kleur.red(
+                `Failed to create Nitro ${packageType}: ${(error as Error).message}`
+            ),
+            1
+        )
     }
 }
 
-const getUserAnswers = async (name: string, usedPm?: PackageManager) => {
-    // const moduleName = await inquirer.prompt({
-    //     type: 'input',
-    //     message: kleur.cyan('📝 What is the name of your module?'),
-    //     name: 'name',
-    //     when: !name,
-    //     default: 'awesome-library',
-    //     validate: (input: string) => {
-    //         const result = validateModuleName(input)
-    //         if (result !== true) {
-    //             return kleur.red(`⚠️  ${result}`)
-    //         }
-    //         return true
-    //     },
-    // })
+const selectLanguages = async (
+    platforms: SupportedPlatform[],
+    packageType: Nitro
+) => {
+    const availableLanguages = Array.from(
+        new Set(platforms.flatMap(platform => PLATFORM_LANGUAGE_MAP[platform]))
+    ).filter(lang => packageType !== Nitro.View || lang !== SupportedLang.CPP)
 
-    // const platforms = await inquirer.prompt({
-    //     type: 'checkbox',
-    //     message: kleur.cyan('🎯 Select target platforms:'),
-    //     name: 'names',
-    //     choices: SUPPORTED_PLATFORMS,
-    //     validate: answers => {
-    //         if (answers.length < 1) {
-    //             return kleur.red('⚠️  You must choose at least one platform')
-    //         }
-    //         return true
-    //     },
-    // })
+    const options =
+        platforms.includes(SupportedPlatform.IOS) &&
+        platforms.includes(SupportedPlatform.ANDROID)
+            ? [
+                  {
+                      label: 'Swift & Kotlin',
+                      value: [SupportedLang.SWIFT, SupportedLang.KOTLIN],
+                      hint: `Use Swift and Kotlin to build your Nitro ${packageType.toLowerCase()} for iOS and Android`,
+                  },
+                  ...(packageType === Nitro.Module
+                      ? [
+                            {
+                                label: 'C++',
+                                value: [SupportedLang.CPP],
+                                hint: 'Use C++ to share code between iOS and Android',
+                            },
+                        ]
+                      : []),
+              ]
+            : availableLanguages.map(lang => ({
+                  label: capitalize(lang),
+                  value: [lang],
+                  hint: `Use ${lang === SupportedLang.CPP ? 'C++' : capitalize(lang)} to build your Nitro ${packageType.toLowerCase()} for ${platforms.join(' and ')}`,
+              }))
 
-    // const availableLanguages = new Set<string>()
-    // platforms.names.forEach((platform: string) => {
-    //     PLATFORM_LANGUAGE_MAP[platform].forEach(lang =>
-    //         availableLanguages.add(lang)
-    //     )
-    // })
+    const selectedLangs = await p.select({
+        message: kleur.cyan('Which language(s) would you like to use?'),
+        options,
+    })
 
-    // const langs = await inquirer.prompt({
-    //     type: 'checkbox',
-    //     message: kleur.cyan('💻 Select programming languages:'),
-    //     name: 'names',
-    //     choices: Array.from(availableLanguages),
-    //     validate: choices => {
-    //         if (choices.length < 1) {
-    //             return kleur.red('⚠️  You must choose at least one language')
-    //         }
+    if (p.isCancel(selectedLangs)) return selectedLangs
+    return selectedLangs
+}
 
-    //         let answers: string[] = []
-
-    //         for (let c of choices) {
-    //             answers.push(c.value as string)
-    //         }
-
-    //         const hasCpp = answers.some(lang => lang === 'cpp')
-    //         const hasNative = answers.some(
-    //             lang => lang === 'swift' || lang === 'kotlin'
-    //         )
-
-    //         if (hasCpp && hasNative) {
-    //             return kleur.red(
-    //                 '⚠️  C++ cannot be selected along with Swift or Kotlin'
-    //             )
-    //         }
-
-    //         if (!hasCpp) {
-    //             for (const platform of platforms.names) {
-    //                 const requiredNative =
-    //                     platform === 'ios' ? 'swift' : 'kotlin'
-    //                 if (!answers.includes(requiredNative)) {
-    //                     return kleur.red(
-    //                         `⚠️  When not using C++, you must select ${requiredNative} for ${platform}`
-    //                     )
-    //                 }
-    //             }
-    //         }
-
-    //         return true
-    //     },
-    // })
-
-    // const moduleType = await inquirer.prompt({
-    //     type: 'list',
-    //     message: kleur.cyan('📦 Select module type:'),
-    //     name: 'name',
-    //     choices: ['Nitro Module', 'Nitro View'],
-    //     default: 'Nitro Module',
-    //     when: !langs.names.includes('cpp'),
-    // })
-
-    // const pm = await inquirer.prompt({
-    //     type: 'list',
-    //     message: kleur.cyan('📦 Select package manager:'),
-    //     name: 'name',
-    //     choices: ['bun', 'yarn', 'npm'],
-    //     default: usedPm || 'yarn',
-    //     when: usedPm === undefined,
-    // })
-
-    // const packageName = await inquirer.prompt({
-    //     type: 'confirm',
-    //     message: kleur.cyan(
-    //         `✨ Your package name will be called: "${kleur.green('react-native-' + (moduleName.name || name).toLowerCase())}" would you like to continue?`
-    //     ),
-    //     name: 'name',
-    //     choices: ['y', 'n'],
-    //     default: true,
-    // })
-
-    // if (!packageName.name) {
-    //     process.exit(0)
-    // }
+const getUserAnswers = async (
+    name: string,
+    usedPm?: PackageManager,
+    ci?: boolean
+): Promise<UserAnswers> => {
+    if (ci) {
+        return {
+            packageName: name,
+            description: `${kleur.yellow(`react-native-${name}`)} is a react native package built with Nitro`,
+            platforms: [SupportedPlatform.IOS, SupportedPlatform.ANDROID],
+            packageType: Nitro.Module,
+            langs: [SupportedLang.SWIFT, SupportedLang.KOTLIN],
+            pm: usedPm || 'bun',
+        }
+    }
 
     const group = await p.group(
         {
-            moduleName: () =>
+            packageName: () =>
                 p.text({
-                    message: kleur.cyan('📝 What is the name of your module?'),
+                    message: kleur.cyan('Enter your package name'),
                     defaultValue: name,
                     initialValue: name,
                     validate(value) {
-                        if (value.length === 0) {
-                            return 'Module name is required'
+                        const packageName = value?.trim()
+                        return validatePackageName(packageName)
+                    },
+                }),
+            description: async ({ results }) =>
+                p.text({
+                    message: kleur.cyan('Enter a description for your package'),
+                    defaultValue: `${kleur.yellow(`react-native-${results.packageName}`)} is a react native package built with Nitro`,
+                    initialValue: `${kleur.yellow(`react-native-${results.packageName}`)} is a react native package built with Nitro`,
+                    placeholder: `react-native-${results.packageName} is a react native package built with Nitro`,
+                    validate(value) {
+                        if (value?.trim().length === 0) {
+                            return 'Package description is required'
                         }
                         return ''
                     },
                 }),
             platforms: () =>
                 p.multiselect({
-                    message: kleur.cyan('🎯 Select target platforms:'),
+                    message: kleur.cyan('Which platform(s) are you targeting?'),
                     options: [
                         {
                             label: 'iOS',
-                            value: 'ios',
-                            hint: 'Swift, C++',
+                            value: SupportedPlatform.IOS,
                         },
                         {
                             label: 'Android',
-                            value: 'android',
-                            hint: 'Kotlin, C++',
+                            value: SupportedPlatform.ANDROID,
                         },
                     ],
-                    initialValues: ['ios', 'android'],
+                    initialValues: [
+                        SupportedPlatform.IOS,
+                        SupportedPlatform.ANDROID,
+                    ],
                     required: true,
                 }),
-            moduleType: () =>
+            packageType: () =>
                 p.select({
-                    message: kleur.cyan('📦 Select module type:'),
+                    message: kleur.cyan('Select your package type'),
                     options: [
                         {
                             label: 'Nitro Module',
@@ -250,48 +207,33 @@ const getUserAnswers = async (name: string, usedPm?: PackageManager) => {
                     initialValue: Nitro.Module,
                 }),
             langs: async ({ results }) => {
-                const availableLanguages = new Set<string>()
-                results.platforms?.forEach((platform: string) => {
-                    PLATFORM_LANGUAGE_MAP[platform].forEach(lang =>
-                        availableLanguages.add(lang)
-                    )
-                })
-                const langs = Array.from(availableLanguages)
-                const hasCpp = langs.some(lang => lang === 'cpp')
-                const hasNative = langs.some(
-                    lang => lang === 'swift' || lang === 'kotlin'
-                )
-
-                if (hasCpp && hasNative) {
-                    return kleur.red(
-                        '⚠️  C++ cannot be selected along with Swift or Kotlin'
-                    )
+                if (!results.platforms || !results.packageType) {
+                    throw new Error('Missing required selections')
                 }
-
-                if (!hasCpp) {
-                    for (const platform of results.platforms || []) {
-                        const requiredNative =
-                            platform === 'ios' ? 'swift' : 'kotlin'
-                        if (!langs.includes(requiredNative)) {
-                            return kleur.red(
-                                `⚠️  When not using C++, you must select ${requiredNative} for ${platform}`
-                            )
-                        }
+                const selectedLangs = await selectLanguages(
+                    results.platforms,
+                    results.packageType
+                )
+                return selectedLangs
+            },
+            pm: async () => {
+                if (usedPm) {
+                    const confirm = await p.confirm({
+                        message: kleur.cyan(
+                            `${kleur.bold(kleur.green(usedPm))} detected! Would you like to continue?`
+                        ),
+                    })
+                    if (p.isCancel(confirm)) {
+                        process.exit(0)
+                    } else if (confirm) {
+                        return usedPm
                     }
                 }
 
-                return p.multiselect({
-                    message: kleur.cyan('💻 Select programming languages:'),
-                    options: langs.map(lang => ({
-                        label: lang.charAt(0).toUpperCase() + lang.slice(1),
-                        value: lang,
-                    })),
-                    required: true,
-                })
-            },
-            pm: () =>
-                p.select({
-                    message: kleur.cyan('📦 Select package manager:'),
+                return p.select<PackageManager>({
+                    message: kleur.cyan(
+                        'Which package manager would you like to use?'
+                    ),
                     options: [
                         {
                             label: 'bun',
@@ -306,32 +248,41 @@ const getUserAnswers = async (name: string, usedPm?: PackageManager) => {
                             value: 'npm',
                         },
                     ],
-                    initialValue: usedPm || 'yarn',
-                }),
+                })
+            },
+            packageNameConfirmation: async ({ results }) => {
+                const packageName = results.packageName
+                if (!packageName) {
+                    return false
+                }
+                const packageNameConfirmation = await p.confirm({
+                    message: kleur.cyan(
+                        `✨ Your package name will be called: ${kleur.bold(kleur.green('react-native-' + packageName.toLowerCase()))} would you like to continue?`
+                    ),
+                })
+                if (!packageNameConfirmation) {
+                    console.log(
+                        kleur.red('Package name confirmation cancelled')
+                    )
+                    process.exit(1)
+                }
+                return packageNameConfirmation
+            },
         },
         {
-            onCancel(opts) {
-                console.log('Cancelled')
-                process.exit(0)
+            onCancel() {
+                console.log(kleur.red('Cancelled'))
+                process.exit(1)
             },
         }
     )
 
-    const packageName = await p.confirm({
-        message: kleur.cyan(
-            `✨ Your package name will be called: "${kleur.green('react-native-' + (group.moduleName || name).toLowerCase())}" would you like to continue?`
-        ),
-    })
-
-    if (!packageName) {
-        process.exit(0)
-    }
-
     return {
-        moduleName: group.moduleName,
-        platforms: group.platforms as SupportedPlatform[],
+        packageName: group.packageName,
+        packageType: group.packageType,
+        platforms: group.platforms,
         langs: group.langs as SupportedLang[],
         pm: group.pm,
-        moduleType: group.moduleType,
+        description: group.description as string,
     }
 }
