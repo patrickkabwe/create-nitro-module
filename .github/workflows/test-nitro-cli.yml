@@ -113,7 +113,7 @@ jobs:
 
             - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
               continue-on-error: false
-              run: ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --ci
+              run: ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --skip-install --ci
 
             - name: Verify generated package structure
               run: |
