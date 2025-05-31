@@ -121,7 +121,11 @@ jobs:
             - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
               continue-on-error: false
               run: |
-                  ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} ${{ matrix.args }} --ci
+                  if [ "${{ matrix.pm }}" == "npm" ]; then  
+                    bun create nitro-module test-${{ matrix.package-type }} --ci
+                  else
+                    ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --ci
+                  fi
 
             - name: Verify generated package structure
               run: |
