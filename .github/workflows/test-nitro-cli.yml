@@ -109,7 +109,6 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
-
             - name: Install npm dependencies (bun)
               run: bun install
 
@@ -120,12 +119,8 @@ jobs:
 
             - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
               continue-on-error: false
-              run: |
-                  if [ "${{ matrix.pm }}" == "npm" ]; then  
-                    bun create nitro-module test-${{ matrix.package-type }} --ci
-                  else
-                    ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --ci
-                  fi
+              if: matrix.pm != 'npm'
+              run: ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --ci
 
             - name: Verify generated package structure
               run: |
@@ -348,52 +343,3 @@ jobs:
             - name: Stop Gradle daemon
               working-directory: ${{ env.WORKING_DIR }}/example/android
               run: ./gradlew --stop
-
-    test-summary:
-        name: Test Summary
-        runs-on: ubuntu-latest
-        needs:
-            [
-                lint-and-build,
-                generate-packages,
-                test-ios-build,
-                test-android-build,
-            ]
-        if: always()
-        steps:
-            - name: Generate summary
-              run: |
-                  echo "## Nitro CLI Test Results" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-
-                  # Check results
-                  if [[ "${{ needs.lint-and-build.result }}" == "success" ]]; then
-                    echo "✅ **CLI Build & Lint**: PASSED" >> $GITHUB_STEP_SUMMARY
-                  else
-                    echo "❌ **CLI Build & Lint**: FAILED" >> $GITHUB_STEP_SUMMARY
-                  fi
-
-                  if [[ "${{ needs.generate-packages.result }}" == "success" ]]; then
-                    echo "✅ **Package Generation**: PASSED" >> $GITHUB_STEP_SUMMARY
-                  else
-                    echo "❌ **Package Generation**: FAILED" >> $GITHUB_STEP_SUMMARY
-                  fi
-
-                  if [[ "${{ needs.test-ios-build.result }}" == "success" ]]; then
-                    echo "✅ **iOS Build**: PASSED" >> $GITHUB_STEP_SUMMARY
-                  else
-                    echo "❌ **iOS Build**: FAILED" >> $GITHUB_STEP_SUMMARY
-                  fi
-
-                  if [[ "${{ needs.test-android-build.result }}" == "success" ]]; then
-                    echo "✅ **Android Build**: PASSED" >> $GITHUB_STEP_SUMMARY
-                  else
-                    echo "❌ **Android Build**: FAILED" >> $GITHUB_STEP_SUMMARY
-                  fi
-
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "### Test Configuration" >> $GITHUB_STEP_SUMMARY
-                  echo "- **Package Manager**: bun" >> $GITHUB_STEP_SUMMARY
-                  echo "- **Package Type**: module" >> $GITHUB_STEP_SUMMARY
-                  echo "- **Platforms**: iOS, Android" >> $GITHUB_STEP_SUMMARY
-                  echo "- **Generation**: Non-interactive mode with --skip-example" >> $GITHUB_STEP_SUMMARY
