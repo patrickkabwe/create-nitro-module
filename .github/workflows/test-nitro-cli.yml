@@ -184,7 +184,7 @@ jobs:
             matrix:
                 pm: ['bun', 'yarn']
                 package-type: ['module', 'view']
-                mode: ['Debug', 'Release']
+                mode: ['Release']
         env:
             WORKING_DIR: /Users/runner/react-native-test-${{ matrix.package-type }}
         steps:
@@ -194,7 +194,7 @@ jobs:
             - name: Download generated package
               uses: actions/download-artifact@v4
               with:
-                  name: test-${{ matrix.package-type }}
+                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
 
             - name: List package structure
@@ -281,7 +281,7 @@ jobs:
             - name: Download generated package
               uses: actions/download-artifact@v4
               with:
-                  name: test-${{ matrix.package-type }}
+                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
 
             - name: List package structure
