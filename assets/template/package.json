@@ -43,8 +43,8 @@
   "bugs": "",
   "homepage": "",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "provenance": true
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
     "@jamesacarr/eslint-formatter-github-actions": "^0.2.0",
