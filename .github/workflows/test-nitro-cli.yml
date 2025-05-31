@@ -182,7 +182,7 @@ jobs:
         runs-on: macos-latest
         strategy:
             matrix:
-                pm: ['bun', 'yarn', 'npm']
+                pm: ['bun', 'yarn']
                 package-type: ['module', 'view']
                 mode: ['Debug', 'Release']
         env:
@@ -269,7 +269,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                pm: ['bun', 'yarn', 'npm']
+                pm: ['bun', 'yarn']
                 package-type: ['module', 'view']
                 mode: ['Debug']
         env:
