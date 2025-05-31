@@ -170,7 +170,7 @@ jobs:
             - name: Upload generated package
               uses: actions/upload-artifact@v4
               with:
-                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  name: react-native-test-${{ matrix.package-type }}
                   path: react-native-test-${{ matrix.package-type }}
                   include-hidden-files: true
                   if-no-files-found: error
