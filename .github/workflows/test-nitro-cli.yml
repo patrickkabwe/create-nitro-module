@@ -109,25 +109,14 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
-            - name: Install dependencies and build CLI
+
+            - name: Install npm dependencies (bun)
+              run: bun install
+
+            - name: Build CLI and Link Locally
               run: |
-                  case "${{ matrix.pm }}" in
-                    "bun")
-                      bun install
-                      bun run build
-                      bun link
-                      ;;
-                    "yarn")
-                      yarn install
-                      yarn build
-                      yarn link
-                      ;;
-                    "npm")
-                      npm ci
-                      npm run build
-                      npm link
-                      ;;
-                  esac
+                  bun run build
+                  ${{matrix.pm}} link
 
             - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
               continue-on-error: false
@@ -201,7 +190,7 @@ jobs:
         runs-on: macos-latest
         strategy:
             matrix:
-                pm: ['bun', 'yarn']
+                pm: ['bun', 'yarn', 'npm']
                 package-type: ['module', 'view']
                 mode: ['Debug', 'Release']
         env:
@@ -288,7 +277,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                pm: ['bun', 'yarn']
+                pm: ['bun', 'yarn', 'npm']
                 package-type: ['module', 'view']
                 mode: ['Debug']
         env:
