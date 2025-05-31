@@ -10,7 +10,7 @@ import {
     babelConfig,
     exampleTsConfig,
     metroConfig,
-} from './code-snippets/code.js'
+} from './code-snippets/code.js.js'
 import {
     ANDROID_CXX_LIB_NAME_TAG,
     ANDROID_NAME_SPACE_TAG,
@@ -210,6 +210,7 @@ export class NitroModuleFactory {
             'README.md',
             'package.json',
             '.github',
+            'release.config.cjs',
         ]
 
         await copyTemplateFiles(
