@@ -171,7 +171,7 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
-                  path: react-native-test-${{ matrix.package-type }}/
+                  path: react-native-test-${{ matrix.package-type }}
                   include-hidden-files: true
                   if-no-files-found: error
                   retention-days: 1
@@ -281,7 +281,7 @@ jobs:
             - name: Download generated package
               uses: actions/download-artifact@v4
               with:
-                  name: react-native-test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  name: react-native-test-${{ matrix.package-type }}
                   path: ${{ env.WORKING_DIR }}
 
             - name: List package structure
