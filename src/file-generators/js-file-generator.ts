@@ -11,7 +11,7 @@ import { createFolder, createModuleFile, mapPlatformToLanguage } from '../utils'
 export class JSFileGenerator implements FileGenerator {
     async generate(config: GenerateModuleConfig): Promise<void> {
         const nitroSpecFolder =
-            config.moduleType === Nitro.View ? '/src/views' : '/src/specs'
+            config.packageType === Nitro.View ? '/src/views' : '/src/specs'
 
         await createFolder(config.cwd, nitroSpecFolder)
         const platformToLangMap = mapPlatformToLanguage(
@@ -23,7 +23,7 @@ export class JSFileGenerator implements FileGenerator {
             .map(([platform, lang]) => `${platform}: '${lang.toLowerCase()}'`)
             .join(', ')
 
-        switch (config.moduleType) {
+        switch (config.packageType) {
             case Nitro.View:
                 await this.generateNitroViewFiles(config, platformLang)
                 break
@@ -41,13 +41,13 @@ export class JSFileGenerator implements FileGenerator {
     ): Promise<void> {
         await createModuleFile(
             config.cwd,
-            `/src/views/${config.moduleName}.nitro.ts`,
-            nitroViewSpecCode(config.moduleName, platformLang)
+            `/src/views/${config.packageName}.nitro.ts`,
+            nitroViewSpecCode(config.packageName, platformLang)
         )
         await createModuleFile(
             config.cwd,
             '/src/index.ts',
-            nitroViewCode(config.moduleName)
+            nitroViewCode(config.packageName)
         )
     }
 
@@ -57,9 +57,9 @@ export class JSFileGenerator implements FileGenerator {
     ): Promise<void> {
         await createModuleFile(
             config.cwd,
-            `/src/specs/${config.moduleName}.nitro.ts`,
+            `/src/specs/${config.packageName}.nitro.ts`,
             nitroModuleSpecCode(
-                config.moduleName,
+                config.packageName,
                 platformLang,
                 `${config.funcName}`
             )
@@ -67,7 +67,7 @@ export class JSFileGenerator implements FileGenerator {
         await createModuleFile(
             config.cwd,
             '/src/index.ts',
-            nitroModuleCode(config.moduleName)
+            nitroModuleCode(config.packageName)
         )
     }
 }

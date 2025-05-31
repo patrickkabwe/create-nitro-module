@@ -16,6 +16,7 @@ program
     )
     .option('-e, --skip-example', 'skip example app generation')
     .option('-i, --skip-install', 'skip installing dependencies')
+    .option('--ci', 'run in CI mode')
     .action(createModule)
 
 program.allowUnknownOption().parse(process.argv)
