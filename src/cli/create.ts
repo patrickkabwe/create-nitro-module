@@ -14,7 +14,12 @@ import {
     SupportedPlatform,
     UserAnswers,
 } from '../types'
-import { detectPackageManager, dirExist, validatePackageName } from '../utils'
+import {
+    capitalize,
+    detectPackageManager,
+    dirExist,
+    validatePackageName,
+} from '../utils'
 
 export const createModule = async (
     packageName: string,
@@ -41,21 +46,14 @@ export const createModule = async (
             platforms: answers.platforms,
             pm: answers.pm,
             cwd: options.moduleDir || process.cwd(),
-            spinner: {
-                start: () => {},
-                stop: () => {},
-                message: () => {},
-            },
+            spinner,
             packageType,
             finalPackageName: 'react-native-' + packageName.toLowerCase(),
             skipInstall: options.skipInstall,
             skipExample: options.skipExample,
         })
         spinner.start(
-            messages.creating.replace(
-                '{packageType}',
-                packageType.charAt(0).toUpperCase() + packageType.slice(1)
-            )
+            messages.creating.replace('{packageType}', capitalize(packageType))
         )
 
         await moduleFactory.createNitroModule()
@@ -119,9 +117,9 @@ const selectLanguages = async (
                       : []),
               ]
             : availableLanguages.map(lang => ({
-                  label: lang.charAt(0).toUpperCase() + lang.slice(1),
+                  label: capitalize(lang),
                   value: [lang],
-                  hint: `Use ${lang === SupportedLang.CPP ? 'C++' : lang.charAt(0).toUpperCase() + lang.slice(1)} to build your Nitro ${packageType.toLowerCase()} for ${platforms.join(' and ')}`,
+                  hint: `Use ${lang === SupportedLang.CPP ? 'C++' : capitalize(lang)} to build your Nitro ${packageType.toLowerCase()} for ${platforms.join(' and ')}`,
               }))
 
     const selectedLangs = await p.select({
