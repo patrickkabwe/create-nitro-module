@@ -177,7 +177,7 @@ jobs:
                   retention-days: 1
 
     test-ios-build:
-        name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package-type }}
+        name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
         needs: generate-packages
         runs-on: macos-latest
         strategy:
@@ -264,7 +264,7 @@ jobs:
                     CODE_SIGNING_ALLOWED=NO
 
     test-android-build:
-        name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package-type }}
+        name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
         needs: generate-packages
         runs-on: ubuntu-latest
         strategy:
