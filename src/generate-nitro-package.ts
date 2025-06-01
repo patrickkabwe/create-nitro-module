@@ -46,7 +46,6 @@ import {
 } from './utils'
 import kleur from 'kleur'
 
-
 const execAsync = util.promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -103,12 +102,12 @@ export class NitroModuleFactory {
             await this.syncExampleAppConfigurations()
             await this.setupWorkflows()
             await this.gitInit()
-            this.config.spinner.stop(kleur.cyan(messages.generating+'Done'))
+            this.config.spinner.stop(kleur.cyan(messages.generating + 'Done'))
         }
         if (!this.config.skipInstall && !this.config.skipExample) {
             this.config.spinner.start(messages.installing)
             await this.installDependenciesAndRunCodegen()
-            this.config.spinner.stop(kleur.cyan(messages.installing+'Done'))
+            this.config.spinner.stop(kleur.cyan(messages.installing + 'Done'))
         }
     }
 
