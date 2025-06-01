@@ -161,7 +161,7 @@ export class NitroModuleFactory {
 
         newWorkspacePackageJsonFile.keywords = [
             ...newWorkspacePackageJsonFile.keywords,
-            this.config.finalPackageName
+            this.config.finalPackageName,
         ]
 
         if (this.config.pm === 'yarn') {
