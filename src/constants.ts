@@ -8,13 +8,15 @@ export const ANDROID_CXX_LIB_NAME_TAG = '$$androidCxxLibName$$'
 export const CXX_NAME_SPACE_TAG = '$$cxxNamespace$$'
 export const IOS_MODULE_NAME_TAG = '$$iosModuleName$$'
 export const JS_PACKAGE_NAME_TAG = '$$packageName$$'
+export const AUTHOR_TAG = '$$author$$'
+export const DESCRIPTION_TAG = '$$description$$'
 
 export const messages = {
     creating: `Creating your Nitro {packageType}...`,
     generating: 'Generating example app...',
     installing: 'Installing dependencies...',
-    runningCodegen: '🚀 Running codegen...',
-    success: '✨ Nitro Module created successfully!',
+    runningCodegen: 'Running codegen...',
+    success: 'Nitro Module created successfully!',
 } as const
 
 export const packagesToRemoveFromExampleApp = [

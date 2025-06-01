@@ -41,6 +41,7 @@ export const createModule = async (
         packageType = answers.packageType
 
         const moduleFactory = new NitroModuleFactory({
+            description: answers.description,
             langs: answers.langs,
             packageName,
             platforms: answers.platforms,
@@ -257,7 +258,7 @@ const getUserAnswers = async (
                 }
                 const packageNameConfirmation = await p.confirm({
                     message: kleur.cyan(
-                        `✨ Your package name will be called: ${kleur.bold(kleur.green('react-native-' + packageName.toLowerCase()))} would you like to continue?`
+                        `Your package name will be called: ${kleur.bold(kleur.green('react-native-' + packageName.toLowerCase()))} would you like to continue?`
                     ),
                 })
                 if (!packageNameConfirmation) {
