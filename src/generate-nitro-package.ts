@@ -147,6 +147,7 @@ export class NitroModuleFactory {
         )
         const newWorkspacePackageJsonFile = JSON.parse(workspacePackageJsonFile)
         newWorkspacePackageJsonFile.name = this.config.finalPackageName
+        newWorkspacePackageJsonFile.description = this.config.description
         newWorkspacePackageJsonFile.repository = `https://github.com/${userName}/${this.config.finalPackageName}.git`
         newWorkspacePackageJsonFile.bugs = `https://github.com/${userName}/${this.config.finalPackageName}/issues`
         newWorkspacePackageJsonFile.homepage = `https://github.com/${userName}/${this.config.finalPackageName}#readme`
@@ -157,6 +158,11 @@ export class NitroModuleFactory {
             codegen: `nitro-codegen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`,
             postcodegen: `${this.config.pm} ${this.config.pm === 'npm' ? '--prefix' : '--cwd'} example run pod`,
         }
+
+        newWorkspacePackageJsonFile.keywords = [
+            ...newWorkspacePackageJsonFile.keywords,
+            this.config.finalPackageName
+        ]
 
         if (this.config.pm === 'yarn') {
             await execAsync('corepack enable', { cwd: this.config.cwd })

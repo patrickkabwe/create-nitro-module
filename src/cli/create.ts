@@ -41,6 +41,7 @@ export const createModule = async (
         packageType = answers.packageType
 
         const moduleFactory = new NitroModuleFactory({
+            description: answers.description,
             langs: answers.langs,
             packageName,
             platforms: answers.platforms,
