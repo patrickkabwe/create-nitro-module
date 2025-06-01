@@ -184,7 +184,7 @@ jobs:
             matrix:
                 pm: ['bun', 'yarn']
                 package-type: ['module', 'view']
-                mode: ['Release']
+                mode: ['Debug', 'Release']
         env:
             WORKING_DIR: /Users/runner/react-native-test-${{ matrix.package-type }}
         steps:
@@ -271,7 +271,7 @@ jobs:
             matrix:
                 pm: ['bun', 'yarn']
                 package-type: ['module', 'view']
-                mode: ['Debug']
+                mode: ['Debug', 'Release']
         env:
             WORKING_DIR: /home/runner/react-native-test-${{ matrix.package-type }}
         steps:
