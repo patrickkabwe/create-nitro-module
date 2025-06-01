@@ -1,3 +1,10 @@
+## [2.0.0-next.3](https://github.com/patrickkabwe/create-nitro-module/compare/v2.0.0-next.2...v2.0.0-next.3) (2025-06-01)
+
+### 🛠️ Other changes
+
+* update GitHub workflow to support both Debug and Release modes ([a8f808a](https://github.com/patrickkabwe/create-nitro-module/commit/a8f808a895f9de903d3d068cad19152cbbaf3043))
+* update release configuration for additional assets ([0f8bc96](https://github.com/patrickkabwe/create-nitro-module/commit/0f8bc96161c0e851a224b733550f36272bc25c9b))
+
 ## [2.0.0-next.2](https://github.com/patrickkabwe/create-nitro-module/compare/v2.0.0-next.1...v2.0.0-next.2) (2025-05-31)
 
 ### 🐛 Bug Fixes
