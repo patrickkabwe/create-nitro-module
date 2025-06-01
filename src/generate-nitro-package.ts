@@ -155,6 +155,7 @@ export class NitroModuleFactory {
             ...newWorkspacePackageJsonFile.scripts,
             build: `${this.config.pm} run typecheck && bob build`,
             codegen: `nitro-codegen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`,
+            postcodegen: `${this.config.pm} ${this.config.pm === 'npm' ? '--prefix' : '--cwd'} example run pod`,
         }
 
         if (this.config.pm === 'yarn') {

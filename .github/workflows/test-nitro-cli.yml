@@ -236,7 +236,10 @@ jobs:
 
             - name: Run codegen
               working-directory: ${{ env.WORKING_DIR }}
-              run: ${{ matrix.pm }} codegen
+              run: |
+                  bunx nitro-codegen --logLevel="debug"
+                  ${{ matrix.pm }} run build
+                  node post-script.js
 
             - name: Install CocoaPods dependencies
               working-directory: ${{ env.WORKING_DIR }}/example
@@ -317,7 +320,10 @@ jobs:
 
             - name: Run codegen
               working-directory: ${{ env.WORKING_DIR }}
-              run: ${{ matrix.pm }} codegen
+              run: |
+                  bunx nitro-codegen --logLevel="debug"
+                  ${{ matrix.pm }} run build
+                  node post-script.js
 
             - name: Setup Java for Android builds
               uses: actions/setup-java@v4
