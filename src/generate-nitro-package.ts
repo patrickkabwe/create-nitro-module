@@ -10,7 +10,7 @@ import {
     babelConfig,
     exampleTsConfig,
     metroConfig,
-} from './code-snippets/code.js.js'
+} from './code-snippets/code.js'
 import {
     ANDROID_CXX_LIB_NAME_TAG,
     ANDROID_NAME_SPACE_TAG,
