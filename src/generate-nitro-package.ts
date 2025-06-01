@@ -14,6 +14,8 @@ import {
 import {
     ANDROID_CXX_LIB_NAME_TAG,
     ANDROID_NAME_SPACE_TAG,
+    AUTHOR_TAG,
+    DESCRIPTION_TAG,
     CXX_NAME_SPACE_TAG,
     foldersToRemoveFromExampleApp,
     IOS_MODULE_NAME_TAG,
@@ -42,6 +44,7 @@ import {
     replacePlaceholder,
     toPascalCase,
 } from './utils'
+import kleur from 'kleur'
 
 const execAsync = util.promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
@@ -64,10 +67,10 @@ export class NitroModuleFactory {
         ])
         this.config.funcName = 'sum'
         this.config.prefix = 'react-native-'
-        this.config.finalModuleName = `${this.config.prefix}${this.config.moduleName}`
+        this.config.finalPackageName = `${this.config.prefix}${this.config.packageName}`
         this.config.cwd = path.join(
             this.config.cwd,
-            this.config.finalModuleName
+            this.config.finalPackageName
         )
     }
 
@@ -80,7 +83,6 @@ export class NitroModuleFactory {
         }
         await createFolder(this.config.cwd)
         const supportedLanguages = [...this.config.langs, SupportedLang.JS]
-        this.config.spinner.start(messages.creating)
         for (const lang of supportedLanguages) {
             const generator = this.generators.get(lang)
             if (!generator) {
@@ -91,21 +93,22 @@ export class NitroModuleFactory {
         await this.copyNitroTemplateFiles()
         await this.replaceNitroJsonPlaceholders()
         await this.updatePackageJsonConfig(this.config.skipExample)
-        await this.updateReadme()
+        await this.updateTemplateFiles()
 
         if (!this.config.skipExample) {
-            this.config.spinner.text = messages.generating
+            this.config.spinner.message(messages.generating)
             await this.createExampleApp()
             await this.configureExamplePackageJson()
             await this.syncExampleAppConfigurations()
             await this.setupWorkflows()
             await this.gitInit()
+            this.config.spinner.stop(kleur.cyan(messages.generating + 'Done'))
         }
         if (!this.config.skipInstall && !this.config.skipExample) {
-            this.config.spinner.text = messages.installing
+            this.config.spinner.start(messages.installing)
             await this.installDependenciesAndRunCodegen()
+            this.config.spinner.stop(kleur.cyan(messages.installing + 'Done'))
         }
-        this.config.spinner.succeed()
     }
 
     private async replaceNitroJsonPlaceholders() {
@@ -114,14 +117,14 @@ export class NitroModuleFactory {
             { encoding: 'utf-8' }
         )
         const replacements = {
-            [ANDROID_NAME_SPACE_TAG]: replaceHyphen(this.config.moduleName),
-            [CXX_NAME_SPACE_TAG]: replaceHyphen(this.config.moduleName),
-            [IOS_MODULE_NAME_TAG]: toPascalCase(this.config.moduleName),
-            [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(this.config.moduleName),
+            [ANDROID_NAME_SPACE_TAG]: replaceHyphen(this.config.packageName),
+            [CXX_NAME_SPACE_TAG]: replaceHyphen(this.config.packageName),
+            [IOS_MODULE_NAME_TAG]: toPascalCase(this.config.packageName),
+            [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(this.config.packageName),
         }
         const newNitroJsonContent = JSON.parse(nitroJsonContent)
         newNitroJsonContent.autolinking = generateAutolinking(
-            toPascalCase(this.config.moduleName),
+            toPascalCase(this.config.packageName),
             this.config.langs
         )
         await createModuleFile(
@@ -147,16 +150,23 @@ export class NitroModuleFactory {
             { encoding: 'utf8' }
         )
         const newWorkspacePackageJsonFile = JSON.parse(workspacePackageJsonFile)
-        newWorkspacePackageJsonFile.name = this.config.finalModuleName
-        newWorkspacePackageJsonFile.repository = `https://github.com/${userName}/${this.config.finalModuleName}.git`
-        newWorkspacePackageJsonFile.bugs = `https://github.com/${userName}/${this.config.finalModuleName}/issues`
-        newWorkspacePackageJsonFile.homepage = `https://github.com/${userName}/${this.config.finalModuleName}#readme`
+        newWorkspacePackageJsonFile.name = this.config.finalPackageName
+        newWorkspacePackageJsonFile.description = this.config.description
+        newWorkspacePackageJsonFile.repository = `https://github.com/${userName}/${this.config.finalPackageName}.git`
+        newWorkspacePackageJsonFile.bugs = `https://github.com/${userName}/${this.config.finalPackageName}/issues`
+        newWorkspacePackageJsonFile.homepage = `https://github.com/${userName}/${this.config.finalPackageName}#readme`
         newWorkspacePackageJsonFile.author = name
         newWorkspacePackageJsonFile.scripts = {
             ...newWorkspacePackageJsonFile.scripts,
             build: `${this.config.pm} run typecheck && bob build`,
             codegen: `nitro-codegen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`,
+            postcodegen: `${this.config.pm} ${this.config.pm === 'npm' ? '--prefix' : '--cwd'} example run pod`,
         }
+
+        newWorkspacePackageJsonFile.keywords = [
+            ...newWorkspacePackageJsonFile.keywords,
+            this.config.finalPackageName,
+        ]
 
         if (this.config.pm === 'yarn') {
             await execAsync('corepack enable', { cwd: this.config.cwd })
@@ -180,15 +190,18 @@ export class NitroModuleFactory {
         )
     }
 
-    private async updateReadme() {
+    private async updateTemplateFiles() {
         const readmePath = path.join(this.config.cwd, 'README.md')
+        const licensePath = path.join(this.config.cwd, 'LICENSE')
 
         const replacements = {
-            [JS_PACKAGE_NAME_TAG]: this.config.finalModuleName,
+            [JS_PACKAGE_NAME_TAG]: this.config.finalPackageName,
             $$command$$:
                 this.config.pm === 'bun' || this.config.pm === 'yarn'
                     ? `${this.config.pm} add`
                     : 'npm install',
+            [DESCRIPTION_TAG]: this.config.description,
+            [AUTHOR_TAG]: getGitUserInfo().name,
         }
 
         const readmeContents = await replacePlaceholder({
@@ -196,7 +209,15 @@ export class NitroModuleFactory {
             replacements,
         })
 
+        const licenseContents = await replacePlaceholder({
+            filePath: licensePath,
+            replacements,
+        })
+
         await writeFile(readmePath, readmeContents, {
+            encoding: 'utf8',
+        })
+        await writeFile(licensePath, licenseContents, {
             encoding: 'utf8',
         })
     }
@@ -211,6 +232,8 @@ export class NitroModuleFactory {
             'README.md',
             'package.json',
             '.github',
+            'release.config.cjs',
+            'LICENSE',
         ]
 
         await copyTemplateFiles(
@@ -230,8 +253,8 @@ export class NitroModuleFactory {
             templatePackageJson.devDependencies['react-native']
 
         const args = `${packageManager} \
-            @react-native-community/cli@latest init ${toPascalCase(this.config.moduleName)}Example \
-            --package-name com.${replaceHyphen(this.config.moduleName)}example \
+            @react-native-community/cli@latest init ${toPascalCase(this.config.packageName)}Example \
+            --package-name com.${replaceHyphen(this.config.packageName)}example \
             --directory example --skip-install --skip-git-init --version ${reactNativeVersion}`
 
         await execAsync(args, { cwd: this.config.cwd })
@@ -241,10 +264,10 @@ export class NitroModuleFactory {
         await writeFile(
             appPath,
             appExampleCode(
-                this.config.moduleName,
-                this.config.finalModuleName,
+                this.config.packageName,
+                this.config.finalPackageName,
                 `${this.config.funcName}`,
-                this.config.moduleType === Nitro.View
+                this.config.packageType === Nitro.View
             ),
             { encoding: 'utf8' }
         )
@@ -261,7 +284,7 @@ export class NitroModuleFactory {
         })
         const exampleAppPackageJson = JSON.parse(examplePackageJsonStr)
 
-        exampleAppPackageJson.name = `${this.config.finalModuleName}-example`
+        exampleAppPackageJson.name = `${this.config.finalPackageName}-example`
 
         exampleAppPackageJson.scripts = {
             ...exampleAppPackageJson.scripts,
@@ -300,7 +323,7 @@ export class NitroModuleFactory {
         )
 
         const replacements = {
-            [JS_PACKAGE_NAME_TAG]: this.config.finalModuleName,
+            [JS_PACKAGE_NAME_TAG]: this.config.finalPackageName,
         }
 
         const reactNativeConfig = await replacePlaceholder({
@@ -343,7 +366,7 @@ export class NitroModuleFactory {
 
         await writeFile(
             tsConfigPath,
-            exampleTsConfig(this.config.finalModuleName),
+            exampleTsConfig(this.config.finalPackageName),
             { encoding: 'utf8' }
         )
 
@@ -356,7 +379,7 @@ export class NitroModuleFactory {
 
         await writeFile(
             androidSettingsGradlePath,
-            androidSettingsGradleCode(toPascalCase(this.config.moduleName)),
+            androidSettingsGradleCode(toPascalCase(this.config.packageName)),
             { encoding: 'utf8' }
         )
 
@@ -426,7 +449,7 @@ export class NitroModuleFactory {
         })
 
         const iosBuildReplacements = {
-            $$exampleApp$$: `${toPascalCase(this.config.moduleName)}Example`,
+            $$exampleApp$$: `${toPascalCase(this.config.packageName)}Example`,
         }
 
         const iosBuildWorkflowContent = await replacePlaceholder({

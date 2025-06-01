@@ -1,4 +1,13 @@
-import { Ora } from 'ora'
+import * as p from '@clack/prompts'
+
+export interface UserAnswers {
+    packageName: string
+    description: string
+    platforms: SupportedPlatform[]
+    packageType: Nitro
+    langs: SupportedLang[]
+    pm: PackageManager
+}
 
 export enum SupportedLang {
     SWIFT = 'swift',
@@ -18,6 +27,7 @@ export type PlatformLang = {
 }
 
 export type CreateModuleOptions = {
+    ci?: boolean
     moduleDir?: string
     skipExample?: boolean
     skipInstall?: boolean
@@ -35,12 +45,13 @@ export type GenerateModuleConfig = {
     cwd: string
     langs: SupportedLang[]
     prefix?: string
-    spinner: Ora
+    spinner: ReturnType<typeof p.spinner>
+    description: string
     funcName?: string
     platforms: SupportedPlatform[]
-    moduleType: Nitro
-    moduleName: string
-    finalModuleName: string
+    packageType: Nitro
+    packageName: string
+    finalPackageName: string
 } & Omit<CreateModuleOptions, 'moduleDir'>
 
 export interface FileGenerator {

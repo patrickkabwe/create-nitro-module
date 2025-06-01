@@ -1,0 +1,344 @@
+name: Test Nitro CLI - Generate & Build
+
+permissions:
+    contents: write
+    packages: write
+    actions: write
+
+on:
+    push:
+        branches: [next]
+        paths:
+            - 'src/**'
+            - '.github/workflows/test-nitro-cli.yml'
+            - 'package.json'
+            - 'bun.lock'
+    pull_request:
+        branches: [main, next]
+        paths:
+            - 'src/**'
+            - '.github/workflows/test-nitro-cli.yml'
+            - 'package.json'
+            - 'bun.lock'
+    workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    lint-and-build:
+        name: Lint and Build CLI
+        runs-on: ubuntu-latest
+        outputs:
+            bun-cache-key: ${{ runner.os }}-bun
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@v4
+
+            - name: Setup Bun.js
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Cache bun dependencies
+              id: bun-cache
+              uses: actions/cache@v4
+              with:
+                  path: ~/.bun/install/cache
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock', '**/bun.lockb') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun-
+
+            - name: Install dependencies
+              run: bun install
+
+            - name: Lint Code
+              run: bun lint
+
+            - name: Build CLI
+              run: bun run build
+
+            - name: Test CLI help commands
+              run: |
+                  node lib/cli/index.js --help
+                  node lib/cli/index.js create --help
+
+    generate-packages:
+        name: Generate with ${{ matrix.pm }} - ${{ matrix.package-type }}
+        needs: lint-and-build
+        runs-on: macos-latest
+        strategy:
+            matrix:
+                pm: ['bun', 'yarn']
+                package-type: ['module', 'view']
+
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Configure Git
+              run: |
+                  git config --global user.name "GitHub Actions Bot"
+                  git config --global user.email "actions@github.com"
+
+            - name: Setup Node.js
+              if: matrix.pm == 'yarn'
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+
+            - name: Setup Bun.js
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Cache dependencies
+              if: matrix.pm == 'bun'
+              uses: actions/cache@v4
+              with:
+                  path: ~/.bun/install/cache
+                  key: ${{ needs.lint-and-build.outputs.bun-cache-key }}-${{ hashFiles('**/bun.lockb') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun-
+
+            - name: Install npm dependencies (bun)
+              run: bun install
+
+            - name: Build CLI and Link Locally
+              run: |
+                  bun run build
+                  ${{matrix.pm}} link
+
+            - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
+              continue-on-error: false
+              run: ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --skip-install --ci
+
+            - name: Verify generated package structure
+              run: |
+                  PACKAGE_DIR="react-native-test-${{ matrix.package-type }}"
+
+                  if [ ! -d "$PACKAGE_DIR" ]; then
+                    echo "❌ Package directory not found: $PACKAGE_DIR"
+                    ls -la
+                    exit 1
+                  fi
+
+                  echo "✅ Package directory created: $PACKAGE_DIR"
+
+                  # Check essential files
+                  cd "$PACKAGE_DIR"
+
+                  REQUIRED_FILES=(
+                    "package.json"
+                    "README.md"
+                    "src/"
+                    "android/"
+                    "ios/"
+                    "example/"
+                  )
+
+                  for file in "${REQUIRED_FILES[@]}"; do
+                    if [ ! -e "$file" ]; then
+                      echo "❌ Missing required file/directory: $file"
+                      ls -la
+                      exit 1
+                    fi
+                    echo "✅ Found: $file"
+                  done
+
+            - name: Test package.json content
+              run: |
+                  cd "react-native-test-${{ matrix.package-type }}"
+
+                  # Verify package name
+                  if ! grep -q "react-native-test-${{ matrix.package-type }}" package.json; then
+                    echo "❌ Package name not correct in package.json"
+                    cat package.json
+                    exit 1
+                  fi
+
+                  # Verify scripts exist
+                  if ! grep -q '"scripts"' package.json; then
+                    echo "❌ Scripts section missing from package.json"
+                    exit 1
+                  fi
+
+                  echo "✅ package.json structure validated"
+
+            - name: Upload generated package
+              uses: actions/upload-artifact@v4
+              with:
+                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  path: react-native-test-${{ matrix.package-type }}
+                  include-hidden-files: true
+                  if-no-files-found: error
+                  retention-days: 1
+
+    test-ios-build:
+        name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
+        needs: generate-packages
+        runs-on: macos-latest
+        strategy:
+            matrix:
+                pm: ['bun', 'yarn']
+                package-type: ['module', 'view']
+                mode: ['Debug', 'Release']
+        env:
+            WORKING_DIR: /Users/runner/react-native-test-${{ matrix.package-type }}
+        steps:
+            - name: Create working directory
+              run: mkdir -p ${{ env.WORKING_DIR }}
+
+            - name: Download generated package
+              uses: actions/download-artifact@v4
+              with:
+                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  path: ${{ env.WORKING_DIR }}
+
+            - name: List package structure
+              working-directory: ${{ env.WORKING_DIR }}
+              run: |
+                  echo "Package structure:"
+                  find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
+
+            - name: Setup Ruby and CocoaPods
+              uses: ruby/setup-ruby@v1
+              with:
+                  ruby-version: '3.2'
+                  bundler-cache: true
+
+            - name: Setup Node.js
+              if: matrix.pm == 'yarn'
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+
+            - name: Setup Yarn
+              if: matrix.pm == 'yarn'
+              run: |
+                  corepack enable
+                  cd ${{ env.WORKING_DIR }}
+                  yarn set version 4.6.0
+                  yarn config set enableImmutableInstalls false
+                  yarn config set nodeLinker node-modules
+                  touch yarn.lock
+
+            - name: Setup Bun.js
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install package dependencies
+              working-directory: ${{ env.WORKING_DIR }}
+              run: ${{ matrix.pm }} install
+
+            - name: Run codegen
+              working-directory: ${{ env.WORKING_DIR }}
+              run: |
+                  bunx nitro-codegen --logLevel="debug"
+                  ${{ matrix.pm }} run build
+                  node post-script.js
+
+            - name: Install CocoaPods dependencies
+              working-directory: ${{ env.WORKING_DIR }}/example
+              run: ${{ matrix.pm }} pod
+
+            - name: Build iOS project
+              working-directory: ${{ env.WORKING_DIR }}/example/ios
+              run: |
+                  # Get the correct scheme name based on package type
+                  if [ "${{ matrix.package-type }}" == "module" ]; then
+                    SCHEME="TestModuleExample"
+                  else
+                    SCHEME="TestViewExample"
+                  fi
+
+                  set -o pipefail && xcodebuild \
+                    CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
+                    -derivedDataPath build -UseModernBuildSystem=YES \
+                    -workspace "${SCHEME}.xcworkspace" \
+                    -scheme "$SCHEME" \
+                    -sdk iphonesimulator \
+                    -configuration ${{ matrix.mode }} \
+                    -destination 'platform=iOS Simulator,name=iPhone 16' \
+                    build \
+                    CODE_SIGNING_ALLOWED=NO
+
+    test-android-build:
+        name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
+        needs: generate-packages
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                pm: ['bun', 'yarn']
+                package-type: ['module', 'view']
+                mode: ['Debug', 'Release']
+        env:
+            WORKING_DIR: /home/runner/react-native-test-${{ matrix.package-type }}
+        steps:
+            - name: Create working directory
+              run: mkdir -p ${{ env.WORKING_DIR }}
+
+            - name: Download generated package
+              uses: actions/download-artifact@v4
+              with:
+                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  path: ${{ env.WORKING_DIR }}
+
+            - name: List package structure
+              working-directory: ${{ env.WORKING_DIR }}
+              run: |
+                  echo "Package structure:"
+                  find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
+
+            - name: Setup Node.js
+              if: matrix.pm == 'yarn'
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+
+            - name: Setup Yarn
+              if: matrix.pm == 'yarn'
+              run: |
+                  corepack enable
+                  cd ${{ env.WORKING_DIR }}
+                  yarn set version 4.6.0
+                  yarn config set enableImmutableInstalls false
+                  yarn config set nodeLinker node-modules
+                  touch yarn.lock
+
+            - name: Setup Bun.js
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install package dependencies
+              working-directory: ${{ env.WORKING_DIR }}
+              run: ${{ matrix.pm }} install
+
+            - name: Run codegen
+              working-directory: ${{ env.WORKING_DIR }}
+              run: |
+                  bunx nitro-codegen --logLevel="debug"
+                  ${{ matrix.pm }} run build
+                  node post-script.js
+
+            - name: Setup Java for Android builds
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'zulu'
+                  java-version: '17'
+
+            - name: Make gradlew executable
+              working-directory: ${{ env.WORKING_DIR }}/example/android
+              run: chmod +x ./gradlew
+
+            - name: Build Android project
+              working-directory: ${{ env.WORKING_DIR }}/example/android
+              run: ./gradlew assemble${{ matrix.mode }} --no-daemon --build-cache
+
+            - name: Stop Gradle daemon
+              working-directory: ${{ env.WORKING_DIR }}/example/android
+              run: ./gradlew --stop

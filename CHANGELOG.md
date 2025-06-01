@@ -1,3 +1,85 @@
+## [2.0.0-next.5](https://github.com/patrickkabwe/create-nitro-module/compare/v2.0.0-next.4...v2.0.0-next.5) (2025-06-01)
+
+### ✨ Features
+
+* add author and description placeholders to template files and update spinner messages ([1eba141](https://github.com/patrickkabwe/create-nitro-module/commit/1eba141c2a88995bbd704f4e8a3d28f042f8b944))
+* add badges for version, downloads, and license to README ([ecdba90](https://github.com/patrickkabwe/create-nitro-module/commit/ecdba907064d076b7fb8a8cd85ac50a5369f6f5f))
+* add description and keywords to package generation ([5b9aded](https://github.com/patrickkabwe/create-nitro-module/commit/5b9aded2b3ebdfe01bff85bfec6ed8a386f18eb9))
+* add MIT License file to the project ([235ac28](https://github.com/patrickkabwe/create-nitro-module/commit/235ac286b3a76f19b8f9bb28afed27870c8ae318))
+* add ncli.tape for automated CLI module creation and improve spinner message formatting ([0dd62c4](https://github.com/patrickkabwe/create-nitro-module/commit/0dd62c464844d19d7e686ebef9d07997480fc486))
+
+### 🐛 Bug Fixes
+
+* correct syntax in package generation keywords array ([2d835a1](https://github.com/patrickkabwe/create-nitro-module/commit/2d835a1cec954252dfce9e85ddd4afb35da2d10c))
+* update cache key in GitHub workflows and correct import path in package generation ([07acfc3](https://github.com/patrickkabwe/create-nitro-module/commit/07acfc351c8d39dd296c55cfff03741a8c39d021))
+* update nitro-module-cli.gif to improve visual representation ([79ba089](https://github.com/patrickkabwe/create-nitro-module/commit/79ba089b08eadc3fab00e1618897a78356679c5c))
+
+## [2.0.0-next.4](https://github.com/patrickkabwe/create-nitro-module/compare/v2.0.0-next.3...v2.0.0-next.4) (2025-06-01)
+
+### 🐛 Bug Fixes
+
+* workflow ([d35a0b6](https://github.com/patrickkabwe/create-nitro-module/commit/d35a0b60834deec42262f66db61d2bda8ddcaa0b))
+
+### 🛠️ Other changes
+
+* enhance GitHub workflow for code generation and CocoaPods installation ([b8c6916](https://github.com/patrickkabwe/create-nitro-module/commit/b8c6916608b5c5428b3f70fc01ae8cfecd640659))
+* update GitHub workflow and package generation scripts ([683e4f8](https://github.com/patrickkabwe/create-nitro-module/commit/683e4f8cc8f09408ea24fd1aad8d5ae14ee9e54e))
+
+## [2.0.0-next.3](https://github.com/patrickkabwe/create-nitro-module/compare/v2.0.0-next.2...v2.0.0-next.3) (2025-06-01)
+
+### 🛠️ Other changes
+
+* update GitHub workflow to support both Debug and Release modes ([a8f808a](https://github.com/patrickkabwe/create-nitro-module/commit/a8f808a895f9de903d3d068cad19152cbbaf3043))
+* update release configuration for additional assets ([0f8bc96](https://github.com/patrickkabwe/create-nitro-module/commit/0f8bc96161c0e851a224b733550f36272bc25c9b))
+
+## [2.0.0-next.2](https://github.com/patrickkabwe/create-nitro-module/compare/v2.0.0-next.1...v2.0.0-next.2) (2025-05-31)
+
+### 🐛 Bug Fixes
+
+* ensure newline at end of package.json file ([b5d2d47](https://github.com/patrickkabwe/create-nitro-module/commit/b5d2d4761e040e53f34b1c4c7c2e738d14fab589))
+
+### 🔄 Code Refactors
+
+* standardize naming from moduleName to packageName across the codebase ([8df59bd](https://github.com/patrickkabwe/create-nitro-module/commit/8df59bdcebfff7e717d4e5aabb2636c60e50bf70))
+* update Nitro module creation to use packageName instead of moduleName ([83207f9](https://github.com/patrickkabwe/create-nitro-module/commit/83207f9e368f984665120e1287ef7880767216f2))
+
+### 📚 Documentation
+
+* add Semantic Release mention to README and documentation ([e81ba14](https://github.com/patrickkabwe/create-nitro-module/commit/e81ba14cf74a344dda19280297e51efabb8be986))
+
+### 🛠️ Other changes
+
+* add Act configuration and update GitHub workflows ([57ffaff](https://github.com/patrickkabwe/create-nitro-module/commit/57ffaff17564446774dcacbe0284c4dd44828021))
+* add Act configuration and update GitHub workflows ([9a0dc4f](https://github.com/patrickkabwe/create-nitro-module/commit/9a0dc4fb7b700bb0963d73f840b465ada8c9d80c))
+* add Act configuration and update GitHub workflows ([d1800ce](https://github.com/patrickkabwe/create-nitro-module/commit/d1800ce807c98f65c0c28a32ebcaafe52b9f8b36))
+* add Act configuration and update GitHub workflows ([9630cb8](https://github.com/patrickkabwe/create-nitro-module/commit/9630cb84ed352292ae38963a7b5e39f7494d514d))
+* add Act configuration and update GitHub workflows ([7b901a5](https://github.com/patrickkabwe/create-nitro-module/commit/7b901a5fadb93e6b849b60fa61ff18e1873367e5))
+* migrate from release-it to semantic-release for version management ([947b75a](https://github.com/patrickkabwe/create-nitro-module/commit/947b75a65bd3a23afd73f7bc4ed1e870ac2b284b))
+* refine artifact naming in GitHub workflows for consistency ([0edc112](https://github.com/patrickkabwe/create-nitro-module/commit/0edc11218ef4246c8998cf015ce30d462ba892f1))
+* remove generate-nitro-module and generate-nitro-views workflows from GitHub Actions ([15f3ad5](https://github.com/patrickkabwe/create-nitro-module/commit/15f3ad554c0ef7375e66c26aa7cae42ccb6e4417))
+* remove npm from package manager matrix in GitHub workflows ([a5f2dd4](https://github.com/patrickkabwe/create-nitro-module/commit/a5f2dd4de11a999a71b752481454b665fe711b9f))
+* rename generate-nitro-module to nitro-package ([7431ece](https://github.com/patrickkabwe/create-nitro-module/commit/7431ece019983664d2e9759710b5de025c572ea8))
+* simplify artifact naming in GitHub workflows by removing package manager from the name ([1af2d24](https://github.com/patrickkabwe/create-nitro-module/commit/1af2d2497208c9dec6ceee2034d5b1c043ebee83))
+* update artifact naming in GitHub workflows for clarity ([d0222f8](https://github.com/patrickkabwe/create-nitro-module/commit/d0222f815f487ffdec58088420e07287ce523fea))
+* update artifact naming in GitHub workflows for clarity ([fa7b444](https://github.com/patrickkabwe/create-nitro-module/commit/fa7b4445648e331f9135a67546abe7c594c468a0))
+* update artifact naming in GitHub workflows to include package manager in the name ([e8a88b5](https://github.com/patrickkabwe/create-nitro-module/commit/e8a88b5590b11f7ce63df2a444179ea5f74db6e2))
+* update artifact naming in GitHub workflows to remove package manager from the name ([4cb84c6](https://github.com/patrickkabwe/create-nitro-module/commit/4cb84c6a585f3dfa1460d0d3a54ca3e335e82b57))
+* update dependencies and refactor CLI entry points ([9078e13](https://github.com/patrickkabwe/create-nitro-module/commit/9078e13431cf1636dcb24bed4ad31ac98269ec9e))
+* update GitHub workflow to support npm alongside bun and yarn ([a702640](https://github.com/patrickkabwe/create-nitro-module/commit/a70264080b1266a258a74476ca29bef3d26c1183))
+* update publishConfig in package.json to set access to public ([ea03bb0](https://github.com/patrickkabwe/create-nitro-module/commit/ea03bb0e7ec62f2fc6ab61b639770680db4f6a7e))
+* update workflow to conditionally use bun for npm package creation ([dbef309](https://github.com/patrickkabwe/create-nitro-module/commit/dbef3098b85fa0527289c0c9d3888a83989af2c5))
+* use capitalize function ([b6e4e3e](https://github.com/patrickkabwe/create-nitro-module/commit/b6e4e3ed5bae6ec279626f825c501ae2e4fcd8ad))
+
+## [2.0.0-next.1](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.11-next.3...v2.0.0-next.1) (2025-05-29)
+
+### ⚠ BREAKING CHANGES
+
+* use `@clack/prompts` to handle prompts
+
+### ✨ Features
+
+* use `@clack/prompts` to handle prompts ([31d414c](https://github.com/patrickkabwe/create-nitro-module/commit/31d414c376084d06afe181e01cff985870340524))
+
 ## [1.8.10](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.9...v1.8.10) (2025-05-29)
 
 ### 🛠️ Other changes

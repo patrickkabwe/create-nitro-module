@@ -42,7 +42,7 @@ export class IOSFileGenerator implements FileGenerator {
         )
         const podspecFilePath = path.join(
             config.cwd,
-            `${toPascalCase(config.moduleName)}.podspec`
+            `${toPascalCase(config.packageName)}.podspec`
         )
         await cp(iosFolderPath, path.join(config.cwd, 'ios'), {
             recursive: true,
@@ -52,14 +52,14 @@ export class IOSFileGenerator implements FileGenerator {
 
         // Create a podspec file
         const replacements = {
-            [IOS_MODULE_NAME_TAG]: toPascalCase(config.moduleName),
+            [IOS_MODULE_NAME_TAG]: toPascalCase(config.packageName),
             'patrickkabwe/create-nitro-module':
-                `${name.replaceAll(' ', '')}/${config.finalModuleName}`.toLowerCase(),
+                `${name.replaceAll(' ', '')}/${config.finalPackageName}`.toLowerCase(),
         }
 
         await createModuleFile(
             config.cwd,
-            `${toPascalCase(config.moduleName)}.podspec`,
+            `${toPascalCase(config.packageName)}.podspec`,
             await replacePlaceholder({
                 filePath: podspecFilePath,
                 replacements,
@@ -70,7 +70,7 @@ export class IOSFileGenerator implements FileGenerator {
         const bridgeFilePath = path.join(config.cwd, 'ios', 'Bridge.h')
 
         const bridgeReplacements = {
-            [IOS_MODULE_NAME_TAG]: config.moduleName,
+            [IOS_MODULE_NAME_TAG]: config.packageName,
             'Created by Marc Rousavy on 22.07.24.': `Created by ${name} on ${new Date().toLocaleDateString()}`, //TODO: user regex
         }
 
@@ -83,13 +83,17 @@ export class IOSFileGenerator implements FileGenerator {
             })
         )
         if (config.langs.includes(SupportedLang.SWIFT)) {
-            const isHybridView = config.moduleType === Nitro.View
+            const isHybridView = config.packageType === Nitro.View
             await createModuleFile(
                 config.cwd,
-                `ios/Hybrid${toPascalCase(config.moduleName)}.swift`,
+                `ios/Hybrid${toPascalCase(config.packageName)}.swift`,
                 isHybridView
-                    ? getSwiftViewCode(config.moduleName)
-                    : getSwiftCode(config.moduleName, `${config.funcName}`)
+                    ? getSwiftViewCode(config.packageName, name)
+                    : getSwiftCode(
+                          config.packageName,
+                          `${config.funcName}`,
+                          name
+                      )
             )
         }
     }

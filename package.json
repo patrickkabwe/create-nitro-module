@@ -1,11 +1,11 @@
 {
     "name": "create-nitro-module",
-    "version": "1.8.10",
+    "version": "2.0.0-next.5",
     "description": "A CLI tool that simplifies creating React Native modules powered by Nitro Modules.",
     "private": false,
     "type": "module",
     "scripts": {
-        "dev": "bun typecheck && tsx src/cli.ts",
+        "dev": "bun typecheck && bun src/cli/index.ts",
         "build": "rm -rf lib && bun typecheck && tsup src",
         "typecheck": "tsc --noEmit",
         "prerelease": "rm -rf ./lib/assets",
@@ -37,8 +37,8 @@
     ],
     "license": "MIT",
     "bin": {
-        "create-nitro-module": "./lib/cli.js",
-        "nitro-module": "./lib/cli.js"
+        "create-nitro-module": "./lib/cli/index.js",
+        "nitro-module": "./lib/cli/index.js"
     },
     "repository": {
         "type": "git",
@@ -54,10 +54,9 @@
         "access": "public"
     },
     "dependencies": {
+        "@clack/prompts": "^0.11.0",
         "commander": "^14.0.0",
-        "inquirer": "^12.1.0",
         "kleur": "^4.1.5",
-        "ora": "^8.1.1",
         "tsup": "^8.3.5"
     },
     "prettier": {
@@ -81,7 +80,6 @@
         "lefthook": "^1.10.1",
         "prettier": "^3.4.1",
         "semantic-release": "^24.2.3",
-        "tsx": "^4.19.2",
         "typescript": "^5.7.2"
     },
     "engines": {
