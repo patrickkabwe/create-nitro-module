@@ -14,6 +14,8 @@ import {
 import {
     ANDROID_CXX_LIB_NAME_TAG,
     ANDROID_NAME_SPACE_TAG,
+    AUTHOR_TAG,
+    DESCRIPTION_TAG,
     CXX_NAME_SPACE_TAG,
     foldersToRemoveFromExampleApp,
     IOS_MODULE_NAME_TAG,
@@ -42,6 +44,8 @@ import {
     replacePlaceholder,
     toPascalCase,
 } from './utils'
+import kleur from 'kleur'
+
 
 const execAsync = util.promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
@@ -90,7 +94,7 @@ export class NitroModuleFactory {
         await this.copyNitroTemplateFiles()
         await this.replaceNitroJsonPlaceholders()
         await this.updatePackageJsonConfig(this.config.skipExample)
-        await this.updateReadme()
+        await this.updateTemplateFiles()
 
         if (!this.config.skipExample) {
             this.config.spinner.message(messages.generating)
@@ -99,12 +103,13 @@ export class NitroModuleFactory {
             await this.syncExampleAppConfigurations()
             await this.setupWorkflows()
             await this.gitInit()
+            this.config.spinner.stop(kleur.cyan(messages.generating+'Done'))
         }
         if (!this.config.skipInstall && !this.config.skipExample) {
-            this.config.spinner.message(messages.installing)
+            this.config.spinner.start(messages.installing)
             await this.installDependenciesAndRunCodegen()
+            this.config.spinner.stop(kleur.cyan(messages.installing+'Done'))
         }
-        this.config.spinner.stop()
     }
 
     private async replaceNitroJsonPlaceholders() {
@@ -186,8 +191,9 @@ export class NitroModuleFactory {
         )
     }
 
-    private async updateReadme() {
+    private async updateTemplateFiles() {
         const readmePath = path.join(this.config.cwd, 'README.md')
+        const licensePath = path.join(this.config.cwd, 'LICENSE')
 
         const replacements = {
             [JS_PACKAGE_NAME_TAG]: this.config.finalPackageName,
@@ -195,6 +201,8 @@ export class NitroModuleFactory {
                 this.config.pm === 'bun' || this.config.pm === 'yarn'
                     ? `${this.config.pm} add`
                     : 'npm install',
+            [DESCRIPTION_TAG]: this.config.description,
+            [AUTHOR_TAG]: getGitUserInfo().name,
         }
 
         const readmeContents = await replacePlaceholder({
@@ -202,7 +210,15 @@ export class NitroModuleFactory {
             replacements,
         })
 
+        const licenseContents = await replacePlaceholder({
+            filePath: licensePath,
+            replacements,
+        })
+
         await writeFile(readmePath, readmeContents, {
+            encoding: 'utf8',
+        })
+        await writeFile(licensePath, licenseContents, {
             encoding: 'utf8',
         })
     }
@@ -218,6 +234,7 @@ export class NitroModuleFactory {
             'package.json',
             '.github',
             'release.config.cjs',
+            'LICENSE',
         ]
 
         await copyTemplateFiles(

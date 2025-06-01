@@ -258,7 +258,7 @@ const getUserAnswers = async (
                 }
                 const packageNameConfirmation = await p.confirm({
                     message: kleur.cyan(
-                        `✨ Your package name will be called: ${kleur.bold(kleur.green('react-native-' + packageName.toLowerCase()))} would you like to continue?`
+                        `Your package name will be called: ${kleur.bold(kleur.green('react-native-' + packageName.toLowerCase()))} would you like to continue?`
                     ),
                 })
                 if (!packageNameConfirmation) {
