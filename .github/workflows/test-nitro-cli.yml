@@ -237,7 +237,7 @@ jobs:
             - name: Run codegen
               working-directory: ${{ env.WORKING_DIR }}
               run: |
-                  nitro-codegen --logLevel="debug"
+                  bunx nitro-codegen --logLevel="debug"
                   ${{ matrix.pm }} run build
                   node post-script.js
 
@@ -321,7 +321,7 @@ jobs:
             - name: Run codegen
               working-directory: ${{ env.WORKING_DIR }}
               run: |
-                  nitro-codegen --logLevel="debug"
+                  bunx nitro-codegen --logLevel="debug"
                   ${{ matrix.pm }} run build
                   node post-script.js
 
