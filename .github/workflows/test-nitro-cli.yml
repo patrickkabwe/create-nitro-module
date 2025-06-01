@@ -177,14 +177,14 @@ jobs:
                   retention-days: 1
 
     test-ios-build:
-        name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package-type }}
+        name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
         needs: generate-packages
         runs-on: macos-latest
         strategy:
             matrix:
                 pm: ['bun', 'yarn']
                 package-type: ['module', 'view']
-                mode: ['Release']
+                mode: ['Debug', 'Release']
         env:
             WORKING_DIR: /Users/runner/react-native-test-${{ matrix.package-type }}
         steps:
@@ -264,14 +264,14 @@ jobs:
                     CODE_SIGNING_ALLOWED=NO
 
     test-android-build:
-        name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package-type }}
+        name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
         needs: generate-packages
         runs-on: ubuntu-latest
         strategy:
             matrix:
                 pm: ['bun', 'yarn']
                 package-type: ['module', 'view']
-                mode: ['Debug']
+                mode: ['Debug', 'Release']
         env:
             WORKING_DIR: /home/runner/react-native-test-${{ matrix.package-type }}
         steps:
