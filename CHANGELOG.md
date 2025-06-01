@@ -1,3 +1,19 @@
+## [2.0.0-next.5](https://github.com/patrickkabwe/create-nitro-module/compare/v2.0.0-next.4...v2.0.0-next.5) (2025-06-01)
+
+### ✨ Features
+
+* add author and description placeholders to template files and update spinner messages ([1eba141](https://github.com/patrickkabwe/create-nitro-module/commit/1eba141c2a88995bbd704f4e8a3d28f042f8b944))
+* add badges for version, downloads, and license to README ([ecdba90](https://github.com/patrickkabwe/create-nitro-module/commit/ecdba907064d076b7fb8a8cd85ac50a5369f6f5f))
+* add description and keywords to package generation ([5b9aded](https://github.com/patrickkabwe/create-nitro-module/commit/5b9aded2b3ebdfe01bff85bfec6ed8a386f18eb9))
+* add MIT License file to the project ([235ac28](https://github.com/patrickkabwe/create-nitro-module/commit/235ac286b3a76f19b8f9bb28afed27870c8ae318))
+* add ncli.tape for automated CLI module creation and improve spinner message formatting ([0dd62c4](https://github.com/patrickkabwe/create-nitro-module/commit/0dd62c464844d19d7e686ebef9d07997480fc486))
+
+### 🐛 Bug Fixes
+
+* correct syntax in package generation keywords array ([2d835a1](https://github.com/patrickkabwe/create-nitro-module/commit/2d835a1cec954252dfce9e85ddd4afb35da2d10c))
+* update cache key in GitHub workflows and correct import path in package generation ([07acfc3](https://github.com/patrickkabwe/create-nitro-module/commit/07acfc351c8d39dd296c55cfff03741a8c39d021))
+* update nitro-module-cli.gif to improve visual representation ([79ba089](https://github.com/patrickkabwe/create-nitro-module/commit/79ba089b08eadc3fab00e1618897a78356679c5c))
+
 ## [2.0.0-next.4](https://github.com/patrickkabwe/create-nitro-module/compare/v2.0.0-next.3...v2.0.0-next.4) (2025-06-01)
 
 ### 🐛 Bug Fixes
