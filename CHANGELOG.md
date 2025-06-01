@@ -1,3 +1,14 @@
+## [2.0.0-next.4](https://github.com/patrickkabwe/create-nitro-module/compare/v2.0.0-next.3...v2.0.0-next.4) (2025-06-01)
+
+### 🐛 Bug Fixes
+
+* workflow ([d35a0b6](https://github.com/patrickkabwe/create-nitro-module/commit/d35a0b60834deec42262f66db61d2bda8ddcaa0b))
+
+### 🛠️ Other changes
+
+* enhance GitHub workflow for code generation and CocoaPods installation ([b8c6916](https://github.com/patrickkabwe/create-nitro-module/commit/b8c6916608b5c5428b3f70fc01ae8cfecd640659))
+* update GitHub workflow and package generation scripts ([683e4f8](https://github.com/patrickkabwe/create-nitro-module/commit/683e4f8cc8f09408ea24fd1aad8d5ae14ee9e54e))
+
 ## [2.0.0-next.3](https://github.com/patrickkabwe/create-nitro-module/compare/v2.0.0-next.2...v2.0.0-next.3) (2025-06-01)
 
 ### 🛠️ Other changes
