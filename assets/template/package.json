@@ -54,7 +54,7 @@
     "@types/react": "^19.0.10",
     "nitro-codegen": "0.26.1",
     "react": "19.0.0",
-    "react-native": "0.79.2",
+    "react-native": "0.79.3",
     "react-native-builder-bob": "^0.37.0",
     "react-native-nitro-modules": "0.26.1",
     "conventional-changelog-conventionalcommits": "^9.0.0",
