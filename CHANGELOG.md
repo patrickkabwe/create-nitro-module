@@ -1,3 +1,11 @@
+## [2.1.1](https://github.com/patrickkabwe/create-nitro-module/compare/v2.1.0...v2.1.1) (2025-06-05)
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([7922c3e](https://github.com/patrickkabwe/create-nitro-module/commit/7922c3e259aa0dc9231d59dfb1567d64db97fb74))
+* **deps-dev:** bump eslint from 9.27.0 to 9.28.0 ([5ae7ace](https://github.com/patrickkabwe/create-nitro-module/commit/5ae7ace904dc65a92dcafed794dca46293fddd01))
+* **deps-dev:** bump eslint-plugin-n from 17.18.0 to 17.19.0 ([97a49fc](https://github.com/patrickkabwe/create-nitro-module/commit/97a49fc4af8cb5d6a8d32ede6478c58e53281cd5))
+
 ## [2.1.0](https://github.com/patrickkabwe/create-nitro-module/compare/v2.0.0...v2.1.0) (2025-06-05)
 
 ### ✨ Features
