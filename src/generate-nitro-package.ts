@@ -1,3 +1,4 @@
+import kleur from 'kleur'
 import { exec } from 'node:child_process'
 import { readFile, rename, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -15,11 +16,12 @@ import {
     ANDROID_CXX_LIB_NAME_TAG,
     ANDROID_NAME_SPACE_TAG,
     AUTHOR_TAG,
-    DESCRIPTION_TAG,
     CXX_NAME_SPACE_TAG,
+    DESCRIPTION_TAG,
     foldersToRemoveFromExampleApp,
     IOS_MODULE_NAME_TAG,
     JS_PACKAGE_NAME_TAG,
+    LICENSE_YEAR_TAG,
     messages,
     packagesToRemoveFromExampleApp,
 } from './constants'
@@ -44,7 +46,6 @@ import {
     replacePlaceholder,
     toPascalCase,
 } from './utils'
-import kleur from 'kleur'
 
 const execAsync = util.promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
@@ -202,6 +203,7 @@ export class NitroModuleFactory {
                     : 'npm install',
             [DESCRIPTION_TAG]: this.config.description,
             [AUTHOR_TAG]: getGitUserInfo().name,
+            [LICENSE_YEAR_TAG]: new Date().getFullYear().toString(),
         }
 
         const readmeContents = await replacePlaceholder({
