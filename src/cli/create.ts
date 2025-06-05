@@ -100,28 +100,28 @@ const selectLanguages = async (
 
     const options =
         platforms.includes(SupportedPlatform.IOS) &&
-        platforms.includes(SupportedPlatform.ANDROID)
+            platforms.includes(SupportedPlatform.ANDROID)
             ? [
-                  {
-                      label: 'Swift & Kotlin',
-                      value: [SupportedLang.SWIFT, SupportedLang.KOTLIN],
-                      hint: `Use Swift and Kotlin to build your Nitro ${packageType.toLowerCase()} for iOS and Android`,
-                  },
-                  ...(packageType === Nitro.Module
-                      ? [
-                            {
-                                label: 'C++',
-                                value: [SupportedLang.CPP],
-                                hint: 'Use C++ to share code between iOS and Android',
-                            },
-                        ]
-                      : []),
-              ]
+                {
+                    label: 'Swift & Kotlin',
+                    value: [SupportedLang.SWIFT, SupportedLang.KOTLIN],
+                    hint: `Use Swift and Kotlin to build your Nitro ${packageType.toLowerCase()} for iOS and Android`,
+                },
+                ...(packageType === Nitro.Module
+                    ? [
+                        {
+                            label: 'C++',
+                            value: [SupportedLang.CPP],
+                            hint: 'Use C++ to share code between iOS and Android',
+                        },
+                    ]
+                    : []),
+            ]
             : availableLanguages.map(lang => ({
-                  label: capitalize(lang),
-                  value: [lang],
-                  hint: `Use ${lang === SupportedLang.CPP ? 'C++' : capitalize(lang)} to build your Nitro ${packageType.toLowerCase()} for ${platforms.join(' and ')}`,
-              }))
+                label: capitalize(lang),
+                value: [lang],
+                hint: `Use ${lang === SupportedLang.CPP ? 'C++' : capitalize(lang)} to build your Nitro ${packageType.toLowerCase()} for ${platforms.join(' and ')}`,
+            }))
 
     const selectedLangs = await p.select({
         message: kleur.cyan('Which language(s) would you like to use?'),
@@ -160,19 +160,22 @@ const getUserAnswers = async (
                         return validatePackageName(packageName)
                     },
                 }),
-            description: async ({ results }) =>
-                p.text({
+            description: async ({ results }) => {
+                const defaultMessage = `react-native-${results.packageName} is a react native package built with Nitro`
+                return await p.text({
                     message: kleur.cyan('Enter a description for your package'),
-                    defaultValue: `${kleur.yellow(`react-native-${results.packageName}`)} is a react native package built with Nitro`,
-                    initialValue: `${kleur.yellow(`react-native-${results.packageName}`)} is a react native package built with Nitro`,
-                    placeholder: `react-native-${results.packageName} is a react native package built with Nitro`,
+                    defaultValue: defaultMessage,
+                    initialValue: defaultMessage,
+                    placeholder: defaultMessage,
                     validate(value) {
                         if (value?.trim().length === 0) {
                             return 'Package description is required'
                         }
                         return ''
                     },
-                }),
+                })
+            }
+            ,
             platforms: () =>
                 p.multiselect({
                     message: kleur.cyan('Which platform(s) are you targeting?'),
