@@ -160,19 +160,21 @@ const getUserAnswers = async (
                         return validatePackageName(packageName)
                     },
                 }),
-            description: async ({ results }) =>
-                p.text({
+            description: async ({ results }) => {
+                const defaultMessage = `react-native-${results.packageName} is a react native package built with Nitro`
+                return await p.text({
                     message: kleur.cyan('Enter a description for your package'),
-                    defaultValue: `${kleur.yellow(`react-native-${results.packageName}`)} is a react native package built with Nitro`,
-                    initialValue: `${kleur.yellow(`react-native-${results.packageName}`)} is a react native package built with Nitro`,
-                    placeholder: `react-native-${results.packageName} is a react native package built with Nitro`,
+                    defaultValue: defaultMessage,
+                    initialValue: defaultMessage,
+                    placeholder: defaultMessage,
                     validate(value) {
                         if (value?.trim().length === 0) {
                             return 'Package description is required'
                         }
                         return ''
                     },
-                }),
+                })
+            },
             platforms: () =>
                 p.multiselect({
                     message: kleur.cyan('Which platform(s) are you targeting?'),
