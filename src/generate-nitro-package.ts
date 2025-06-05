@@ -138,6 +138,14 @@ export class NitroModuleFactory {
         )
     }
 
+    private getPostCodegenScript() {
+        let script = `${this.config.pm} --cwd example pod`
+        if (this.config.pm === 'npm') {
+            script = `${this.config.pm} --prefix example run pod`
+        }
+        return script
+    }
+
     private async updatePackageJsonConfig(skipExample?: boolean) {
         const { name } = getGitUserInfo()
         const userName = name.replaceAll(' ', '').toLowerCase()
@@ -161,7 +169,7 @@ export class NitroModuleFactory {
             ...newWorkspacePackageJsonFile.scripts,
             build: `${this.config.pm} run typecheck && bob build`,
             codegen: `nitro-codegen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`,
-            postcodegen: `${this.config.pm} ${this.config.pm === 'npm' ? '--prefix' : '--cwd'} example run pod`,
+            postcodegen: this.getPostCodegenScript(),
         }
 
         newWorkspacePackageJsonFile.keywords = [
@@ -425,9 +433,9 @@ export class NitroModuleFactory {
 
     private async installDependenciesAndRunCodegen() {
         await execAsync(`${this.config.pm} install`, { cwd: this.config.cwd })
-        await execAsync(`${this.config.pm} run codegen`, {
-            cwd: this.config.cwd,
-        })
+        let packageManager = this.config.pm === 'npm' ? 'npx --yes' : this.config.pm
+        let codegenCommand = `${packageManager} nitro-codegen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
+        await execAsync(codegenCommand, { cwd: this.config.cwd })
     }
 
     private async gitInit() {
