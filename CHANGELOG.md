@@ -1,3 +1,25 @@
+## [2.1.0](https://github.com/patrickkabwe/create-nitro-module/compare/v2.0.0...v2.1.0) (2025-06-05)
+
+### ✨ Features
+
+* upgrade nitro to 0.26.1 ([336b995](https://github.com/patrickkabwe/create-nitro-module/commit/336b995a613f70e977851a3748d307ab6e10670c))
+
+### 🐛 Bug Fixes
+
+* `postcodegen` script not working correctly with `bun` ([9c08c4b](https://github.com/patrickkabwe/create-nitro-module/commit/9c08c4b7cdc1f2b0db49573417e5260ff9c7f092))
+* package and readme description ([b033671](https://github.com/patrickkabwe/create-nitro-module/commit/b033671cff4948d9d1768d06f4c95327f10fd779))
+
+### 🔄 Code Refactors
+
+* improve code readability in installDependenciesAndRunCodegen method ([d6d81bc](https://github.com/patrickkabwe/create-nitro-module/commit/d6d81bc7128553d56e099837898d6d0f4158e200))
+* improve language selection logic in CLI ([ed9df70](https://github.com/patrickkabwe/create-nitro-module/commit/ed9df708e7e98e1ba07328500d05bc8de8817957))
+
+### 🛠️ Other changes
+
+* update ESLint configuration to use defineConfig for improved structure and readability ([7d51f85](https://github.com/patrickkabwe/create-nitro-module/commit/7d51f8537b0867d4a882a1d9b56b4294a82407a0))
+* update LICENSE file to use dynamic copyright year ([e7f25a5](https://github.com/patrickkabwe/create-nitro-module/commit/e7f25a58243ec4834d52f4ce00f11955f4ac2e95))
+* update react-native to version 0.79.3 ([6bb9d16](https://github.com/patrickkabwe/create-nitro-module/commit/6bb9d1631b2b0aa246c3c724fff6345c4ffdeac5))
+
 ## [2.0.0](https://github.com/patrickkabwe/create-nitro-module/compare/v1.8.10...v2.0.0) (2025-06-01)
 
 ### ⚠ BREAKING CHANGES

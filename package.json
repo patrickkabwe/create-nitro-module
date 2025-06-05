@@ -1,6 +1,6 @@
 {
     "name": "create-nitro-module",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "A CLI tool that simplifies creating React Native modules powered by Nitro Modules.",
     "private": false,
     "type": "module",
