@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/patrickkabwe/create-nitro-module/compare/v2.1.1...v2.1.2) (2025-06-07)
+
+### 🛠️ Other changes
+
+* **deps:** update nitro-codegen and react-native-nitro-modules to use caret versioning ([eeadf9a](https://github.com/patrickkabwe/create-nitro-module/commit/eeadf9a8aa1689cbf727aee39cd4544e58d6f857))
+* **deps:** update nitro-codegen and react-native-nitro-modules to version 0.26.2 ([04d578a](https://github.com/patrickkabwe/create-nitro-module/commit/04d578a011a71a3dca6e9ce0174748a1a4b92aa3))
+
 ## [2.1.1](https://github.com/patrickkabwe/create-nitro-module/compare/v2.1.0...v2.1.1) (2025-06-05)
 
 ### 🛠️ Other changes
