@@ -1,3 +1,9 @@
+## [2.1.3](https://github.com/patrickkabwe/create-nitro-module/compare/v2.1.2...v2.1.3) (2025-06-13)
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump @types/node from 22.15.24 to 24.0.1 ([28530f1](https://github.com/patrickkabwe/create-nitro-module/commit/28530f11587bcb825ce1d152b11bfe1bfd7e9973))
+
 ## [2.1.2](https://github.com/patrickkabwe/create-nitro-module/compare/v2.1.1...v2.1.2) (2025-06-07)
 
 ### 🛠️ Other changes
