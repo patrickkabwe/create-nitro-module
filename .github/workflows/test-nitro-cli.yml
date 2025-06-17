@@ -94,7 +94,6 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: 22.x
-                  cache: ${{ matrix.pm }}
 
             - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
