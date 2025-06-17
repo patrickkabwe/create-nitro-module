@@ -191,12 +191,18 @@ export class NitroModuleFactory {
             await execAsync('corepack disable', { cwd: this.config.cwd })
         } else if (this.config.pm === 'pnpm') {
             const workspaceDirs = ['example']
-            const yamlContent = `packages:\n${workspaceDirs.map(d => `  - '${d}'`).join('\n')}\n`
+            const yamlContent = `packages:\n${workspaceDirs.map(d => `  - ${d}`).join('\n')}\n`
 
             const WORKSPACE_FILENAME = 'pnpm-workspace.yaml'
             await writeFile(
                 path.join(this.config.cwd, WORKSPACE_FILENAME),
                 yamlContent,
+                { encoding: 'utf8' }
+            )
+            const  NPMRC_FILENAME = '.npmrc'
+            await writeFile(
+                path.join(this.config.cwd, NPMRC_FILENAME),
+                'node-linker=hoisted',
                 { encoding: 'utf8' }
             )
             delete newWorkspacePackageJsonFile.workspaces
