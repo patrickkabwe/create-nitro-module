@@ -23,6 +23,12 @@ bun install -g create-nitro-module
 yarn global add create-nitro-module
 ```
 
+### Using PNPM
+
+```bash
+pnpm add -g create-nitro-module
+```
+
 ### Using NPM
 
 ```bash
