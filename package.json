@@ -37,8 +37,7 @@
     ],
     "license": "MIT",
     "bin": {
-        "create-nitro-module": "./lib/cli/index.js",
-        "nitro-module": "./lib/cli/index.js"
+        "create-nitro-module": "./lib/cli/index.js"
     },
     "repository": {
         "type": "git",
