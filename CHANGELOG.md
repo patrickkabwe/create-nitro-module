@@ -1,3 +1,29 @@
+## [3.0.0](https://github.com/patrickkabwe/create-nitro-module/compare/v2.1.3...v3.0.0) (2025-06-17)
+
+### ⚠ BREAKING CHANGES
+
+* The CLI entry point 'nitro-module' is no longer available in the package's bin field.
+
+### ✨ Features
+
+* add support for pnpm package manager ([a456841](https://github.com/patrickkabwe/create-nitro-module/commit/a4568416140907b3e057e8e5b69d0984cfa95696))
+
+### 🐛 Bug Fixes
+
+* add .npmrc file for pnpm configuration and fix yaml formatting ([9dc9fc0](https://github.com/patrickkabwe/create-nitro-module/commit/9dc9fc059a9138860bc6796cb54dc40ffaf964a7))
+* correct indentation in package manager selection logic ([a68dc75](https://github.com/patrickkabwe/create-nitro-module/commit/a68dc7587faf9f807f623725cce87ae96a22bcd2))
+
+### 📚 Documentation
+
+* add pnpm support to README and documentation ([570bbcf](https://github.com/patrickkabwe/create-nitro-module/commit/570bbcf81884ed3c051728e07751942b0d2f4b92))
+
+### 🛠️ Other changes
+
+* add pnpm to package manager selection in CI workflow ([32561be](https://github.com/patrickkabwe/create-nitro-module/commit/32561bec1ce12a98c911014bb0b799fff6f735f6))
+* **deps-dev:** bump @typescript-eslint/parser from 8.33.0 to 8.34.1 ([9e841f9](https://github.com/patrickkabwe/create-nitro-module/commit/9e841f9ee24bfb89df29fb8f4deed67a8f2da303))
+* remove cache option from node setup in CI workflow ([841bed3](https://github.com/patrickkabwe/create-nitro-module/commit/841bed3d1d7eb6b503fa6154e607e76e54b30f37))
+* remove nitro-module entry from bin in package.json ([a210a70](https://github.com/patrickkabwe/create-nitro-module/commit/a210a701b295d885e13ac9bb6c3dc80734e01ee1))
+
 ## [2.1.3](https://github.com/patrickkabwe/create-nitro-module/compare/v2.1.2...v2.1.3) (2025-06-13)
 
 ### 🛠️ Other changes
