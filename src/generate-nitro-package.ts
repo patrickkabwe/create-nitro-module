@@ -199,7 +199,7 @@ export class NitroModuleFactory {
                 yamlContent,
                 { encoding: 'utf8' }
             )
-            const  NPMRC_FILENAME = '.npmrc'
+            const NPMRC_FILENAME = '.npmrc'
             await writeFile(
                 path.join(this.config.cwd, NPMRC_FILENAME),
                 'node-linker=hoisted',
