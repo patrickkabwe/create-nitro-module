@@ -290,7 +290,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                pm: ['bun', 'yarn']
+                pm: ['bun', 'yarn', 'pnpm']
                 package-type: ['module', 'view']
                 mode: ['Debug', 'Release']
         env:
@@ -318,7 +318,7 @@ jobs:
                   version: 10
 
             - name: Setup Node.js
-              if: matrix.pm == 'yarn'
+              if: matrix.pm == 'yarn' || matrix.pm == 'pnpm'
               uses: actions/setup-node@v4
               with:
                   node-version: 22.x
