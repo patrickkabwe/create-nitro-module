@@ -144,7 +144,7 @@ const getUserAnswers = async (
             platforms: [SupportedPlatform.IOS, SupportedPlatform.ANDROID],
             packageType: Nitro.Module,
             langs: [SupportedLang.SWIFT, SupportedLang.KOTLIN],
-            pm: usedPm || 'bun',
+            pm: usedPm || 'pnpm',
         }
     }
 
@@ -249,6 +249,10 @@ const getUserAnswers = async (
                         {
                             label: 'npm',
                             value: 'npm',
+                        },
+                        {
+                            label: 'pnpm',
+                            value: 'pnpm',
                         },
                     ],
                 })

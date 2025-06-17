@@ -142,6 +142,8 @@ export class NitroModuleFactory {
         let script = `${this.config.pm} --cwd example pod`
         if (this.config.pm === 'npm') {
             script = `${this.config.pm} --prefix example run pod`
+        } else if (this.config.pm === 'pnpm') {
+            script = `pnpm --filter ./example pod`
         }
         return script
     }
@@ -187,6 +189,23 @@ export class NitroModuleFactory {
                 cwd: this.config.cwd,
             })
             await execAsync('corepack disable', { cwd: this.config.cwd })
+        } else if (this.config.pm === 'pnpm') {
+            const workspaceDirs = ['example']
+            const yamlContent = `packages:\n${workspaceDirs.map(d => `  - ${d}`).join('\n')}\n`
+
+            const WORKSPACE_FILENAME = 'pnpm-workspace.yaml'
+            await writeFile(
+                path.join(this.config.cwd, WORKSPACE_FILENAME),
+                yamlContent,
+                { encoding: 'utf8' }
+            )
+            const NPMRC_FILENAME = '.npmrc'
+            await writeFile(
+                path.join(this.config.cwd, NPMRC_FILENAME),
+                'node-linker=hoisted',
+                { encoding: 'utf8' }
+            )
+            delete newWorkspacePackageJsonFile.workspaces
         }
 
         if (skipExample) {
@@ -206,9 +225,9 @@ export class NitroModuleFactory {
         const replacements = {
             [JS_PACKAGE_NAME_TAG]: this.config.finalPackageName,
             $$command$$:
-                this.config.pm === 'bun' || this.config.pm === 'yarn'
-                    ? `${this.config.pm} add`
-                    : 'npm install',
+                this.config.pm === 'npm'
+                    ? 'npm install'
+                    : `${this.config.pm} add`,
             [DESCRIPTION_TAG]: this.config.description,
             [AUTHOR_TAG]: getGitUserInfo().name,
             [LICENSE_YEAR_TAG]: new Date().getFullYear().toString(),
@@ -257,7 +276,12 @@ export class NitroModuleFactory {
     }
 
     private async createExampleApp() {
-        const packageManager = this.config.pm === 'bun' ? 'bunx' : 'npx -y'
+        const packageManager =
+            this.config.pm === 'bun'
+                ? 'bunx'
+                : this.config.pm === 'pnpm'
+                  ? 'pnpx'
+                  : 'npx -y'
 
         const reactNativeVersion =
             templatePackageJson.devDependencies['react-native']
@@ -346,9 +370,9 @@ export class NitroModuleFactory {
             replacements,
         })
 
-        await writeFile(reactNativeConfigPath, reactNativeConfig, {
-            encoding: 'utf8',
-        })
+        // await writeFile(reactNativeConfigPath, reactNativeConfig, {
+        //     encoding: 'utf8',
+        // })
         // Setup metro.config.js
         const metroConfigPath = path.join(
             this.config.cwd,
@@ -356,7 +380,7 @@ export class NitroModuleFactory {
             'metro.config.js'
         )
 
-        await writeFile(metroConfigPath, metroConfig, { encoding: 'utf8' })
+        // await writeFile(metroConfigPath, metroConfig, { encoding: 'utf8' })
 
         // Setup babel.config.js
         const babelConfigPath = path.join(
@@ -365,7 +389,7 @@ export class NitroModuleFactory {
             'babel.config.js'
         )
 
-        await writeFile(babelConfigPath, babelConfig, { encoding: 'utf8' })
+        // await writeFile(babelConfigPath, babelConfig, { encoding: 'utf8' })
 
         // Setup tsconfig.json
         const tsConfigPath = path.join(
@@ -374,11 +398,11 @@ export class NitroModuleFactory {
             'tsconfig.json'
         )
 
-        await writeFile(
-            tsConfigPath,
-            exampleTsConfig(this.config.finalPackageName),
-            { encoding: 'utf8' }
-        )
+        // await writeFile(
+        //     tsConfigPath,
+        //     exampleTsConfig(this.config.finalPackageName),
+        //     { encoding: 'utf8' }
+        // )
 
         const androidSettingsGradlePath = path.join(
             this.config.cwd,
@@ -416,12 +440,35 @@ export class NitroModuleFactory {
                 'hermesCommand = "$rootDir/../../node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc"',
         }
 
-        const toWrite = await replacePlaceholder({
+        const androidBuildGradleData = await replacePlaceholder({
             data: androidBuildGradle,
             replacements: gradleReplacements,
         })
 
-        await writeFile(androidBuildGradlePath, toWrite, { encoding: 'utf8' })
+        // await writeFile(androidBuildGradlePath, androidBuildGradleData, { encoding: 'utf8' })
+
+        const filesToWrite = [
+            { saveTo: reactNativeConfigPath, data: reactNativeConfig },
+            { saveTo: metroConfigPath, data: metroConfig },
+            { saveTo: babelConfigPath, data: babelConfig },
+            {
+                saveTo: tsConfigPath,
+                data: exampleTsConfig(this.config.finalPackageName),
+            },
+            {
+                saveTo: androidSettingsGradlePath,
+                data: androidSettingsGradleCode(
+                    toPascalCase(this.config.packageName)
+                ),
+            },
+            { saveTo: androidBuildGradlePath, data: androidBuildGradleData },
+        ]
+        await Promise.all(
+            filesToWrite.map(async item => {
+                const { saveTo, data } = item
+                await writeFile(saveTo, data, { encoding: 'utf8' })
+            })
+        )
 
         for (const folder of foldersToRemoveFromExampleApp) {
             await rm(path.join(this.config.cwd, 'example', folder), {

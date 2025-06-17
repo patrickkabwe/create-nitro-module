@@ -1,4 +1,5 @@
 import * as p from '@clack/prompts'
+import { detectPackageManager } from './utils'
 
 export interface UserAnswers {
     packageName: string
@@ -33,7 +34,10 @@ export type CreateModuleOptions = {
     skipInstall?: boolean
 }
 
-export type PackageManager = 'bun' | 'yarn' | 'npm'
+export type PackageManager = Exclude<
+    ReturnType<typeof detectPackageManager>,
+    undefined
+>
 
 export enum Nitro {
     Module = 'module',
