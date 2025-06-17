@@ -70,7 +70,7 @@ jobs:
         runs-on: macos-latest
         strategy:
             matrix:
-                pm: ['bun', 'yarn']
+                pm: ['bun', 'yarn', 'pnpm']
                 package-type: ['module', 'view']
 
         env:
@@ -83,11 +83,18 @@ jobs:
                   git config --global user.name "GitHub Actions Bot"
                   git config --global user.email "actions@github.com"
 
+            - name: Setup pnpm
+              if: matrix.pm == 'pnpm'
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
             - name: Setup Node.js
-              if: matrix.pm == 'yarn'
+              if: matrix.pm == 'yarn' || matrix.pm == 'pnpm'
               uses: actions/setup-node@v4
               with:
                   node-version: 22.x
+                  cache: ${{ matrix.pm }}
 
             - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
@@ -113,7 +120,13 @@ jobs:
 
             - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
               continue-on-error: false
+              if: matrix.pm != 'pnpm'
               run: ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --skip-install --ci
+
+            - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
+              continue-on-error: false
+              if: matrix.pm == 'pnpm'
+              run: create-nitro-module test-${{ matrix.package-type }} --skip-install --ci
 
             - name: Verify generated package structure
               run: |
@@ -182,7 +195,7 @@ jobs:
         runs-on: macos-latest
         strategy:
             matrix:
-                pm: ['bun', 'yarn']
+                pm: ['bun', 'yarn', 'pnpm']
                 package-type: ['module', 'view']
                 mode: ['Debug', 'Release']
         env:
@@ -209,8 +222,14 @@ jobs:
                   ruby-version: '3.2'
                   bundler-cache: true
 
+            - name: Setup pnpm
+              if: matrix.pm == 'pnpm'
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
             - name: Setup Node.js
-              if: matrix.pm == 'yarn'
+              if: matrix.pm == 'yarn' || matrix.pm == 'pnpm'
               uses: actions/setup-node@v4
               with:
                   node-version: 22.x
@@ -292,6 +311,12 @@ jobs:
               run: |
                   echo "Package structure:"
                   find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
+
+            - name: Setup pnpm
+              if: matrix.pm == 'pnpm'
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
 
             - name: Setup Node.js
               if: matrix.pm == 'yarn'
