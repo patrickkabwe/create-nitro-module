@@ -39,12 +39,11 @@ import {
     copyTemplateFiles,
     createFolder,
     createModuleFile,
-    dirExist,
     generateAutolinking,
     getGitUserInfo,
     replaceHyphen,
     replacePlaceholder,
-    toPascalCase,
+    toPascalCase
 } from './utils'
 
 const execAsync = util.promisify(exec)
@@ -76,12 +75,6 @@ export class NitroModuleFactory {
     }
 
     async createNitroModule() {
-        const dirExists = await dirExist(this.config.cwd)
-        if (dirExists) {
-            throw new Error(
-                'Looks like the directory with the same name already exists.'
-            )
-        }
         await createFolder(this.config.cwd)
         const supportedLanguages = [...this.config.langs, SupportedLang.JS]
         for (const lang of supportedLanguages) {
@@ -280,8 +273,8 @@ export class NitroModuleFactory {
             this.config.pm === 'bun'
                 ? 'bunx'
                 : this.config.pm === 'pnpm'
-                  ? 'pnpx'
-                  : 'npx -y'
+                    ? 'pnpx'
+                    : 'npx -y'
 
         const reactNativeVersion =
             templatePackageJson.devDependencies['react-native']
@@ -370,17 +363,12 @@ export class NitroModuleFactory {
             replacements,
         })
 
-        // await writeFile(reactNativeConfigPath, reactNativeConfig, {
-        //     encoding: 'utf8',
-        // })
         // Setup metro.config.js
         const metroConfigPath = path.join(
             this.config.cwd,
             'example',
             'metro.config.js'
         )
-
-        // await writeFile(metroConfigPath, metroConfig, { encoding: 'utf8' })
 
         // Setup babel.config.js
         const babelConfigPath = path.join(
@@ -389,20 +377,12 @@ export class NitroModuleFactory {
             'babel.config.js'
         )
 
-        // await writeFile(babelConfigPath, babelConfig, { encoding: 'utf8' })
-
         // Setup tsconfig.json
         const tsConfigPath = path.join(
             this.config.cwd,
             'example',
             'tsconfig.json'
         )
-
-        // await writeFile(
-        //     tsConfigPath,
-        //     exampleTsConfig(this.config.finalPackageName),
-        //     { encoding: 'utf8' }
-        // )
 
         const androidSettingsGradlePath = path.join(
             this.config.cwd,
@@ -444,8 +424,6 @@ export class NitroModuleFactory {
             data: androidBuildGradle,
             replacements: gradleReplacements,
         })
-
-        // await writeFile(androidBuildGradlePath, androidBuildGradleData, { encoding: 'utf8' })
 
         const filesToWrite = [
             { saveTo: reactNativeConfigPath, data: reactNativeConfig },
