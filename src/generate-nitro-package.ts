@@ -43,7 +43,7 @@ import {
     getGitUserInfo,
     replaceHyphen,
     replacePlaceholder,
-    toPascalCase
+    toPascalCase,
 } from './utils'
 
 const execAsync = util.promisify(exec)
@@ -273,8 +273,8 @@ export class NitroModuleFactory {
             this.config.pm === 'bun'
                 ? 'bunx'
                 : this.config.pm === 'pnpm'
-                    ? 'pnpx'
-                    : 'npx -y'
+                  ? 'pnpx'
+                  : 'npx -y'
 
         const reactNativeVersion =
             templatePackageJson.devDependencies['react-native']
