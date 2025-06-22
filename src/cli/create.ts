@@ -26,6 +26,7 @@ export const createModule = async (
     options: CreateModuleOptions
 ) => {
     let packageType = Nitro.Module
+    let moduleFactory: NitroModuleFactory | null = null
     const spinner = p.spinner()
     try {
         if (options.moduleDir) {
@@ -40,7 +41,7 @@ export const createModule = async (
         packageName = answers.packageName
         packageType = answers.packageType
 
-        const moduleFactory = new NitroModuleFactory({
+        moduleFactory = new NitroModuleFactory({
             description: answers.description,
             langs: answers.langs,
             packageName,
@@ -53,6 +54,35 @@ export const createModule = async (
             skipInstall: options.skipInstall,
             skipExample: options.skipExample,
         })
+
+        const modulePath = path.join(
+            process.cwd(),
+            'react-native-' + packageName.toLowerCase()
+        )
+        const dirExists = await dirExist(modulePath)
+
+        if (dirExists) {
+            const confirm = await p.confirm({
+                message:
+                    'Looks like the directory with the same name already exists.' +
+                    ' Would you like to overwrite the existing directory? (yes/no)' +
+                    kleur.yellow(
+                        ' This will delete the existing directory and all its contents.'
+                    ),
+                initialValue: true,
+                active: 'yes',
+                inactive: 'no',
+            })
+            if (p.isCancel(confirm)) {
+                process.exit(1)
+            } else if (confirm) {
+                rmSync(modulePath, { recursive: true, force: true })
+            } else {
+                console.log(kleur.red('Cancelled'))
+                process.exit(1)
+            }
+        }
+
         spinner.start(
             messages.creating.replace('{packageType}', capitalize(packageType))
         )
