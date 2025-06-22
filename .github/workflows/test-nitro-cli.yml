@@ -359,6 +359,12 @@ jobs:
               working-directory: ${{ env.WORKING_DIR }}/example/android
               run: chmod +x ./gradlew
 
+            - name: Clean and generate codegen artifacts
+              working-directory: ${{ env.WORKING_DIR }}/example/android
+              run: |
+                  ./gradlew clean
+                  ./gradlew generateCodegenArtifactsFromSchema
+
             - name: Build Android project
               working-directory: ${{ env.WORKING_DIR }}/example/android
               run: ./gradlew assemble${{ matrix.mode }} --no-daemon --build-cache
