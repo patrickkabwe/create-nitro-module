@@ -359,10 +359,6 @@ jobs:
               working-directory: ${{ env.WORKING_DIR }}/example/android
               run: chmod +x ./gradlew
 
-            - name: Clean build directory
-              working-directory: ${{ env.WORKING_DIR }}/example/android
-              run: ./gradlew clean
-
             - name: Build Android project
               working-directory: ${{ env.WORKING_DIR }}/example/android
               run: ./gradlew assemble${{ matrix.mode }} --no-daemon --build-cache
