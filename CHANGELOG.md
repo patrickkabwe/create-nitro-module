@@ -1,3 +1,20 @@
+## [3.0.1](https://github.com/patrickkabwe/create-nitro-module/compare/v3.0.0...v3.0.1) (2025-07-01)
+
+### 🐛 Bug Fixes
+
+* remove or overwrite existing folder only when user confirms ([f0270fb](https://github.com/patrickkabwe/create-nitro-module/commit/f0270fb2ae969f862c9504c24d5cdb55cee2e822))
+
+### 🛠️ Other changes
+
+* add clean step to Android build workflow ([d8e244c](https://github.com/patrickkabwe/create-nitro-module/commit/d8e244c36f95cca6323f3c86d457d92e35520d2e))
+* add code generation step to Android build workflow ([0058334](https://github.com/patrickkabwe/create-nitro-module/commit/0058334ff6509c0fa496a0c5e44406bbc246260c))
+* bump up react-native version to 0.80.0 ([4fe0280](https://github.com/patrickkabwe/create-nitro-module/commit/4fe0280a61b560406198beb87a91f5083942ff05))
+* **deps-dev:** bump eslint from 9.28.0 to 9.30.0 ([8d970ac](https://github.com/patrickkabwe/create-nitro-module/commit/8d970ac13951e1733d66095b7236cc9e6002421c))
+* **deps-dev:** bump lefthook from 1.11.13 to 1.11.14 ([de1f544](https://github.com/patrickkabwe/create-nitro-module/commit/de1f544232e53fdaf084e5d44815e3f1346db491))
+* enable 16 KB page size on Android ([973d7c7](https://github.com/patrickkabwe/create-nitro-module/commit/973d7c74e1e594f2448ed5d0e6b75c4c77bf575c))
+* remove clean step from Android build workflow ([61b3564](https://github.com/patrickkabwe/create-nitro-module/commit/61b356416563c2d1a087eb97d8d81da766f1ae2a))
+* update nitro-codegen and react-native-nitro-modules to version 0.26.3 ([ce44f8f](https://github.com/patrickkabwe/create-nitro-module/commit/ce44f8f81085c6a8c1c065918e1e7cf595c3d413))
+
 ## [3.0.0](https://github.com/patrickkabwe/create-nitro-module/compare/v2.1.3...v3.0.0) (2025-06-17)
 
 ### ⚠ BREAKING CHANGES
