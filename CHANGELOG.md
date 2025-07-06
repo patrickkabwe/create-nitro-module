@@ -1,3 +1,9 @@
+## [3.0.3](https://github.com/patrickkabwe/create-nitro-module/compare/v3.0.2...v3.0.3) (2025-07-06)
+
+### 🛠️ Other changes
+
+* **deps:** downgrade react-native from 0.80.0 to 0.79.5 in package.json ([c5591ce](https://github.com/patrickkabwe/create-nitro-module/commit/c5591ce753734e560511d48664552364aa654aeb))
+
 ## [3.0.2](https://github.com/patrickkabwe/create-nitro-module/compare/v3.0.1...v3.0.2) (2025-07-05)
 
 ### 🛠️ Other changes
