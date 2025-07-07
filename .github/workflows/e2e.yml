@@ -5,9 +5,6 @@ on:
         workflows: ['Test Nitro CLI - Generate & Build']
         types:
             - completed
-        branches:
-            - main
-            - next
 
     workflow_dispatch:
 
