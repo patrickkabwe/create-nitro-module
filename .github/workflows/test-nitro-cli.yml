@@ -13,6 +13,8 @@ on:
             - '.github/workflows/test-nitro-cli.yml'
             - 'package.json'
             - 'bun.lock'
+            - 'assets/template/**'
+
     pull_request:
         branches: [main, next]
         paths:
@@ -20,6 +22,8 @@ on:
             - '.github/workflows/test-nitro-cli.yml'
             - 'package.json'
             - 'bun.lock'
+            - 'assets/template/**'
+            
     workflow_dispatch:
 
 concurrency:

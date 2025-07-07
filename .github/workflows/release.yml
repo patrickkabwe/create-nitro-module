@@ -1,15 +1,7 @@
 name: Release
 
 on:
-    push:
-      branches:
-        - main
-        - next
-      paths-ignore:
-        - 'docs/**'
-
-permissions:
-  contents: read
+    workflow_dispatch:
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,8 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      issues: write
-      pull-requests: write
       id-token: write
     steps:
       - name: Checkout
