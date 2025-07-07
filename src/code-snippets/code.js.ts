@@ -13,7 +13,7 @@ function App(): React.JSX.Element {
   return (
     <View style={styles.container}>
         ${isHybridView
-        ? `<${toPascalCase(moduleName)} isRed={true} style={styles.view} />`
+        ? `<${toPascalCase(moduleName)} isRed={true} style={styles.view} testID="${moduleName}" />`
         : `<Text style={styles.text}>
         {${toPascalCase(moduleName)}.${funcName}(1, 2)}
         </Text>`

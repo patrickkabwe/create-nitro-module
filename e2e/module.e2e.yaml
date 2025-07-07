@@ -1,0 +1,4 @@
+appId: com.testmoduleexample
+---
+- launchApp
+- assertVisible: '3'
