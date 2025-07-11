@@ -37,6 +37,7 @@ jobs:
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
+                  run-id: ${{ github.event.workflow_run.id }}
 
             - name: List package structure
               working-directory: ${{ env.WORKING_DIR }}
@@ -133,6 +134,8 @@ jobs:
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
+                  run-id: ${{ github.event.workflow_run.id }}
+                  
 
             - name: List package structure
               working-directory: ${{ env.WORKING_DIR }}

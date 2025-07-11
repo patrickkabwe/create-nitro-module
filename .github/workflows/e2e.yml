@@ -27,12 +27,13 @@ jobs:
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
+                  run-id: ${{ github.event.workflow_run.id }}
 
             - name: List package structure
               working-directory: ${{ env.WORKING_DIR }}
               run: |
-                echo "Package structure:"
-                find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
+                  echo "Package structure:"
+                  find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
 
             - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
@@ -88,5 +89,5 @@ jobs:
 
             - name: Run Maestro Tests
               run: |
-                #   maestro test ./e2e
-                echo "Maestro Tests"
+                  #   maestro test ./e2e
+                  echo "Maestro Tests"
