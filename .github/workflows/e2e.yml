@@ -64,6 +64,16 @@ jobs:
                   ${{ matrix.pm }} run build
                   node post-script.js
 
+            - name: Setup Java for Android builds
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'zulu'
+                  java-version: '17'
+                  cache: "gradle"
+
+            - name: Setup Android SDK
+              uses: android-actions/setup-android@v3
+
             - name: Setup Maestro
               uses: ./.github/actions/setup-maestro
 
