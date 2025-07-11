@@ -5,7 +5,8 @@ on:
         branches: [next]
         paths:
             - 'src/**'
-            - '.github/workflows/test-nitro-cli.yml'
+            - '.github/workflows/**'
+            - '.github/actions/**'
             - 'package.json'
             - 'bun.lock'
             - 'assets/template/**'
@@ -14,7 +15,8 @@ on:
         branches: [main, next]
         paths:
             - 'src/**'
-            - '.github/workflows/test-nitro-cli.yml'
+            - '.github/workflows/**'
+            - '.github/actions/**'
             - 'package.json'
             - 'bun.lock'
             - 'assets/template/**'

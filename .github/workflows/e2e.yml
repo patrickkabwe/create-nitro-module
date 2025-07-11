@@ -64,21 +64,15 @@ jobs:
                   ${{ matrix.pm }} run build
                   node post-script.js
 
-            # - name: Setup Java for Android builds
-            #   uses: actions/setup-java@v4
-            #   with:
-            #       distribution: 'zulu'
-            #       java-version: '17'
+            - name: Setup Java for Android builds
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'zulu'
+                  java-version: '17'
+                  cache: "gradle"
 
-            # - name: Make gradlew executable
-            #   working-directory: ${{ env.WORKING_DIR }}/example/android
-            #   run: chmod +x ./gradlew
-
-            # - name: Clean and generate codegen artifacts
-            #   working-directory: ${{ env.WORKING_DIR }}/example/android
-            #   run: |
-            #       ./gradlew clean
-            #       ./gradlew generateCodegenArtifactsFromSchema
+            - name: Setup Android SDK
+              uses: android-actions/setup-android@v3
 
             - name: Setup Maestro
               uses: ./.github/actions/setup-maestro
