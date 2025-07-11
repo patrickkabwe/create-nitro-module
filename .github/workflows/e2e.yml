@@ -35,6 +35,7 @@ jobs:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
                   run-id: ${{ github.event.workflow_run.id }}
+                  github-token: ${{ github.token }}
               continue-on-error: true
               id: download-artifact-e2e
 
