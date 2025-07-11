@@ -16,7 +16,7 @@ jobs:
                 mode: ['Debug', 'Release']
                 pm: ['bun']
         env:
-            WORKING_DIR: /home/runner/react-native-test-${{ matrix.package-type }}
+            WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
 
         steps:
             - name: Create working directory
