@@ -69,7 +69,7 @@ jobs:
               with:
                   distribution: 'zulu'
                   java-version: '17'
-                  cache: "gradle"
+                  cache: 'gradle'
 
             - name: Setup Android SDK
               uses: android-actions/setup-android@v3
@@ -77,15 +77,15 @@ jobs:
             - name: Setup Maestro
               uses: ./.github/actions/setup-maestro
 
-            - name: Setup Android Emulator for E2E Tests
-              uses: ./.github/actions/setup-android-emulator
-
-            - name: Confirm emulator is ready
-              run: |
-                  adb devices
-                  adb shell getprop sys.boot_completed
-
-            - name: Run Maestro Tests
-              run: |
-                  #   maestro test ./e2e
-                  echo "Maestro Tests"
+            - name: Run Android Emulator and Tests
+              uses: reactivecircus/android-emulator-runner@v2
+              with:
+                  api-level: 30
+                  target: google_apis
+                  arch: x86_64
+                  profile: Nexus 6
+                  script: |
+                      echo "Emulator is ready"
+                      adb devices
+                      echo "Maestro Tests"
+                      # maestro test ./e2e
