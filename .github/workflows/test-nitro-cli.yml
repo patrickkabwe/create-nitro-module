@@ -45,6 +45,7 @@ jobs:
                   path: ${{ env.WORKING_DIR }}
                   run-id: ${{ github.event.workflow_run.id }}
                   github-token: ${{ github.token }}
+                  repository: ${{ github.repository }}
               continue-on-error: true
               id: download-artifact
 
@@ -165,6 +166,7 @@ jobs:
                   path: ${{ env.WORKING_DIR }}
                   run-id: ${{ github.event.workflow_run.id }}
                   github-token: ${{ github.token }}
+                  repository: ${{ github.repository }}
               continue-on-error: true
               id: download-artifact-android
 
