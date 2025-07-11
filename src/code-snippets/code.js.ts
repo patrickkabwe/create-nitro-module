@@ -12,12 +12,13 @@ import { ${toPascalCase(moduleName)} } from '${finalModuleName}';
 function App(): React.JSX.Element {
   return (
     <View style={styles.container}>
-        ${isHybridView
-        ? `<${toPascalCase(moduleName)} isRed={true} style={styles.view} />`
-        : `<Text style={styles.text}>
+        ${
+            isHybridView
+                ? `<${toPascalCase(moduleName)} isRed={true} style={styles.view} testID="${moduleName}" />`
+                : `<Text style={styles.text}>
         {${toPascalCase(moduleName)}.${funcName}(1, 2)}
         </Text>`
-    }
+        }
     </View>
   );
 }
@@ -28,16 +29,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  ${isHybridView
-        ? `view: {
+  ${
+      isHybridView
+          ? `view: {
     width: 200,
     height: 200
   }`
-        : `text: {
+          : `text: {
         fontSize: 40, 
         color: 'green'
     }`
-    }});
+  }});
 
 export default App;`
 
@@ -80,8 +82,8 @@ import type { ${toPascalCase(moduleName)} as ${toPascalCase(
 
 export const ${toPascalCase(moduleName)} =
   NitroModules.createHybridObject<${toPascalCase(
-    moduleName
-)}Spec>('${toPascalCase(moduleName)}')`
+      moduleName
+  )}Spec>('${toPascalCase(moduleName)}')`
 
 // Nitro View index.ts code
 export const nitroViewCode = (
@@ -167,8 +169,9 @@ const androidWorkaround = async () => {
    'nitrogen/generated/android',
    '${moduleName}OnLoad.cpp'
  )
- ${isHybridView
-        ? `
+ ${
+     isHybridView
+         ? `
  const viewManagerFile = path.join(
    process.cwd(),
    'nitrogen/generated/android/kotlin/com/margelo/nitro/${moduleName.toLowerCase()}/views',
@@ -178,8 +181,8 @@ const androidWorkaround = async () => {
  const viewManagerStr = await readFile(viewManagerFile, { encoding: 'utf8' })
  await writeFile(viewManagerFile, viewManagerStr.replace(/com\\.margelo\\.nitro\\.${moduleName.toLowerCase()}\\.\\*/g, 'com.${moduleName.toLowerCase()}.*'))
 `
-        : ''
-    }
+         : ''
+ }
  
  const str = await readFile(androidOnLoadFile, { encoding: 'utf8' })
  await writeFile(androidOnLoadFile, str.replace(/margelo\\/nitro\\//g, ''))

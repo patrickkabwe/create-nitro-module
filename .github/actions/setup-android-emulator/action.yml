@@ -1,0 +1,33 @@
+name: "Setup Android Emulator"
+description: "Installs and boots Android emulator"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install emulator & system image
+      shell: bash
+      run: |
+        echo "y" | sdkmanager "system-images;android-30;google_apis;x86_64"
+        sdkmanager --install "platform-tools" "platforms;android-30" "emulator"
+
+    - name: Create AVD
+      shell: bash
+      run: |
+        echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --force
+        emulator -list-avds
+
+    - name: Start emulator
+      shell: bash
+      run: |
+        nohup emulator -avd test -no-audio -no-window -no-boot-anim -gpu swiftshader_indirect &
+        boot_completed=""
+        timeout=600
+        while [[ "$boot_completed" != "1" && $timeout -gt 0 ]]; do
+          sleep 5
+          boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+          echo "Waiting for emulator... ($((timeout--))s left)"
+        done
+        if [[ "$boot_completed" != "1" ]]; then
+          echo "Emulator did not boot in time" && exit 1
+        fi
+        adb shell input keyevent 82

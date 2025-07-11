@@ -1,0 +1,92 @@
+name: E2E Test with Maestro
+
+on:
+    workflow_run:
+        workflows: ['Generate Packages']
+        types:
+            - completed
+    workflow_dispatch:
+jobs:
+    android-test:
+        name: Android E2E Test
+        runs-on: macos-latest
+        strategy:
+            matrix:
+                package-type: ['module', 'view']
+                mode: ['Debug', 'Release']
+                pm: ['bun']
+        env:
+            WORKING_DIR: /home/runner/react-native-test-${{ matrix.package-type }}
+
+        steps:
+            - name: Create working directory
+              run: mkdir -p ${{ env.WORKING_DIR }}
+
+            - name: Download generated package
+              uses: actions/download-artifact@v4
+              with:
+                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  path: ${{ env.WORKING_DIR }}
+
+            - name: List package structure
+              working-directory: ${{ env.WORKING_DIR }}
+              run: |
+                echo "Package structure:"
+                find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
+
+            - name: Setup Bun.js
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Cache bun dependencies
+              id: bun-cache
+              uses: actions/cache@v4
+              with:
+                  path: ~/.bun/install/cache
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock', '**/bun.lockb') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun-
+
+            - name: Install package dependencies
+              working-directory: ${{ env.WORKING_DIR }}
+              run: ${{ matrix.pm }} install
+
+            - name: Run codegen
+              working-directory: ${{ env.WORKING_DIR }}
+              run: |
+                  bunx nitro-codegen --logLevel="debug"
+                  ${{ matrix.pm }} run build
+                  node post-script.js
+
+            # - name: Setup Java for Android builds
+            #   uses: actions/setup-java@v4
+            #   with:
+            #       distribution: 'zulu'
+            #       java-version: '17'
+
+            # - name: Make gradlew executable
+            #   working-directory: ${{ env.WORKING_DIR }}/example/android
+            #   run: chmod +x ./gradlew
+
+            # - name: Clean and generate codegen artifacts
+            #   working-directory: ${{ env.WORKING_DIR }}/example/android
+            #   run: |
+            #       ./gradlew clean
+            #       ./gradlew generateCodegenArtifactsFromSchema
+
+            - name: Setup Maestro
+              uses: ./.github/actions/setup-maestro
+
+            - name: Setup Android Emulator for E2E Tests
+              uses: ./.github/actions/setup-android-emulator
+
+            - name: Confirm emulator is ready
+              run: |
+                  adb devices
+                  adb shell getprop sys.boot_completed
+
+            - name: Run Maestro Tests
+              run: |
+                #   maestro test ./e2e
+                echo "Maestro Tests"
