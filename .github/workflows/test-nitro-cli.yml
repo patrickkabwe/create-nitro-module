@@ -2,14 +2,14 @@ name: Test Nitro CLI - Generate & Build
 
 permissions:
     contents: write
-    packages: write
-    actions: write
+    actions: read
 
 on:
     workflow_run:
         workflows: ['Generate Packages']
         types:
             - completed
+    workflow_dispatch:
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,7 +26,7 @@ jobs:
                 package-type: ['module', 'view']
                 mode: ['Debug', 'Release']
         env:
-            WORKING_DIR: /Users/runner/react-native-test-${{ matrix.package-type }}
+            WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
         steps:
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -36,6 +36,9 @@ jobs:
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
+                  run-id: ${{ github.event.workflow_run.id }}
+                  github-token: ${{ github.token }}
+                  repository: ${{ github.repository }}
 
             - name: List package structure
               working-directory: ${{ env.WORKING_DIR }}
@@ -122,7 +125,7 @@ jobs:
                 package-type: ['module', 'view']
                 mode: ['Debug', 'Release']
         env:
-            WORKING_DIR: /home/runner/react-native-test-${{ matrix.package-type }}
+            WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
         steps:
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -132,6 +135,9 @@ jobs:
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
+                  run-id: ${{ github.event.workflow_run.id }}
+                  github-token: ${{ github.token }}
+                  repository: ${{ github.repository }}
 
             - name: List package structure
               working-directory: ${{ env.WORKING_DIR }}
@@ -182,6 +188,7 @@ jobs:
               with:
                   distribution: 'zulu'
                   java-version: '17'
+                  cache: "gradle"
 
             - name: Make gradlew executable
               working-directory: ${{ env.WORKING_DIR }}/example/android

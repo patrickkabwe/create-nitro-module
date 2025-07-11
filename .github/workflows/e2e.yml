@@ -16,9 +16,12 @@ jobs:
                 mode: ['Debug', 'Release']
                 pm: ['bun']
         env:
-            WORKING_DIR: /home/runner/react-native-test-${{ matrix.package-type }}
+            WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
 
         steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
 
@@ -27,12 +30,14 @@ jobs:
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
+                  run-id: ${{ github.event.workflow_run.id }}
+                  github-token: ${{ github.token }}
 
             - name: List package structure
               working-directory: ${{ env.WORKING_DIR }}
               run: |
-                echo "Package structure:"
-                find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
+                  echo "Package structure:"
+                  find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
 
             - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
@@ -59,21 +64,15 @@ jobs:
                   ${{ matrix.pm }} run build
                   node post-script.js
 
-            # - name: Setup Java for Android builds
-            #   uses: actions/setup-java@v4
-            #   with:
-            #       distribution: 'zulu'
-            #       java-version: '17'
+            - name: Setup Java for Android builds
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'zulu'
+                  java-version: '17'
+                  cache: "gradle"
 
-            # - name: Make gradlew executable
-            #   working-directory: ${{ env.WORKING_DIR }}/example/android
-            #   run: chmod +x ./gradlew
-
-            # - name: Clean and generate codegen artifacts
-            #   working-directory: ${{ env.WORKING_DIR }}/example/android
-            #   run: |
-            #       ./gradlew clean
-            #       ./gradlew generateCodegenArtifactsFromSchema
+            - name: Setup Android SDK
+              uses: android-actions/setup-android@v3
 
             - name: Setup Maestro
               uses: ./.github/actions/setup-maestro
@@ -88,5 +87,5 @@ jobs:
 
             - name: Run Maestro Tests
               run: |
-                #   maestro test ./e2e
-                echo "Maestro Tests"
+                  #   maestro test ./e2e
+                  echo "Maestro Tests"

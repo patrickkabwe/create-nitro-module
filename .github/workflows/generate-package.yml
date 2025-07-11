@@ -5,7 +5,8 @@ on:
         branches: [next]
         paths:
             - 'src/**'
-            - '.github/workflows/test-nitro-cli.yml'
+            - '.github/workflows/**'
+            - '.github/actions/**'
             - 'package.json'
             - 'bun.lock'
             - 'assets/template/**'
@@ -14,14 +15,14 @@ on:
         branches: [main, next]
         paths:
             - 'src/**'
-            - '.github/workflows/test-nitro-cli.yml'
+            - '.github/workflows/**'
+            - '.github/actions/**'
             - 'package.json'
             - 'bun.lock'
             - 'assets/template/**'
 
 permissions:
     contents: write
-    packages: write
     actions: write
 
 jobs:
@@ -184,4 +185,4 @@ jobs:
                   path: react-native-test-${{ matrix.package-type }}
                   include-hidden-files: true
                   if-no-files-found: error
-                  retention-days: 1
+                  retention-days: 7
