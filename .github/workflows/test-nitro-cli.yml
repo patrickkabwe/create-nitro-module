@@ -2,14 +2,14 @@ name: Test Nitro CLI - Generate & Build
 
 permissions:
     contents: write
-    packages: write
-    actions: write
+    actions: read
 
 on:
     workflow_run:
         workflows: ['Generate Packages']
         types:
             - completed
+    workflow_dispatch:
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -31,11 +31,36 @@ jobs:
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
 
+            - name: Debug workflow run info
+              run: |
+                  echo "Triggered by workflow run ID: ${{ github.event.workflow_run.id }}"
+                  echo "Triggered by workflow: ${{ github.event.workflow_run.name }}"
+                  echo "Workflow conclusion: ${{ github.event.workflow_run.conclusion }}"
+                  echo "Looking for artifact: test-${{ matrix.package-type }}-${{ matrix.pm }}"
+
             - name: Download generated package
               uses: actions/download-artifact@v4
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
+                  run-id: ${{ github.event.workflow_run.id }}
+                  github-token: ${{ github.token }}
+                  repository: ${{ github.repository }}
+              continue-on-error: true
+              id: download-artifact
+
+            - name: List all available artifacts if download failed
+              if: steps.download-artifact.outcome == 'failure'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  echo "❌ Failed to download artifact: test-${{ matrix.package-type }}-${{ matrix.pm }}"
+                  echo "📦 Listing all available artifacts from run ${{ github.event.workflow_run.id }}:"
+                  gh run view ${{ github.event.workflow_run.id }} --json artifacts --jq '.artifacts[] | "\(.name) (created: \(.created_at), expires: \(.expires_at))"'
+
+            - name: Exit if artifact download failed
+              if: steps.download-artifact.outcome == 'failure'
+              run: exit 1
 
             - name: List package structure
               working-directory: ${{ env.WORKING_DIR }}
@@ -127,11 +152,36 @@ jobs:
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
 
+            - name: Debug workflow run info
+              run: |
+                  echo "Triggered by workflow run ID: ${{ github.event.workflow_run.id }}"
+                  echo "Triggered by workflow: ${{ github.event.workflow_run.name }}"
+                  echo "Workflow conclusion: ${{ github.event.workflow_run.conclusion }}"
+                  echo "Looking for artifact: test-${{ matrix.package-type }}-${{ matrix.pm }}"
+
             - name: Download generated package
               uses: actions/download-artifact@v4
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
+                  run-id: ${{ github.event.workflow_run.id }}
+                  github-token: ${{ github.token }}
+                  repository: ${{ github.repository }}
+              continue-on-error: true
+              id: download-artifact-android
+
+            - name: List all available artifacts if download failed
+              if: steps.download-artifact-android.outcome == 'failure'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  echo "❌ Failed to download artifact: test-${{ matrix.package-type }}-${{ matrix.pm }}"
+                  echo "📦 Listing all available artifacts from run ${{ github.event.workflow_run.id }}:"
+                  gh run view ${{ github.event.workflow_run.id }} --json artifacts --jq '.artifacts[] | "\(.name) (created: \(.created_at), expires: \(.expires_at))"'
+
+            - name: Exit if artifact download failed
+              if: steps.download-artifact-android.outcome == 'failure'
+              run: exit 1
 
             - name: List package structure
               working-directory: ${{ env.WORKING_DIR }}
