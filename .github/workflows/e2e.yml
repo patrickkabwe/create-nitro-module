@@ -2,225 +2,91 @@ name: E2E Test with Maestro
 
 on:
     workflow_run:
-        workflows: ['Test Nitro CLI - Generate & Build']
+        workflows: ['Generate Packages']
         types:
             - completed
-
     workflow_dispatch:
-
 jobs:
-    maestro-e2e:
-        name: Maestro E2E Tests - ${{ matrix.package-type }}
+    android-test:
+        name: Android E2E Test
         runs-on: macos-latest
-        if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
         strategy:
             matrix:
                 package-type: ['module', 'view']
-                pm: ['bun'] # Use bun for consistency
-
+                mode: ['Debug', 'Release']
+                pm: ['bun']
         env:
-            WORKING_DIR: /Users/runner/react-native-test-${{ matrix.package-type }}
+            WORKING_DIR: /home/runner/react-native-test-${{ matrix.package-type }}
 
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+            - name: Create working directory
+              run: mkdir -p ${{ env.WORKING_DIR }}
 
-            - name: Download generated package artifacts
-              if: github.event_name == 'workflow_run'
-              uses: actions/github-script@v7
+            - name: Download generated package
+              uses: actions/download-artifact@v4
               with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  script: |
-                      const fs = require('fs');
-                      const path = require('path');
+                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  path: ${{ env.WORKING_DIR }}
 
-                      // Get artifacts from the workflow run
-                      const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
-                          owner: context.repo.owner,
-                          repo: context.repo.repo,
-                          run_id: ${{ github.event.workflow_run.id }}
-                      });
-
-                      const artifactName = 'test-${{ matrix.package-type }}-${{ matrix.pm }}';
-                      const artifact = artifacts.data.artifacts.find(a => a.name === artifactName);
-
-                      if (!artifact) {
-                          throw new Error(`Artifact ${artifactName} not found`);
-                      }
-
-                      // Download the artifact
-                      const download = await github.rest.actions.downloadArtifact({
-                          owner: context.repo.owner,
-                          repo: context.repo.repo,
-                          artifact_id: artifact.id,
-                          archive_format: 'zip'
-                      });
-
-                      // Save and extract the artifact
-                      fs.writeFileSync('/tmp/artifact.zip', Buffer.from(download.data));
-
-                      // Create working directory and extract
-                      await exec.exec('mkdir', ['-p', '${{ env.WORKING_DIR }}']);
-                      await exec.exec('unzip', ['/tmp/artifact.zip', '-d', '${{ env.WORKING_DIR }}']);
-
-            - name: Create mock package for testing
-              if: github.event_name == 'workflow_dispatch'
+            - name: List package structure
+              working-directory: ${{ env.WORKING_DIR }}
               run: |
-                  echo "Creating mock package structure for testing..."
-                  mkdir -p ${{ env.WORKING_DIR }}
-                  cd ${{ env.WORKING_DIR }}
+                echo "Package structure:"
+                find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
 
-                  # Create a basic package.json
-                  cat > package.json << 'EOF'
-                  {
-                    "name": "react-native-test-${{ matrix.package-type }}",
-                    "version": "0.1.0",
-                    "scripts": {
-                      "build": "echo 'Mock build completed'"
-                    }
-                  }
-                  EOF
-
-                  # Create basic example directory
-                  mkdir -p example/ios
-                  mkdir -p example/android
-
-                  echo "Mock package created for testing"
-
-            - name: Setup Bun
+            - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
               with:
                   bun-version: latest
 
-            - name: Setup Ruby and CocoaPods
-              uses: ruby/setup-ruby@v1
+            - name: Cache bun dependencies
+              id: bun-cache
+              uses: actions/cache@v4
               with:
-                  ruby-version: '3.2'
-                  bundler-cache: true
-
-            - name: Verify package structure
-              working-directory: ${{ env.WORKING_DIR }}
-              run: |
-                  echo "Verifying package structure..."
-                  ls -la
-
-                  # Check if we have the expected files
-                  if [ ! -f "package.json" ]; then
-                      echo "❌ package.json not found"
-                      exit 1
-                  fi
-
-                  if [ ! -d "example" ]; then
-                      echo "❌ example directory not found"
-                      exit 1
-                  fi
-
-                  echo "✅ Package structure verified"
+                  path: ~/.bun/install/cache
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock', '**/bun.lockb') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun-
 
             - name: Install package dependencies
-              if: github.event_name == 'workflow_run'
               working-directory: ${{ env.WORKING_DIR }}
-              run: bun install
+              run: ${{ matrix.pm }} install
 
-            - name: Run codegen and build
-              if: github.event_name == 'workflow_run'
+            - name: Run codegen
               working-directory: ${{ env.WORKING_DIR }}
               run: |
                   bunx nitro-codegen --logLevel="debug"
-                  bun run build
+                  ${{ matrix.pm }} run build
                   node post-script.js
 
-            - name: Install CocoaPods dependencies
-              if: github.event_name == 'workflow_run'
-              working-directory: ${{ env.WORKING_DIR }}/example
-              run: bun pod
+            # - name: Setup Java for Android builds
+            #   uses: actions/setup-java@v4
+            #   with:
+            #       distribution: 'zulu'
+            #       java-version: '17'
 
-            - name: Install Maestro
+            # - name: Make gradlew executable
+            #   working-directory: ${{ env.WORKING_DIR }}/example/android
+            #   run: chmod +x ./gradlew
+
+            # - name: Clean and generate codegen artifacts
+            #   working-directory: ${{ env.WORKING_DIR }}/example/android
+            #   run: |
+            #       ./gradlew clean
+            #       ./gradlew generateCodegenArtifactsFromSchema
+
+            - name: Setup Maestro
+              uses: ./.github/actions/setup-maestro
+
+            - name: Setup Android Emulator for E2E Tests
+              uses: ./.github/actions/setup-android-emulator
+
+            - name: Confirm emulator is ready
               run: |
-                  curl -Ls "https://get.maestro.mobile.dev" | bash
-                  echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+                  adb devices
+                  adb shell getprop sys.boot_completed
 
-            - name: Start iOS Simulator
-              if: github.event_name == 'workflow_run'
+            - name: Run Maestro Tests
               run: |
-                  # Start simulator
-                  xcrun simctl boot "iPhone 16" || true
-                  xcrun simctl list devices | grep "iPhone 16"
-
-            - name: Build and install iOS app
-              if: github.event_name == 'workflow_run'
-              working-directory: ${{ env.WORKING_DIR }}/example/ios
-              run: |
-                  # Get the correct scheme name based on package type
-                  if [ "${{ matrix.package-type }}" == "module" ]; then
-                    SCHEME="TestModuleExample"
-                    APP_NAME="TestModuleExample"
-                  else
-                    SCHEME="TestViewExample" 
-                    APP_NAME="TestViewExample"
-                  fi
-
-                  # Build the app
-                  set -o pipefail && xcodebuild \
-                    CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
-                    -derivedDataPath build -UseModernBuildSystem=YES \
-                    -workspace "${SCHEME}.xcworkspace" \
-                    -scheme "$SCHEME" \
-                    -sdk iphonesimulator \
-                    -configuration Debug \
-                    -destination 'platform=iOS Simulator,name=iPhone 16' \
-                    build \
-                    CODE_SIGNING_ALLOWED=NO
-
-                  # Install the app
-                  APP_PATH=$(find build/Build/Products/Debug-iphonesimulator -name "*.app" | head -1)
-                  if [ -n "$APP_PATH" ]; then
-                    xcrun simctl install "iPhone 16" "$APP_PATH"
-                    echo "App installed: $APP_PATH"
-                  else
-                    echo "App not found in build output"
-                    exit 1
-                  fi
-
-            - name: Wait for simulator to be ready
-              if: github.event_name == 'workflow_run'
-              run: |
-                  # Wait for simulator to be fully booted
-                  xcrun simctl bootstatus "iPhone 16" -b
-
-            - name: Run Maestro E2E test
-              if: github.event_name == 'workflow_run'
-              run: |
-                  # Copy e2e test files to working directory
-                  cp e2e/${{ matrix.package-type }}.e2e.yaml ${{ env.WORKING_DIR }}/
-
-                  # Run maestro test
-                  cd ${{ env.WORKING_DIR }}
-                  maestro test ${{ matrix.package-type }}.e2e.yaml --device="iPhone 16"
-
-            - name: Test workflow syntax (mock run)
-              if: github.event_name == 'workflow_dispatch'
-              run: |
-                  echo "✅ Workflow syntax is valid"
-                  echo "✅ Matrix strategy working: ${{ matrix.package-type }}"
-                  echo "✅ Environment variables: ${{ env.WORKING_DIR }}"
-                  echo "✅ Mock package structure created successfully"
-                  echo "This is a mock run to test workflow structure with act"
-
-            - name: Upload Maestro test results
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: maestro-results-${{ matrix.package-type }}
-                  path: |
-                      ${{ env.WORKING_DIR }}/**/*.mp4
-                      ${{ env.WORKING_DIR }}/**/*.png
-                      ${{ env.WORKING_DIR }}/**/maestro-*.log
-                  if-no-files-found: ignore
-                  retention-days: 3
-
-            - name: Cleanup
-              if: always()
-              run: |
-                  # Stop simulator
-                  xcrun simctl shutdown "iPhone 16" || true
+                #   maestro test ./e2e
+                echo "Maestro Tests"

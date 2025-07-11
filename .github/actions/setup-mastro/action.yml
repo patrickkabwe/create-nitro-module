@@ -1,0 +1,10 @@
+name: 'Setup Maestro'
+description: 'Installs Maestro CLI'
+runs:
+    using: 'composite'
+    steps:
+        - run: |
+              echo "Installing Maestro CLI..."
+              curl -Ls "https://get.maestro.mobile.dev" | bash
+              echo "Done!"
+          shell: bash

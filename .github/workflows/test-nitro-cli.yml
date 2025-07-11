@@ -6,195 +6,19 @@ permissions:
     actions: write
 
 on:
-    push:
-        branches: [next]
-        paths:
-            - 'src/**'
-            - '.github/workflows/test-nitro-cli.yml'
-            - 'package.json'
-            - 'bun.lock'
-            - 'assets/template/**'
-
-    pull_request:
-        branches: [main, next]
-        paths:
-            - 'src/**'
-            - '.github/workflows/test-nitro-cli.yml'
-            - 'package.json'
-            - 'bun.lock'
-            - 'assets/template/**'
-            
-    workflow_dispatch:
+    workflow_run:
+        workflows: ['Generate Packages']
+        types:
+            - completed
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
 jobs:
-    lint-and-build:
-        name: Lint and Build CLI
-        runs-on: ubuntu-latest
-        outputs:
-            bun-cache-key: ${{ runner.os }}-bun
-        steps:
-            - name: Checkout Repo
-              uses: actions/checkout@v4
-
-            - name: Setup Bun.js
-              uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
-
-            - name: Cache bun dependencies
-              id: bun-cache
-              uses: actions/cache@v4
-              with:
-                  path: ~/.bun/install/cache
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock', '**/bun.lockb') }}
-                  restore-keys: |
-                      ${{ runner.os }}-bun-
-
-            - name: Install dependencies
-              run: bun install
-
-            - name: Lint Code
-              run: bun lint
-
-            - name: Build CLI
-              run: bun run build
-
-            - name: Test CLI help commands
-              run: |
-                  node lib/cli/index.js --help
-                  node lib/cli/index.js create --help
-
-    generate-packages:
-        name: Generate with ${{ matrix.pm }} - ${{ matrix.package-type }}
-        needs: lint-and-build
-        runs-on: macos-latest
-        strategy:
-            matrix:
-                pm: ['bun', 'yarn', 'pnpm']
-                package-type: ['module', 'view']
-
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        steps:
-            - uses: actions/checkout@v4
-
-            - name: Configure Git
-              run: |
-                  git config --global user.name "GitHub Actions Bot"
-                  git config --global user.email "actions@github.com"
-
-            - name: Setup pnpm
-              if: matrix.pm == 'pnpm'
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10
-
-            - name: Setup Node.js
-              if: matrix.pm == 'yarn' || matrix.pm == 'pnpm'
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 22.x
-
-            - name: Setup Bun.js
-              uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
-
-            - name: Cache dependencies
-              if: matrix.pm == 'bun'
-              uses: actions/cache@v4
-              with:
-                  path: ~/.bun/install/cache
-                  key: ${{ needs.lint-and-build.outputs.bun-cache-key }}-${{ hashFiles('**/bun.lockb') }}
-                  restore-keys: |
-                      ${{ runner.os }}-bun-
-
-            - name: Install npm dependencies (bun)
-              run: bun install
-
-            - name: Build CLI and Link Locally
-              run: |
-                  bun run build
-                  ${{matrix.pm}} link
-
-            - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
-              continue-on-error: false
-              if: matrix.pm != 'pnpm'
-              run: ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --skip-install --ci
-
-            - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
-              continue-on-error: false
-              if: matrix.pm == 'pnpm'
-              run: create-nitro-module test-${{ matrix.package-type }} --skip-install --ci
-
-            - name: Verify generated package structure
-              run: |
-                  PACKAGE_DIR="react-native-test-${{ matrix.package-type }}"
-
-                  if [ ! -d "$PACKAGE_DIR" ]; then
-                    echo "❌ Package directory not found: $PACKAGE_DIR"
-                    ls -la
-                    exit 1
-                  fi
-
-                  echo "✅ Package directory created: $PACKAGE_DIR"
-
-                  # Check essential files
-                  cd "$PACKAGE_DIR"
-
-                  REQUIRED_FILES=(
-                    "package.json"
-                    "README.md"
-                    "src/"
-                    "android/"
-                    "ios/"
-                    "example/"
-                  )
-
-                  for file in "${REQUIRED_FILES[@]}"; do
-                    if [ ! -e "$file" ]; then
-                      echo "❌ Missing required file/directory: $file"
-                      ls -la
-                      exit 1
-                    fi
-                    echo "✅ Found: $file"
-                  done
-
-            - name: Test package.json content
-              run: |
-                  cd "react-native-test-${{ matrix.package-type }}"
-
-                  # Verify package name
-                  if ! grep -q "react-native-test-${{ matrix.package-type }}" package.json; then
-                    echo "❌ Package name not correct in package.json"
-                    cat package.json
-                    exit 1
-                  fi
-
-                  # Verify scripts exist
-                  if ! grep -q '"scripts"' package.json; then
-                    echo "❌ Scripts section missing from package.json"
-                    exit 1
-                  fi
-
-                  echo "✅ package.json structure validated"
-
-            - name: Upload generated package
-              uses: actions/upload-artifact@v4
-              with:
-                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
-                  path: react-native-test-${{ matrix.package-type }}
-                  include-hidden-files: true
-                  if-no-files-found: error
-                  retention-days: 1
-
     test-ios-build:
         name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
-        needs: generate-packages
+        if: github.event.workflow_run.conclusion == 'success'
         runs-on: macos-latest
         strategy:
             matrix:
@@ -290,7 +114,7 @@ jobs:
 
     test-android-build:
         name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
-        needs: generate-packages
+        if: github.event.workflow_run.conclusion == 'success'
         runs-on: ubuntu-latest
         strategy:
             matrix:
