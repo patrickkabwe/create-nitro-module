@@ -184,4 +184,4 @@ jobs:
                   path: react-native-test-${{ matrix.package-type }}
                   include-hidden-files: true
                   if-no-files-found: error
-                  retention-days: 1
+                  retention-days: 7
