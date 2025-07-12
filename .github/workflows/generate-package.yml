@@ -20,6 +20,7 @@ on:
             - 'package.json'
             - 'bun.lock'
             - 'assets/template/**'
+    workflow_dispatch:
 
 permissions:
     contents: write
