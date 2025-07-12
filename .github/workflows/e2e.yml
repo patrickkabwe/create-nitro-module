@@ -87,7 +87,7 @@ jobs:
                   cores: 2
                   ram-size: 4096M
                   heap-size: 512M
-                  emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+                #   emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
                   disable-animations: true
                   script: |
                       echo "Waiting for emulator to be ready..."
