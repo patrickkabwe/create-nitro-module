@@ -26,6 +26,10 @@ permissions:
     contents: write
     actions: write
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     lint-and-build:
         name: Lint and Build CLI
