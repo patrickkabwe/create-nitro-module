@@ -87,53 +87,49 @@ jobs:
                   cores: 2
                   ram-size: 4096M
                   heap-size: 512M
-                  emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+                #   emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
                   disable-animations: true
                   script: |
                       echo "Waiting for emulator to be ready..."
 
-                      # Wait for emulator to appear in adb devices
                       timeout=300
                       while [[ $timeout -gt 0 ]]; do
-                        if adb devices | grep -q "emulator.*device"; then
-                          echo "Emulator device found!"
-                          break
-                        fi
-                        echo "Waiting for emulator device... ($timeout seconds left)"
-                        sleep 5
-                        timeout=$((timeout - 5))
+                      if adb devices | grep -q "emulator.*device"; then
+                      echo "✅ Emulator device found!"
+                      break
+                      fi
+                      echo "⌛ Waiting for emulator device... ($timeout seconds left)"
+                      sleep 5
+                      timeout=$((timeout - 5))
                       done
 
                       if [[ $timeout -le 0 ]]; then
-                        echo "Timeout: Emulator device not found"
-                        adb devices
-                        exit 1
+                          echo "❌ Timeout: Emulator device not found"
+                          adb devices
+                          exit 1
                       fi
 
-                      # Wait for emulator to fully boot
                       echo "Waiting for emulator to complete boot..."
                       timeout=300
                       while [[ $timeout -gt 0 ]]; do
-                        boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r\n')
-                        if [[ "$boot_completed" == "1" ]]; then
-                          echo "Emulator boot completed!"
+                          boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r\n')
+                          if [[ "$boot_completed" == "1" ]]; then
+                          echo "✅ Emulator boot completed!"
                           break
-                        fi
-                        echo "Boot status: $boot_completed (waiting... $timeout seconds left)"
-                        sleep 5
-                        timeout=$((timeout - 5))
+                          fi
+                          echo "⌛ Boot status: $boot_completed (waiting... $timeout seconds left)"
+                          sleep 5
+                          timeout=$((timeout - 5))
                       done
 
                       if [[ $timeout -le 0 ]]; then
-                        echo "Timeout: Emulator did not complete boot"
-                        exit 1
+                          echo "❌ Timeout: Emulator did not complete boot"
+                          exit 1
                       fi
 
-                      # Final verification
-                      echo "Final emulator status:"
+                      echo "✅ Emulator is ready for tests"
                       adb devices
                       adb shell getprop sys.boot_completed
 
-                      echo "Emulator is ready for tests!"
-                      echo "Maestro Tests"
-                      # maestro test ./e2e
+                      echo "🚀 Running Maestro Tests"
+                      maestro test ${{ env.WORKING_DIR }}/e2e
