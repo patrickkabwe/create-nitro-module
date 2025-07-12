@@ -6,10 +6,15 @@ on:
         types:
             - completed
     workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     android-test:
         name: Android E2E Test
-        runs-on: macos-latest
+        runs-on: ubuntu-latest
         strategy:
             matrix:
                 package-type: ['module', 'view']
@@ -21,6 +26,13 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
+
+            - name: enable KVM for linux runners
+              if: runner.os == 'Linux'
+              run: |
+                  echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+                  sudo udevadm control --reload-rules
+                  sudo udevadm trigger --name-match=kvm
 
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -80,14 +92,11 @@ jobs:
             - name: Run Android Emulator and Tests
               uses: reactivecircus/android-emulator-runner@v2
               with:
-                  api-level: 29
-                  target: default
+                  api-level: 35
+                  target: google_apis
                   arch: x86_64
-                  profile: Nexus 6
-                  cores: 2
-                  ram-size: 4096M
-                  heap-size: 512M
-                #   emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+                  profile: Galaxy Nexus
+                  emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
                   disable-animations: true
                   script: |
                       echo "Waiting for emulator to be ready..."
