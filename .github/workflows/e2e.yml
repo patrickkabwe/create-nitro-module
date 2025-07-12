@@ -102,17 +102,17 @@ jobs:
                       echo "Waiting for emulator to be ready..."
 
                       timeout=300
-                      while [[ $timeout -gt 0 ]]; do
-                      if adb devices | grep -q "emulator.*device"; then
-                      echo "✅ Emulator device found!"
-                      break
-                      fi
-                      echo "⌛ Waiting for emulator device... ($timeout seconds left)"
-                      sleep 5
-                      timeout=$((timeout - 5))
+                      while [ "$timeout" -gt 0 ]; do
+                          if adb devices | grep -q "emulator.*device"; then
+                          echo "✅ Emulator device found!"
+                          break
+                          fi
+                          echo "⌛ Waiting for emulator device... ($timeout seconds left)"
+                          sleep 5
+                          timeout=$((timeout - 5))
                       done
 
-                      if [[ $timeout -le 0 ]]; then
+                      if [ "$timeout" -le 0 ]; then
                           echo "❌ Timeout: Emulator device not found"
                           adb devices
                           exit 1
@@ -120,9 +120,9 @@ jobs:
 
                       echo "Waiting for emulator to complete boot..."
                       timeout=300
-                      while [[ $timeout -gt 0 ]]; do
+                      while [ "$timeout" -gt 0 ]; do
                           boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r\n')
-                          if [[ "$boot_completed" == "1" ]]; then
+                          if [ "$boot_completed" = "1" ]; then
                           echo "✅ Emulator boot completed!"
                           break
                           fi
@@ -131,7 +131,7 @@ jobs:
                           timeout=$((timeout - 5))
                       done
 
-                      if [[ $timeout -le 0 ]]; then
+                      if [ "$timeout" -le 0 ]; then
                           echo "❌ Timeout: Emulator did not complete boot"
                           exit 1
                       fi
@@ -141,4 +141,4 @@ jobs:
                       adb shell getprop sys.boot_completed
 
                       echo "🚀 Running Maestro Tests"
-                      maestro test ${{ env.WORKING_DIR }}/e2e
+                      maestro test ./e2e
