@@ -103,5 +103,31 @@ jobs:
                       adb devices
                       adb shell getprop sys.boot_completed
 
+                      echo "🔨 Building Android app (${{ matrix.mode }})..."
+                      cd android
+                      chmod +x gradlew
+                      ./gradlew assemble${{ matrix.mode }} --no-daemon --stacktrace
+
+                      echo "📱 Installing app on emulator..."
+                      APK_PATH="app/build/outputs/apk/$(echo ${{ matrix.mode }} | tr '[:upper:]' '[:lower:]')/app-${{ matrix.mode }}.apk"
+                      if [ ! -f "$APK_PATH" ]; then
+                          APK_PATH="app/build/outputs/apk/$(echo ${{ matrix.mode }} | tr '[:upper:]' '[:lower:]')/app-$(echo ${{ matrix.mode }} | tr '[:upper:]' '[:lower:]').apk"
+                      fi
+                      adb install -r "$APK_PATH"
+
+                      echo "🔍 Verifying app installation..."
+                      APP_ID="com.test${{ matrix.package-type }}example"
+                      if adb shell pm list packages | grep -q "$APP_ID"; then
+                          echo "✅ App $APP_ID is installed successfully"
+                      else
+                          echo "❌ App $APP_ID is not installed"
+                          echo "Installed packages:"
+                          adb shell pm list packages | grep test
+                          exit 1
+                      fi
+
+                      echo "✅ App installed, starting tests..."
+                      cd ..
+
                       echo "🚀 Running Maestro Tests"
                       maestro test ./e2e
