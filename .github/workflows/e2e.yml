@@ -104,7 +104,7 @@ jobs:
                       adb shell getprop sys.boot_completed
 
                       echo "🔨 Building Android app (${{ matrix.mode }})..."
-                      cd android
+                      cd ${{ env.WORKING_DIR }}/example/android
                       chmod +x gradlew
                       ./gradlew assemble${{ matrix.mode }} --no-daemon --stacktrace
 
@@ -127,7 +127,7 @@ jobs:
                       fi
 
                       echo "✅ App installed, starting tests..."
-                      cd ..
+                      cd ${{ github.workspace }}
 
                       echo "🚀 Running Maestro Tests"
                       maestro test ./e2e
