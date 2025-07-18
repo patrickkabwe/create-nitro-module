@@ -112,8 +112,6 @@ jobs:
                       APK_DIR="$ANDROID_DIR/app/build/outputs/apk/$(echo '${{ matrix.mode }}' | tr '[:upper:]' '[:lower:]')"
                       APK_PATH="$APK_DIR/app-$(echo '${{ matrix.mode }}' | tr '[:upper:]' '[:lower:]').apk"
 
-                      echo "📦 APK path: $APK_PATH"
-
                       echo "📱 Installing APK..."
                       adb install -r "$APK_PATH"
 
