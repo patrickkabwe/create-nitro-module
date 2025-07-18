@@ -104,7 +104,11 @@ jobs:
                       adb shell getprop sys.boot_completed
 
                       echo "🔨 Building Android app (${{ matrix.mode }})..."
+                      ls -la ${{ env.WORKING_DIR }}
                       cd ${{ env.WORKING_DIR }}/example/android
+                      echo "🔍 Current directory:"
+                      pwd
+                      ls -la
                       chmod +x ./gradlew
                       ./gradlew assemble${{ matrix.mode }} --no-daemon --stacktrace
 
