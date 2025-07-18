@@ -104,27 +104,13 @@ jobs:
 
                       ANDROID_DIR="${{ env.WORKING_DIR }}/example/android"
 
-                      if [ ! -f "$ANDROID_DIR/gradlew" ]; then
-                        echo "⚠️ gradlew not found. Generating it..."
-                        (cd "$ANDROID_DIR" && gradle wrapper)
-                      fi
-
                       chmod +x "$ANDROID_DIR/gradlew"
 
                       echo "🔨 Building Android app (${{ matrix.mode }})..."
-                      "$ANDROID_DIR/gradlew" -p "$ANDROID_DIR" assemble${{ matrix.mode }} --no-daemon --stacktrace
+                      "$ANDROID_DIR/gradlew" assemble${{ matrix.mode }} --no-daemon --stacktrace
 
                       APK_DIR="$ANDROID_DIR/app/build/outputs/apk/$(echo '${{ matrix.mode }}' | tr '[:upper:]' '[:lower:]')"
-                      APK_PATH="$APK_DIR/app-${{ matrix.mode }}.apk"
-                      if [ ! -f "$APK_PATH" ]; then
-                        APK_PATH="$APK_DIR/app-$(echo '${{ matrix.mode }}' | tr '[:upper:]' '[:lower:]').apk"
-                      fi
-
-                      echo "📦 APK path: $APK_PATH"
-                      if [ ! -f "$APK_PATH" ]; then
-                        echo "❌ APK not found"
-                        exit 1
-                      fi
+                      APK_PATH="$APK_DIR/app-$(echo '${{ matrix.mode }}' | tr '[:upper:]' '[:lower:]').apk"
 
                       echo "📱 Installing APK..."
                       adb install -r "$APK_PATH"
@@ -132,12 +118,6 @@ jobs:
                       APP_ID="com.test${{ matrix.package-type }}example"
                       echo "🚀 Launching app: $APP_ID"
                       adb shell monkey -p "$APP_ID" -c android.intent.category.LAUNCHER 1
-
-                      cd ${{ github.workspace }}
-                      if [ ! -d "./e2e" ] || [ -z "$(ls -A ./e2e/*.yaml 2>/dev/null)" ]; then
-                        echo "❌ No Maestro test flows found in ./e2e"
-                        exit 1
-                      fi
 
                       echo "🧪 Running Maestro tests"
                       maestro test ./e2e
