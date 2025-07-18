@@ -105,7 +105,7 @@ jobs:
 
                       echo "🔨 Building Android app (${{ matrix.mode }})..."
                       cd ${{ env.WORKING_DIR }}/example/android
-                      chmod +x gradlew
+                      chmod +x ./gradlew
                       ./gradlew assemble${{ matrix.mode }} --no-daemon --stacktrace
 
                       echo "📱 Installing app on emulator..."
