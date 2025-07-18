@@ -99,39 +99,40 @@ jobs:
                   emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
                   disable-animations: true
                   script: |
-                      echo "✅ Emulator is ready for tests"
-                      adb devices
-                      adb shell getprop sys.boot_completed
+                      echo "✅ Emulator started"
 
-                      echo "🔨 Building Android app (${{ matrix.mode }})..."
-                      ls -la ${{ env.WORKING_DIR }}
-                      cd ${{ env.WORKING_DIR }}/example/android
-                      echo "🔍 Current directory:"
-                      pwd
-                      ls -la
-                      chmod +x ./gradlew
-                      ./gradlew assemble${{ matrix.mode }} --no-daemon --stacktrace
+                      # Absolute path to example android project
+                      ANDROID_DIR="${{ env.WORKING_DIR }}/example/android"
 
-                      echo "📱 Installing app on emulator..."
-                      APK_PATH="app/build/outputs/apk/$(echo ${{ matrix.mode }} | tr '[:upper:]' '[:lower:]')/app-${{ matrix.mode }}.apk"
-                      if [ ! -f "$APK_PATH" ]; then
-                          APK_PATH="app/build/outputs/apk/$(echo ${{ matrix.mode }} | tr '[:upper:]' '[:lower:]')/app-$(echo ${{ matrix.mode }} | tr '[:upper:]' '[:lower:]').apk"
+                      # 🔧 Ensure gradlew
+                      if [ ! -f "$ANDROID_DIR/gradlew" ]; then
+                          echo "⚠️ gradlew not found, generating..."
+                          (cd "$ANDROID_DIR" && gradle wrapper)
                       fi
+                      chmod +x "$ANDROID_DIR/gradlew"
+
+                      # 🔨 Build APK
+                      echo "🔨 Building Android app (${{ matrix.mode }})..."
+                      "$ANDROID_DIR/gradlew" -p "$ANDROID_DIR" assemble${{ matrix.mode }} --no-daemon --stacktrace
+
+                      # 📦 Install APK
+                      APK_PATH="$ANDROID_DIR/app/build/outputs/apk/$(echo ${{ matrix.mode }} | tr '[:upper:]' '[:lower:]')/app-${{ matrix.mode }}.apk"
+                      if [ ! -f "$APK_PATH" ]; then
+                          APK_PATH="$ANDROID_DIR/app/build/outputs/apk/$(echo ${{ matrix.mode }} | tr '[:upper:]' '[:lower:]')/app-$(echo ${{ matrix.mode }} | tr '[:upper:]' '[:lower:]').apk"
+                      fi
+
                       adb install -r "$APK_PATH"
 
-                      echo "🔍 Verifying app installation..."
+                      # ✅ Verify install
                       APP_ID="com.test${{ matrix.package-type }}example"
-                      if adb shell pm list packages | grep -q "$APP_ID"; then
-                          echo "✅ App $APP_ID is installed successfully"
-                      else
-                          echo "❌ App $APP_ID is not installed"
-                          echo "Installed packages:"
-                          adb shell pm list packages | grep test
+                      adb shell monkey -p "$APP_ID" -c android.intent.category.LAUNCHER 1
+
+                      # ✅ Run Maestro tests
+                      cd ${{ github.workspace }}
+                      if [ ! -d "./e2e" ] || [ -z "$(ls -A ./e2e/*.yaml 2>/dev/null)" ]; then
+                          echo "❌ No Maestro test flows found in ./e2e"
                           exit 1
                       fi
 
-                      echo "✅ App installed, starting tests..."
-                      cd ${{ github.workspace }}
-
-                      echo "🚀 Running Maestro Tests"
+                      echo "🚀 Running Maestro tests"
                       maestro test ./e2e
