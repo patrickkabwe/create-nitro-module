@@ -1,4 +1,4 @@
-appId: com.testmoduleexample
+appId: ${APP_ID}
 ---
 - launchApp
 - assertVisible: '3'

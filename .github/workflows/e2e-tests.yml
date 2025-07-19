@@ -24,7 +24,6 @@ jobs:
 
         env:
             WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
-
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -98,10 +97,11 @@ jobs:
                   emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
                   disable-animations: true
                   script: |
-                    # Wait for system to settle
-                    adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
-                    # Retry once if necessary
-                    ${{ matrix.pm }} android:e2e ${{ env.WORKING_DIR }}/example
+                      # Wait for system to settle
+                      adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+
+                      # Retry once if necessary
+                      ${{ matrix.pm }} android:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package-type }}
 
     test-ios:
         name: iOS E2E Test
@@ -163,17 +163,17 @@ jobs:
 
             - name: Run tests
               run: |
-                if [ "${{ matrix.package-type }}" == "module" ]; then
-                    SCHEME="TestModuleExample"
-                else
-                    SCHEME="TestViewExample"
-                fi
-                ${{ matrix.pm }} ios:e2e ${{ env.WORKING_DIR }}/example $SCHEME
+                  if [ "${{ matrix.package-type }}" == "module" ]; then
+                      SCHEME="TestModuleExample"
+                  else
+                      SCHEME="TestViewExample"
+                  fi
+                  ${{ matrix.pm }} ios:e2e ${{ env.WORKING_DIR }}/example $SCHEME ${{ matrix.package-type }}
 
             - name: Upload test artifacts
               if: always()
               uses: actions/upload-artifact@v4
               with:
-                name: maestro-artifacts-ios-${{ matrix.package-type }}
-                path: e2e-artifacts
-                include-hidden-files: true
+                  name: maestro-artifacts-ios-${{ matrix.package-type }}
+                  path: e2e-artifacts
+                  include-hidden-files: true
