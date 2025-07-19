@@ -158,10 +158,6 @@ jobs:
                   ${{ matrix.pm }} run build
                   node post-script.js
 
-            - name: Install Pods
-              working-directory: ${{ env.WORKING_DIR }}
-              run: bun pods
-
             - name: Install Maestro CLI
               uses: ./.github/actions/setup-maestro
 
