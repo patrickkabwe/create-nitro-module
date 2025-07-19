@@ -5,6 +5,7 @@ trap 'exit' INT
 PLATFORM=${1:-}
 EXAMPLE_DIR=${2:-}
 SCHEME=${3:-}
+APP_ID=${4:-}
 
 
 echo "Running e2e tests for $PLATFORM"
@@ -65,7 +66,9 @@ failedTests=()
 for file in $allTestFiles
 do
   testName=$(basename "${file%.*}")
-  testCmd="maestro test \"$file\" --flatten-debug-output"
+  testCmd="maestro test \"$file\" -e APP_ID=$APP_ID --flatten-debug-output"
+  echo "Running test: $testCmd"
+  
   if ! eval "$testCmd --debug-output e2e-artifacts/$testName";
   then
     echo "Test ${file} failed. Retrying in 30 seconds..."
