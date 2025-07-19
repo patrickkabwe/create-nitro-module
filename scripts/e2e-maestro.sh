@@ -79,6 +79,16 @@ failedTests=()
 for file in $allTestFiles
 do
   testName=$(basename "${file%.*}")
+
+  if [ "$PACKAGE_TYPE" == "module" ]; then
+    APP_ID="com.testmoduleexample"
+  elif [ "$PACKAGE_TYPE" == "view" ]; then
+    APP_ID="com.testviewexample"
+  else
+    echo "Error! You must pass either 'module' or 'view'"
+    echo ""
+    exit 1
+  fi
   
   testCmd="maestro test \"$file\" -e APP_ID=$APP_ID --flatten-debug-output"
   echo "Running test: $testCmd"
