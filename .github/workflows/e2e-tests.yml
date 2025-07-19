@@ -163,12 +163,7 @@ jobs:
 
             - name: Run tests
               run: |
-                  if [ "${{ matrix.package-type }}" == "module" ]; then
-                      SCHEME="TestModuleExample"
-                  else
-                      SCHEME="TestViewExample"
-                  fi
-                  ${{ matrix.pm }} ios:e2e ${{ env.WORKING_DIR }}/example $SCHEME ${{ matrix.package-type }}
+                  ${{ matrix.pm }} ios:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package-type }}
 
             - name: Upload test artifacts
               if: always()
