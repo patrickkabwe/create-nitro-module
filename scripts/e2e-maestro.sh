@@ -68,6 +68,7 @@ do
   testName=$(basename "${file%.*}")
   testCmd="maestro test \"$file\" -e APP_ID=$APP_ID --flatten-debug-output"
   echo "Running test: $testCmd"
+  
   if ! eval "$testCmd --debug-output e2e-artifacts/$testName";
   then
     echo "Test ${file} failed. Retrying in 30 seconds..."
