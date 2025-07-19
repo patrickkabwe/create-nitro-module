@@ -74,6 +74,7 @@ do
     echo ""
     exit 1
   fi
+  
   testCmd="maestro test \"$file\" -e APP_ID=$APP_ID --flatten-debug-output"
   echo "Running test: $testCmd"
   
