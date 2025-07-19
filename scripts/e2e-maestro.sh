@@ -4,8 +4,7 @@ trap 'exit' INT
 
 PLATFORM=${1:-}
 EXAMPLE_DIR=${2:-}
-SCHEME=${3:-}
-PACKAGE_TYPE=${4:-}
+PACKAGE_TYPE=${3:-}
 
 echo "Running e2e tests for $PLATFORM"
 
@@ -61,10 +60,26 @@ allTestFiles=$(ls ./e2e-tests/*.yaml)
 
 echo "Found test files: $allTestFiles"
 
+APP_ID=""
+SCHEME=""
+
+if [ "$PACKAGE_TYPE" == "module" ]; then
+    APP_ID="com.testmoduleexample"
+    SCHEME="TestModuleExample"
+elif [ "$PACKAGE_TYPE" == "view" ]; then
+    APP_ID="com.testviewexample"
+    SCHEME="TestViewExample"
+else
+    echo "Error! You must pass either 'module' or 'view'"
+    echo ""
+    exit 1
+fi
+
 failedTests=()
 for file in $allTestFiles
 do
   testName=$(basename "${file%.*}")
+
   if [ "$PACKAGE_TYPE" == "module" ]; then
     APP_ID="com.testmoduleexample"
   elif [ "$PACKAGE_TYPE" == "view" ]; then
