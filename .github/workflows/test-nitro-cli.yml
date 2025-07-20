@@ -94,6 +94,10 @@ jobs:
               working-directory: ${{ env.WORKING_DIR }}/example
               run: ${{ matrix.pm }} pod
 
+            - name: Install xcpretty
+              run: |
+                  gem install xcpretty
+
             - name: Build iOS project
               working-directory: ${{ env.WORKING_DIR }}/example/ios
               run: |
