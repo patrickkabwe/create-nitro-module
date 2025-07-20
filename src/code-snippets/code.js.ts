@@ -6,7 +6,7 @@ export const appExampleCode = (
     funcName: string,
     isHybridView: boolean
 ) => `import React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import {${!isHybridView ? `Text, ` : ' '}View, StyleSheet } from 'react-native';
 import { ${toPascalCase(moduleName)} } from '${finalModuleName}';
 
 function App(): React.JSX.Element {
