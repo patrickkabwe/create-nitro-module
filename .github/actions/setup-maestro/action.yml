@@ -8,10 +8,9 @@ runs:
               curl -Ls "https://get.maestro.mobile.dev" | bash
 
               # Add Maestro to PATH for subsequent steps
-              echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+              echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
 
               # Verify installation
-              export PATH="$HOME/.maestro/bin:$PATH"
               maestro --version || echo "Maestro installation verification failed"
 
               echo "Maestro installation complete!"

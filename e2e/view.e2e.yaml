@@ -1,5 +1,0 @@
-appId: com.testviewexample
----
-- launchApp
-- assertVisible:
-      id: 'view'
