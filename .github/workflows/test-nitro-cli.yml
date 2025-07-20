@@ -113,7 +113,7 @@ jobs:
                     -configuration ${{ matrix.mode }} \
                     -destination 'platform=iOS Simulator,name=iPhone 16' \
                     build \
-                    CODE_SIGNING_ALLOWED=NO
+                    CODE_SIGNING_ALLOWED=NO | xcpretty
 
     test-android-build:
         name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})

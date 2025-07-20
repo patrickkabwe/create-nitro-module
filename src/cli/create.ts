@@ -78,7 +78,7 @@ export const createModule = async (
                 message:
                     'Looks like the directory with the same name already exists.' +
                     ' Would you like to overwrite the existing directory? (yes/no)' +
-                    kleur.yellow(
+                    kleur.red(
                         ' This will delete the existing directory and all its contents.'
                     ),
                 initialValue: true,

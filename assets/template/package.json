@@ -53,11 +53,11 @@
     "@semantic-release/git": "^10.0.1",
     "@types/jest": "^29.5.12",
     "@types/react": "^19.1.0",
-    "nitro-codegen": "^0.26.3",
+    "nitro-codegen": "^0.26.4",
     "react": "19.1.0",
     "react-native": "0.80.1",
     "react-native-builder-bob": "^0.37.0",
-    "react-native-nitro-modules": "^0.26.3",
+    "react-native-nitro-modules": "^0.26.4",
     "conventional-changelog-conventionalcommits": "^9.0.0",
     "semantic-release": "^24.2.6",
     "typescript": "5.0.4"
