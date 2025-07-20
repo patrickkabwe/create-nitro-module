@@ -94,7 +94,7 @@ jobs:
                   target: google_apis
                   arch: x86_64
                   profile: Galaxy Nexus
-                  emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+                  emulator-options: -no-snapshot -memory 4096 -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
                   disable-animations: true
                   script: |
                       # Wait for system to settle
