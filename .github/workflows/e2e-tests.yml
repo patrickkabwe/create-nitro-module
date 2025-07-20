@@ -105,7 +105,7 @@ jobs:
 
     test-ios:
         name: iOS E2E Test
-        runs-on: macos-latest
+        runs-on: macOS-15
         strategy:
             matrix:
                 package-type: ['module', 'view']
