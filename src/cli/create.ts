@@ -36,8 +36,15 @@ export const createModule = async (
             }
         }
 
-        if (options.packageType && ![Nitro.Module, Nitro.View].includes(options.packageType)) {
-            console.log(kleur.red(`Invalid package type ${options.packageType}. Please use either "${Nitro.Module}" or "${Nitro.View}".`))
+        if (
+            options.packageType &&
+            ![Nitro.Module, Nitro.View].includes(options.packageType)
+        ) {
+            console.log(
+                kleur.red(
+                    `Invalid package type ${options.packageType}. Please use either "${Nitro.Module}" or "${Nitro.View}".`
+                )
+            )
             process.exit(1)
         }
 
@@ -135,28 +142,28 @@ const selectLanguages = async (
 
     const options =
         platforms.includes(SupportedPlatform.IOS) &&
-            platforms.includes(SupportedPlatform.ANDROID)
+        platforms.includes(SupportedPlatform.ANDROID)
             ? [
-                {
-                    label: 'Swift & Kotlin',
-                    value: [SupportedLang.SWIFT, SupportedLang.KOTLIN],
-                    hint: `Use Swift and Kotlin to build your Nitro ${packageType.toLowerCase()} for iOS and Android`,
-                },
-                ...(packageType === Nitro.Module
-                    ? [
-                        {
-                            label: 'C++',
-                            value: [SupportedLang.CPP],
-                            hint: 'Use C++ to share code between iOS and Android',
-                        },
-                    ]
-                    : []),
-            ]
+                  {
+                      label: 'Swift & Kotlin',
+                      value: [SupportedLang.SWIFT, SupportedLang.KOTLIN],
+                      hint: `Use Swift and Kotlin to build your Nitro ${packageType.toLowerCase()} for iOS and Android`,
+                  },
+                  ...(packageType === Nitro.Module
+                      ? [
+                            {
+                                label: 'C++',
+                                value: [SupportedLang.CPP],
+                                hint: 'Use C++ to share code between iOS and Android',
+                            },
+                        ]
+                      : []),
+              ]
             : availableLanguages.map(lang => ({
-                label: capitalize(lang),
-                value: [lang],
-                hint: `Use ${lang === SupportedLang.CPP ? 'C++' : capitalize(lang)} to build your Nitro ${packageType.toLowerCase()} for ${platforms.join(' and ')}`,
-            }))
+                  label: capitalize(lang),
+                  value: [lang],
+                  hint: `Use ${lang === SupportedLang.CPP ? 'C++' : capitalize(lang)} to build your Nitro ${packageType.toLowerCase()} for ${platforms.join(' and ')}`,
+              }))
 
     const selectedLangs = await p.select({
         message: kleur.cyan('Which language(s) would you like to use?'),
