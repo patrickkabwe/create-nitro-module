@@ -36,8 +36,20 @@ export const createModule = async (
             }
         }
 
+        if (
+            options.packageType &&
+            ![Nitro.Module, Nitro.View].includes(options.packageType)
+        ) {
+            console.log(
+                kleur.red(
+                    `Invalid package type ${options.packageType}. Please use either "${Nitro.Module}" or "${Nitro.View}".`
+                )
+            )
+            process.exit(1)
+        }
+
         const usedPm = detectPackageManager()
-        const answers = await getUserAnswers(packageName, usedPm, options.ci)
+        const answers = await getUserAnswers(packageName, usedPm, options)
         packageName = answers.packageName
         packageType = answers.packageType
 
@@ -66,7 +78,7 @@ export const createModule = async (
                 message:
                     'Looks like the directory with the same name already exists.' +
                     ' Would you like to overwrite the existing directory? (yes/no)' +
-                    kleur.yellow(
+                    kleur.red(
                         ' This will delete the existing directory and all its contents.'
                     ),
                 initialValue: true,
@@ -165,14 +177,14 @@ const selectLanguages = async (
 const getUserAnswers = async (
     name: string,
     usedPm?: PackageManager,
-    ci?: boolean
+    options?: CreateModuleOptions
 ): Promise<UserAnswers> => {
-    if (ci) {
+    if (options?.ci) {
         return {
             packageName: name,
             description: `${kleur.yellow(`react-native-${name}`)} is a react native package built with Nitro`,
             platforms: [SupportedPlatform.IOS, SupportedPlatform.ANDROID],
-            packageType: Nitro.Module,
+            packageType: options?.packageType || Nitro.Module,
             langs: [SupportedLang.SWIFT, SupportedLang.KOTLIN],
             pm: usedPm || 'pnpm',
         }
@@ -180,8 +192,11 @@ const getUserAnswers = async (
 
     const group = await p.group(
         {
-            packageName: () =>
-                p.text({
+            packageName: async () => {
+                if (name) {
+                    return name
+                }
+                return p.text({
                     message: kleur.cyan('Enter your package name'),
                     defaultValue: name,
                     initialValue: name,
@@ -189,7 +204,8 @@ const getUserAnswers = async (
                         const packageName = value?.trim()
                         return validatePackageName(packageName)
                     },
-                }),
+                })
+            },
             description: async ({ results }) => {
                 const defaultMessage = `react-native-${results.packageName} is a react native package built with Nitro`
                 return await p.text({
@@ -224,8 +240,12 @@ const getUserAnswers = async (
                     ],
                     required: true,
                 }),
-            packageType: () =>
-                p.select({
+            packageType: async () => {
+                if (options?.packageType) {
+                    return options.packageType
+                }
+
+                return p.select({
                     message: kleur.cyan('Select your package type'),
                     options: [
                         {
@@ -238,7 +258,8 @@ const getUserAnswers = async (
                         },
                     ],
                     initialValue: Nitro.Module,
-                }),
+                })
+            },
             langs: async ({ results }) => {
                 if (!results.platforms || !results.packageType) {
                     throw new Error('Missing required selections')
