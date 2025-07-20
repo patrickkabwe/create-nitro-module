@@ -20,6 +20,23 @@ case $PLATFORM in
     ;;
 esac
 
+
+APP_ID=""
+SCHEME=""
+
+if [ "$PACKAGE_TYPE" == "module" ]; then
+    APP_ID="com.testmoduleexample"
+    SCHEME="TestModuleExample"
+elif [ "$PACKAGE_TYPE" == "view" ]; then
+    APP_ID="com.testviewexample"
+    SCHEME="TestViewExample"
+else
+    echo "Error! You must pass either 'module' or 'view'"
+    echo ""
+    exit 1
+fi
+
+
 if [ "$PLATFORM" == "ios" ]; then
   cd $EXAMPLE_DIR/ios
   pod install
@@ -60,35 +77,11 @@ allTestFiles=$(ls ./e2e-tests/*.yaml)
 
 echo "Found test files: $allTestFiles"
 
-APP_ID=""
-SCHEME=""
-
-if [ "$PACKAGE_TYPE" == "module" ]; then
-    APP_ID="com.testmoduleexample"
-    SCHEME="TestModuleExample"
-elif [ "$PACKAGE_TYPE" == "view" ]; then
-    APP_ID="com.testviewexample"
-    SCHEME="TestViewExample"
-else
-    echo "Error! You must pass either 'module' or 'view'"
-    echo ""
-    exit 1
-fi
 
 failedTests=()
 for file in $allTestFiles
 do
   testName=$(basename "${file%.*}")
-
-  if [ "$PACKAGE_TYPE" == "module" ]; then
-    APP_ID="com.testmoduleexample"
-  elif [ "$PACKAGE_TYPE" == "view" ]; then
-    APP_ID="com.testviewexample"
-  else
-    echo "Error! You must pass either 'module' or 'view'"
-    echo ""
-    exit 1
-  fi
   
   testCmd="maestro test \"$file\" -e APP_ID=$APP_ID --flatten-debug-output"
   echo "Running test: $testCmd"
