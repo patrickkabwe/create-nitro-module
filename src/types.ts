@@ -32,6 +32,7 @@ export type CreateModuleOptions = {
     moduleDir?: string
     skipExample?: boolean
     skipInstall?: boolean
+    packageType?: Nitro
 }
 
 export type PackageManager = Exclude<

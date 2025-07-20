@@ -124,12 +124,12 @@ jobs:
             - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
               continue-on-error: false
               if: matrix.pm != 'pnpm'
-              run: ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --skip-install --ci
+              run: ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --skip-install --ci --package-type ${{ matrix.package-type }}
 
             - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
               continue-on-error: false
               if: matrix.pm == 'pnpm'
-              run: create-nitro-module test-${{ matrix.package-type }} --skip-install --ci
+              run: create-nitro-module test-${{ matrix.package-type }} --skip-install --ci --package-type ${{ matrix.package-type }}
 
             - name: Verify generated package structure
               run: |
