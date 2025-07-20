@@ -19,7 +19,7 @@ jobs:
     test-ios-build:
         name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
         if: github.event.workflow_run.conclusion == 'success'
-        runs-on: macos-latest
+        runs-on: macOS-15
         strategy:
             matrix:
                 pm: ['bun', 'yarn', 'pnpm']
@@ -93,6 +93,10 @@ jobs:
             - name: Install CocoaPods dependencies
               working-directory: ${{ env.WORKING_DIR }}/example
               run: ${{ matrix.pm }} pod
+
+            - name: Install xcpretty
+              run: |
+                  gem install xcpretty
 
             - name: Build iOS project
               working-directory: ${{ env.WORKING_DIR }}/example/ios

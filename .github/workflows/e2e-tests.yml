@@ -107,7 +107,7 @@ jobs:
     test-ios:
         if: github.event.workflow_run.conclusion == 'success'
         name: iOS E2E Test
-        runs-on: macos-latest
+        runs-on: macOS-15
         strategy:
             matrix:
                 package-type: ['module', 'view']
