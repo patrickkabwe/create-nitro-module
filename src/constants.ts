@@ -9,6 +9,7 @@ export const CXX_NAME_SPACE_TAG = '$$cxxNamespace$$'
 export const IOS_MODULE_NAME_TAG = '$$iosModuleName$$'
 export const JS_PACKAGE_NAME_TAG = '$$packageName$$'
 export const AUTHOR_TAG = '$$author$$'
+export const LICENSE_YEAR_TAG = '$$licenseYear$$'
 export const DESCRIPTION_TAG = '$$description$$'
 
 export const messages = {

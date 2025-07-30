@@ -45,6 +45,11 @@ Options:
     yarn create nitro-module@latest my-awesome-module
     ```
     </TabItem>
+    <TabItem value="pnpm" label="Pnpm">
+    ```bash
+    pnpm create nitro-module@latest my-awesome-module
+    ```
+    </TabItem>
 </Tabs>
 
 For additional support, please [open an issue](https://github.com/patrickkabwe/create-nitro-module/issues) on our GitHub repository.

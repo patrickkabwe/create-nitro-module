@@ -209,6 +209,7 @@ export const detectPackageManager = () => {
     if (userAgent.startsWith('npm')) return 'npm'
     if (userAgent.startsWith('yarn')) return 'yarn'
     if (userAgent.startsWith('bun')) return 'bun'
+    if (userAgent.startsWith('pnpm')) return 'pnpm'
     return 'bun'
 }
 

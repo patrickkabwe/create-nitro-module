@@ -1,6 +1,6 @@
 {
     "name": "create-nitro-module",
-    "version": "2.0.0-next.5",
+    "version": "3.0.3",
     "description": "A CLI tool that simplifies creating React Native modules powered by Nitro Modules.",
     "private": false,
     "type": "module",
@@ -12,7 +12,9 @@
         "release": "bun run build && bun semantic-release",
         "lint": "eslint --fix ",
         "format": "prettier --write ",
-        "commitlint": "commitlint --edit"
+        "commitlint": "commitlint --edit",
+        "ios:e2e": "bash scripts/e2e-maestro.sh ios",
+        "android:e2e": "bash scripts/e2e-maestro.sh android"
     },
     "files": [
         "lib",
@@ -37,8 +39,7 @@
     ],
     "license": "MIT",
     "bin": {
-        "create-nitro-module": "./lib/cli/index.js",
-        "nitro-module": "./lib/cli/index.js"
+        "create-nitro-module": "./lib/cli/index.js"
     },
     "repository": {
         "type": "git",
@@ -71,7 +72,7 @@
         "@commitlint/config-conventional": "^19.8.1",
         "@semantic-release/changelog": "^6.0.3",
         "@semantic-release/git": "^10.0.1",
-        "@types/node": "^22.10.0",
+        "@types/node": "^24.0.1",
         "@typescript-eslint/eslint-plugin": "^8.16.0",
         "@typescript-eslint/parser": "^8.16.0",
         "conventional-changelog-conventionalcommits": "^9.0.0",

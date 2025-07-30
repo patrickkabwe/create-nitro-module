@@ -1,0 +1,17 @@
+name: 'Setup Maestro'
+description: 'Installs Maestro CLI'
+runs:
+    using: 'composite'
+    steps:
+        - run: |
+              echo "Installing Maestro CLI..."
+              curl -Ls "https://get.maestro.mobile.dev" | bash
+
+              # Add Maestro to PATH for subsequent steps
+              echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
+
+              # Verify installation
+              maestro --version || echo "Maestro installation verification failed"
+
+              echo "Maestro installation complete!"
+          shell: bash
