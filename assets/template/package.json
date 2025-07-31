@@ -23,6 +23,7 @@
     "cpp",
     "nitro.json",
     "android/build.gradle",
+    "android/fix-prefab.gradle",
     "android/gradle.properties",
     "android/CMakeLists.txt",
     "android/src",
