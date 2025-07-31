@@ -1,3 +1,9 @@
+## [3.1.0-next.2](https://github.com/patrickkabwe/create-nitro-module/compare/v3.1.0-next.1...v3.1.0-next.2) (2025-07-31)
+
+### 🛠️ Other changes
+
+* update package.json dependencies and add fix-prefab.gradle file ([7108fbd](https://github.com/patrickkabwe/create-nitro-module/commit/7108fbd9cf98150d2792ef6bda72e83ad20bea39))
+
 ## [3.1.0-next.1](https://github.com/patrickkabwe/create-nitro-module/compare/v3.0.3...v3.1.0-next.1) (2025-07-30)
 
 ### ✨ Features
