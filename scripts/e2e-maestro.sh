@@ -40,14 +40,6 @@ fi
 if [ "$PLATFORM" == "ios" ]; then
   cd $EXAMPLE_DIR/ios
   
-  # Only run pod install if Pods directory doesn't exist or Podfile.lock is newer
-  if [ ! -d "Pods" ] || [ "Podfile.lock" -nt "Pods/Manifest.lock" ]; then
-    echo "📦 Installing/updating Pods..."
-    pod install
-  else
-    echo "✅ Skipping pod install - Pods are up to date"
-  fi
-  
   # Get iPhone 16 simulator ID dynamically
   iphone16Id=$(xcrun simctl list devices | grep "iPhone 16 (" | grep -E '\(Booted\)|\(Shutdown\)' | head -1 | grep -E -o '\([0-9A-F-]{36}\)' | tr -d '()')
   echo "📱 Using iPhone 16 simulator with ID: $iphone16Id"
