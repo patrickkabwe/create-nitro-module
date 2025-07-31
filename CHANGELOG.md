@@ -1,3 +1,52 @@
+## [3.1.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.0.3...v3.1.0) (2025-07-31)
+
+### ✨ Features
+
+* **actions:** add Setup Maestro action to install Maestro CLI ([70838ef](https://github.com/patrickkabwe/create-nitro-module/commit/70838ef76fa91248cca152f2344d819c2bb6fd63))
+* add support for `--package-type` which can either be `view` or `module` ([83fb57d](https://github.com/patrickkabwe/create-nitro-module/commit/83fb57d81937dd03e520155654e4883d41cb7888))
+
+### 🐛 Bug Fixes
+
+* **ci:** update e2e workflow to use dynamic paths for Android app build and test execution ([b87a171](https://github.com/patrickkabwe/create-nitro-module/commit/b87a171e02939dcdcd872125b11a3e31f813717a))
+* **code:** update import statement to conditionally include Text based on hybrid view ([362391f](https://github.com/patrickkabwe/create-nitro-module/commit/362391f0afdab9fc2b6ebcbcca72feae0aae856a))
+* **e2e:** correct path to gradlew in Android app build step ([#274](https://github.com/patrickkabwe/create-nitro-module/issues/274)) ([d544c3a](https://github.com/patrickkabwe/create-nitro-module/commit/d544c3ab12545820d3babcca67acf48e2ef28763))
+* **e2e:** update emulator options in E2E test configuration for improved performance ([d727d90](https://github.com/patrickkabwe/create-nitro-module/commit/d727d907eb17f8eba48482119ddd0b3748b47834))
+* **e2e:** update emulator options in E2E test configuration for improved performance ([#286](https://github.com/patrickkabwe/create-nitro-module/issues/286)) ([e556a5c](https://github.com/patrickkabwe/create-nitro-module/commit/e556a5c00b6eae865cd53c4f6c34ed109282efaf))
+
+### 🔄 Code Refactors
+
+* improve formatting and readability in create.ts for package type validation ([84615a1](https://github.com/patrickkabwe/create-nitro-module/commit/84615a10b00a3d6abecb7948491d8eb4e7bd3909))
+
+### 🛠️ Other changes
+
+* add xcpretty installation step to CI workflow for improved iOS build output ([d88e2e3](https://github.com/patrickkabwe/create-nitro-module/commit/d88e2e3bee4fc219b4fa7f7a4e219cbab047f7e1))
+* bum up nitro to 0.27.2 ([0d08a5d](https://github.com/patrickkabwe/create-nitro-module/commit/0d08a5df0909a322059a8e93c4801d17bdab2a31))
+* bump up nitro and react-native ([165558f](https://github.com/patrickkabwe/create-nitro-module/commit/165558fff38557beecdfc0b42954f40239708030))
+* change macOS runner version in CI workflow for iOS E2E tests ([6e57677](https://github.com/patrickkabwe/create-nitro-module/commit/6e576770e0742b5bb5c1cef160224890d7177d8f))
+* **ci:** add Git author and committer information to release workflow ([7f4e371](https://github.com/patrickkabwe/create-nitro-module/commit/7f4e371b72f3a8e621dd325feb8fcead29ec7f41))
+* **ci:** enhance e2e workflow by adding Android app build and installation steps ([021450f](https://github.com/patrickkabwe/create-nitro-module/commit/021450f394b2fc98facbeffabcccfdab848b2bc9))
+* **deps-dev:** bump @types/jest in /assets/template ([#250](https://github.com/patrickkabwe/create-nitro-module/issues/250)) ([041f217](https://github.com/patrickkabwe/create-nitro-module/commit/041f217986af4ecad64395bd36c055c6c9331f3a))
+* **deps-dev:** bump @types/node from 24.0.1 to 24.0.10 ([#244](https://github.com/patrickkabwe/create-nitro-module/issues/244)) ([25cbc66](https://github.com/patrickkabwe/create-nitro-module/commit/25cbc66771f59bbc3348fc410106bfa086e9778a))
+* **deps-dev:** bump @types/node from 24.0.10 to 24.0.12 ([#254](https://github.com/patrickkabwe/create-nitro-module/issues/254)) ([0619552](https://github.com/patrickkabwe/create-nitro-module/commit/061955271b3d8bf66850eee5699d7b56f95ff8e7))
+* **deps-dev:** bump @types/node from 24.0.12 to 24.0.13 ([#258](https://github.com/patrickkabwe/create-nitro-module/issues/258)) ([97be28b](https://github.com/patrickkabwe/create-nitro-module/commit/97be28b11eec8dacb89366cbffdb22c40dba67c6))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([#248](https://github.com/patrickkabwe/create-nitro-module/issues/248)) ([0d326d0](https://github.com/patrickkabwe/create-nitro-module/commit/0d326d05ecba10fdfa7b2a4598934b2aa9d95127))
+* **deps-dev:** bump @typescript-eslint/parser from 8.34.1 to 8.36.0 ([#249](https://github.com/patrickkabwe/create-nitro-module/issues/249)) ([338e58e](https://github.com/patrickkabwe/create-nitro-module/commit/338e58e2f5e981cedd448dcda2701a68474b79c5))
+* **deps-dev:** bump eslint from 9.30.0 to 9.30.1 ([#243](https://github.com/patrickkabwe/create-nitro-module/issues/243)) ([4aa9aa2](https://github.com/patrickkabwe/create-nitro-module/commit/4aa9aa24bcf9b9f4d14b6bcb5af5fa1b7e494a10))
+* **deps-dev:** bump lefthook from 1.11.14 to 1.11.16 ([#242](https://github.com/patrickkabwe/create-nitro-module/issues/242)) ([66cb81c](https://github.com/patrickkabwe/create-nitro-module/commit/66cb81ca41f557f1ce33f9928b5d0577f287108d))
+* **deps-dev:** bump lefthook from 1.11.16 to 1.12.0 ([#253](https://github.com/patrickkabwe/create-nitro-module/issues/253)) ([11222d1](https://github.com/patrickkabwe/create-nitro-module/commit/11222d16b28c8308b78048b89e13b73c57ea3656))
+* **deps-dev:** bump lefthook from 1.12.0 to 1.12.2 ([#272](https://github.com/patrickkabwe/create-nitro-module/issues/272)) ([a676ae3](https://github.com/patrickkabwe/create-nitro-module/commit/a676ae39b4adfe969f749537768aa6609982484f))
+* **deps-dev:** bump prettier from 3.5.3 to 3.6.2 ([#245](https://github.com/patrickkabwe/create-nitro-module/issues/245)) ([4dd4586](https://github.com/patrickkabwe/create-nitro-module/commit/4dd4586fffb245c67e259523adc1ac8947459ffd))
+* **e2e:** add caching and pod installation steps to iOS workflow ([66d2b62](https://github.com/patrickkabwe/create-nitro-module/commit/66d2b62211d48aa03a911383efa1a4f84a8142b0))
+* **e2e:** add conditional execution for E2E tests based on previous workflow success ([ed4540f](https://github.com/patrickkabwe/create-nitro-module/commit/ed4540f2bc807a44cbaa6ba3294335f065b4ecc3))
+* **e2e:** remove commented-out Java setup steps from e2e workflow ([#261](https://github.com/patrickkabwe/create-nitro-module/issues/261)) ([fd48bed](https://github.com/patrickkabwe/create-nitro-module/commit/fd48bede37f766c914c7fd154ffb0c714f02d0f5))
+* **release:** 3.1.0-next.1 [skip ci] ([87f15c6](https://github.com/patrickkabwe/create-nitro-module/commit/87f15c6f17fe0659287b3e305c7ddbedd80c3f48))
+* **release:** 3.1.0-next.2 [skip ci] ([ebab473](https://github.com/patrickkabwe/create-nitro-module/commit/ebab47307eff97edf36e32b2c8319aa7048fa76a))
+* update dependencies in bun.lock to latest versions ([1e67116](https://github.com/patrickkabwe/create-nitro-module/commit/1e67116aab49cfd9a0acc78cc2c6b2754e5ac525))
+* update macOS version in CI workflow for iOS build testing ([2da1045](https://github.com/patrickkabwe/create-nitro-module/commit/2da104512480aa6a450b58aaeeb085440a3001a5))
+* update nitro-codegen and react-native-nitro-modules to version 0.26.4 ([5d94e84](https://github.com/patrickkabwe/create-nitro-module/commit/5d94e8456d4faa9dc3a57eeb9c8c020dcd775b44))
+* update package.json dependencies and add fix-prefab.gradle file ([7108fbd](https://github.com/patrickkabwe/create-nitro-module/commit/7108fbd9cf98150d2792ef6bda72e83ad20bea39))
+* **workflows:** update release and test workflows ([#246](https://github.com/patrickkabwe/create-nitro-module/issues/246)) ([acb90e5](https://github.com/patrickkabwe/create-nitro-module/commit/acb90e572b5106c62883035df794df68de699cd6))
+
 ## [3.1.0-next.2](https://github.com/patrickkabwe/create-nitro-module/compare/v3.1.0-next.1...v3.1.0-next.2) (2025-07-31)
 
 ### 🛠️ Other changes
