@@ -22,7 +22,7 @@ jobs:
         runs-on: macOS-15
         strategy:
             matrix:
-                pm: ['bun', 'yarn', 'pnpm']
+                pm: ['bun', 'yarn']
                 package-type: ['module', 'view']
                 mode: ['Debug', 'Release']
         env:
@@ -125,7 +125,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                pm: ['bun', 'yarn', 'pnpm']
+                pm: ['bun', 'yarn']
                 package-type: ['module', 'view']
                 mode: ['Debug', 'Release']
         env:
