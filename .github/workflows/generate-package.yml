@@ -38,7 +38,7 @@ jobs:
             bun-cache-key: ${{ runner.os }}-bun
         steps:
             - name: Checkout Repo
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
@@ -80,7 +80,7 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
 
             - name: Configure Git
               run: |

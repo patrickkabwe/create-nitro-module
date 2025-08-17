@@ -27,7 +27,7 @@ jobs:
             WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Enable KVM (Android emulator)
               if: runner.os == 'Linux'
@@ -119,7 +119,7 @@ jobs:
             WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
