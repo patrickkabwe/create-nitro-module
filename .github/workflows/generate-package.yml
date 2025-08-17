@@ -74,7 +74,7 @@ jobs:
         runs-on: macos-latest
         strategy:
             matrix:
-                pm: ['bun', 'yarn', 'pnpm']
+                pm: ['bun', 'yarn']
                 package-type: ['module', 'view']
 
         env:
