@@ -1,7 +1,8 @@
 name: Test Nitro CLI - Generate & Build
 
+# Minimal permissions for downloading artifacts from other runs
 permissions:
-    contents: write
+    contents: read
     actions: read
 
 on:
@@ -18,15 +19,18 @@ concurrency:
 jobs:
     test-ios-build:
         name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
-        if: github.event.workflow_run.conclusion == 'success'
-        runs-on: macOS-15
+        # Run on successful upstream, or when manually dispatched
+        if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+        runs-on: macOS-latest
         strategy:
+            fail-fast: false
             matrix:
                 pm: ['bun', 'yarn']
                 package-type: ['module', 'view']
                 mode: ['Debug', 'Release']
         env:
             WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
+            SCHEME: ${{ matrix.package-type == 'module' && 'TestModuleExample' || 'TestViewExample' }}
         steps:
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -57,14 +61,8 @@ jobs:
                   ruby-version: '3.2'
                   bundler-cache: true
 
-            - name: Setup pnpm
-              if: matrix.pm == 'pnpm'
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10
-
             - name: Setup Node.js
-              if: matrix.pm == 'yarn' || matrix.pm == 'pnpm'
+              if: matrix.pm == 'yarn'
               uses: actions/setup-node@v4
               with:
                   node-version: 22.x
@@ -95,6 +93,16 @@ jobs:
                   ${{ matrix.pm }} run build
                   node post-script.js
 
+            - name: Cache CocoaPods
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cocoapods/repos
+                      ${{ env.WORKING_DIR }}/example/ios/Pods
+                  key: ${{ runner.os }}-pods-${{ hashFiles(format('{0}/example/ios/Podfile.lock', env.WORKING_DIR)) }}
+                  restore-keys: |
+                      ${{ runner.os }}-pods-
+
             - name: Install CocoaPods dependencies
               working-directory: ${{ env.WORKING_DIR }}/example
               run: ${{ matrix.pm }} pod
@@ -106,18 +114,11 @@ jobs:
             - name: Build iOS project
               working-directory: ${{ env.WORKING_DIR }}/example/ios
               run: |
-                  # Get the correct scheme name based on package type
-                  if [ "${{ matrix.package-type }}" == "module" ]; then
-                    SCHEME="TestModuleExample"
-                  else
-                    SCHEME="TestViewExample"
-                  fi
-
                   set -o pipefail && xcodebuild \
                     CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
                     -derivedDataPath build -UseModernBuildSystem=YES \
                     -workspace "${SCHEME}.xcworkspace" \
-                    -scheme "$SCHEME" \
+                    -scheme "${SCHEME}" \
                     -sdk iphonesimulator \
                     -configuration ${{ matrix.mode }} \
                     -destination 'platform=iOS Simulator,name=iPhone 16' \
@@ -126,9 +127,11 @@ jobs:
 
     test-android-build:
         name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
-        if: github.event.workflow_run.conclusion == 'success'
+        # Run on successful upstream, or when manually dispatched
+        if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
         runs-on: ubuntu-latest
         strategy:
+            fail-fast: false
             matrix:
                 pm: ['bun', 'yarn']
                 package-type: ['module', 'view']
@@ -154,14 +157,8 @@ jobs:
                   echo "Package structure:"
                   find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
 
-            - name: Setup pnpm
-              if: matrix.pm == 'pnpm'
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10
-
             - name: Setup Node.js
-              if: matrix.pm == 'yarn' || matrix.pm == 'pnpm'
+              if: matrix.pm == 'yarn'
               uses: actions/setup-node@v4
               with:
                   node-version: 22.x
@@ -202,6 +199,16 @@ jobs:
             - name: Make gradlew executable
               working-directory: ${{ env.WORKING_DIR }}/example/android
               run: chmod +x ./gradlew
+
+            - name: Cache Gradle
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.gradle/caches
+                      ~/.gradle/wrapper
+                  key: ${{ runner.os }}-gradle-${{ hashFiles(format('{0}/example/android/**/*.gradle*', env.WORKING_DIR)) }}
+                  restore-keys: |
+                      ${{ runner.os }}-gradle-
 
             - name: Clean and generate codegen artifacts
               working-directory: ${{ env.WORKING_DIR }}/example/android
