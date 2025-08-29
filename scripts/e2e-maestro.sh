@@ -64,9 +64,17 @@ if [ "$PLATFORM" == "ios" ]; then
   # Check if xcpretty is available
   if command -v xcpretty >/dev/null 2>&1; then
     set -o pipefail && $buildCmd | xcpretty
+    if [ $? -ne 0 ]; then
+      echo "❌ iOS build failed!"
+      exit 1
+    fi
   else
     echo "⚠️  xcpretty not found. Install with: gem install xcpretty"
     $buildCmd
+    if [ $? -ne 0 ]; then
+      echo "❌ iOS build failed!"
+      exit 1
+    fi
   fi
   
   # Launch the simulator if not already booted
@@ -92,6 +100,10 @@ else
   # Build with optimizations and pretty output
   echo "🔨 Building Android app..."
   ./gradlew assembleRelease --no-daemon --build-cache --parallel --console=rich
+  if [ $? -ne 0 ]; then
+    echo "❌ Android build failed!"
+    exit 1
+  fi
   APK_PATH="app/build/outputs/apk/release/app-release.apk"
   
   # Install the APK
