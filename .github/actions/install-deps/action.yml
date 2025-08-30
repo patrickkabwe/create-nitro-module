@@ -1,0 +1,22 @@
+name: Install package dependencies
+description: Install dependencies using the provided package manager in a working directory
+inputs:
+  pm:
+    description: Package manager (bun|yarn|pnpm|npm)
+    required: true
+  working-directory:
+    description: Directory to run the install in
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -euo pipefail
+        cd "${{ inputs.working-directory }}"
+        case "${{ inputs.pm }}" in
+          bun|yarn|pnpm|npm) ;;
+          *) echo "Unsupported pm: ${{ inputs.pm }}" >&2; exit 1;;
+        esac
+        ${{ inputs.pm }} install
+
