@@ -1,3 +1,35 @@
+## [3.2.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.1.0...v3.2.0) (2025-08-30)
+
+### ✨ Features
+
+* **snippets:** update code.js.ts snippets ([4fa1868](https://github.com/patrickkabwe/create-nitro-module/commit/4fa186851d9ee97cdb48ee19e503e983b4d0f612))
+
+### 🛠️ Other changes
+
+* **android:** enable RN_SERIALIZABLE_STATE for Nitro Views ([fb0cd8a](https://github.com/patrickkabwe/create-nitro-module/commit/fb0cd8a4427e8545f3390fddc33534f1e2b8bd1f))
+* **ci:** add Xcode setup step and update gradle cache syntax in CI workflow ([1bc93b5](https://github.com/patrickkabwe/create-nitro-module/commit/1bc93b5fcebbf54122f66cfcb504a26e312008ad))
+* **ci:** refactor template android/ios workflows ([ebc11ea](https://github.com/patrickkabwe/create-nitro-module/commit/ebc11ea53daba78fef7f4652a7cf44fc7976c0ff))
+* **ci:** refactor test-nitro-cli workflow ([bb53ba9](https://github.com/patrickkabwe/create-nitro-module/commit/bb53ba912632aa47ce90127d3e604cf19caa6402))
+* **ci:** update e2e workflow and improve build error handling ([154d89e](https://github.com/patrickkabwe/create-nitro-module/commit/154d89e695327c17462b501dc70e2b5e65fe8cee))
+* **deps-dev:** bump @types/node from 24.1.0 to 24.2.1 ([f2c8da1](https://github.com/patrickkabwe/create-nitro-module/commit/f2c8da1eb65ba875a2396f2fe6e5285641dbd2c8))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([bdaece7](https://github.com/patrickkabwe/create-nitro-module/commit/bdaece71e2cc17cf1005a70d206ae9bc5a5a4deb))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([825160a](https://github.com/patrickkabwe/create-nitro-module/commit/825160acb821199d43a787e17d2df3b5804cac9b))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([3a63213](https://github.com/patrickkabwe/create-nitro-module/commit/3a63213383e5639841ea1b9e38386837894d850a))
+* **deps-dev:** bump @typescript-eslint/parser from 8.38.0 to 8.39.1 ([72f74f3](https://github.com/patrickkabwe/create-nitro-module/commit/72f74f3df9f173ae0c6b0eeb23ca990cbf3721f6))
+* **deps-dev:** bump @typescript-eslint/parser from 8.39.1 to 8.40.0 ([4c2ccef](https://github.com/patrickkabwe/create-nitro-module/commit/4c2ccef32acf00da79eae75aee5b702c8103e489))
+* **deps-dev:** bump @typescript-eslint/parser from 8.40.0 to 8.41.0 ([2140d19](https://github.com/patrickkabwe/create-nitro-module/commit/2140d19b2e6a2aba8a8d96dc819a970983e292db))
+* **deps-dev:** bump eslint from 9.32.0 to 9.33.0 ([3011364](https://github.com/patrickkabwe/create-nitro-module/commit/301136429b67b3233f6637a8a342cb9195546982))
+* **deps-dev:** bump eslint from 9.33.0 to 9.34.0 ([f8b7e79](https://github.com/patrickkabwe/create-nitro-module/commit/f8b7e79cc6dd4d487a315bc49022dfd3e36fd26b))
+* **deps-dev:** bump lefthook from 1.12.2 to 1.12.3 ([b748a27](https://github.com/patrickkabwe/create-nitro-module/commit/b748a2772ab5b998f377edbf3e63a185bdf7f45b))
+* **deps-dev:** bump react-native ([f346894](https://github.com/patrickkabwe/create-nitro-module/commit/f34689491f71547cd6a71ffb4b9e635bee6e034b))
+* **deps-dev:** bump react-native-nitro-modules in /assets/template ([77d4fc5](https://github.com/patrickkabwe/create-nitro-module/commit/77d4fc577c3afef54d3055b225d3e51fbcdee551))
+* **deps:** bump actions/checkout from 4 to 5 ([41f84bf](https://github.com/patrickkabwe/create-nitro-module/commit/41f84bf332134c2c478f7a6d09673cef367d76b5))
+* **deps:** bump actions/download-artifact from 4 to 5 ([be72d59](https://github.com/patrickkabwe/create-nitro-module/commit/be72d597f120dbec6fd9107871524e379ba04d3d))
+* **deps:** bump actions/setup-java from 4 to 5 ([45c211d](https://github.com/patrickkabwe/create-nitro-module/commit/45c211d4ae366bcb3f59b0f2ee1761e9db9bc9ed))
+* **deps:** bump actions/upload-pages-artifact from 3 to 4 ([4fdf4b9](https://github.com/patrickkabwe/create-nitro-module/commit/4fdf4b9097f9e08425e8135a3f21da247b8bfee6))
+* remove pnpm from CI workflow package managers ([2f45f1b](https://github.com/patrickkabwe/create-nitro-module/commit/2f45f1b38f398c18209cd42555cb18cb12ac21cc))
+* update package dependencies and enhance CI workflows ([81a99d3](https://github.com/patrickkabwe/create-nitro-module/commit/81a99d3eebd19c903600cace92f9472ac90d10e1))
+
 ## [3.1.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.0.3...v3.1.0) (2025-07-31)
 
 ### ✨ Features
