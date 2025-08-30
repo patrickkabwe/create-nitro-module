@@ -1,0 +1,22 @@
+name: Android Gradle build
+description: Clean, generate codegen artifacts, build assemble{mode}, and stop Gradle
+inputs:
+  android-dir:
+    description: Path to example/android directory
+    required: true
+  mode:
+    description: Build mode (Debug|Release)
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -euo pipefail
+        cd "${{ inputs.android-dir }}"
+        chmod +x ./gradlew
+        ./gradlew clean
+        ./gradlew generateCodegenArtifactsFromSchema
+        ./gradlew assemble${{ inputs.mode }} --no-daemon --build-cache
+        ./gradlew --stop
+
