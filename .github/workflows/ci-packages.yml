@@ -223,13 +223,9 @@ jobs:
 
       - name: Setup Yarn
         if: matrix.pm == 'yarn'
-        run: |
-          corepack enable
-          cd ${{ env.WORKING_DIR }}
-          yarn set version 4.6.0
-          yarn config set enableImmutableInstalls false
-          yarn config set nodeLinker node-modules
-          touch yarn.lock
+        uses: ./.github/actions/setup-yarn
+        with:
+          working-directory: ${{ env.WORKING_DIR }}
 
       - name: Setup Bun.js
         uses: oven-sh/setup-bun@v2
@@ -237,15 +233,16 @@ jobs:
           bun-version: latest
 
       - name: Install package dependencies
-        working-directory: ${{ env.WORKING_DIR }}
-        run: ${{ matrix.pm }} install
+        uses: ./.github/actions/install-deps
+        with:
+          pm: ${{ matrix.pm }}
+          working-directory: ${{ env.WORKING_DIR }}
 
-      - name: Run codegen
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          bunx nitro-codegen --logLevel="debug"
-          ${{ matrix.pm }} run build
-          node post-script.js
+      - name: Run codegen and build
+        uses: ./.github/actions/run-codegen-build
+        with:
+          pm: ${{ matrix.pm }}
+          working-directory: ${{ env.WORKING_DIR }}
 
       - name: Cache CocoaPods
         uses: actions/cache@v4
@@ -261,23 +258,12 @@ jobs:
         working-directory: ${{ env.WORKING_DIR }}/example
         run: ${{ matrix.pm }} pod
 
-      - name: Install xcpretty
-        run: |
-          gem install xcpretty
-
       - name: Build iOS project
-        working-directory: ${{ env.WORKING_DIR }}/example/ios
-        run: |
-          set -o pipefail && xcodebuild \
-            CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
-            -derivedDataPath build -UseModernBuildSystem=YES \
-            -workspace "${SCHEME}.xcworkspace" \
-            -scheme "${SCHEME}" \
-            -sdk iphonesimulator \
-            -configuration ${{ matrix.mode }} \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
-            build \
-            CODE_SIGNING_ALLOWED=NO | xcpretty
+        uses: ./.github/actions/ios-build-xcode
+        with:
+          ios-dir: ${{ env.WORKING_DIR }}/example/ios
+          scheme: ${{ env.SCHEME }}
+          mode: ${{ matrix.mode }}
 
   # Package manager build tests (Android)
   test-android-build:
@@ -316,13 +302,9 @@ jobs:
 
       - name: Setup Yarn
         if: matrix.pm == 'yarn'
-        run: |
-          corepack enable
-          cd ${{ env.WORKING_DIR }}
-          yarn set version 4.6.0
-          yarn config set enableImmutableInstalls false
-          yarn config set nodeLinker node-modules
-          touch yarn.lock
+        uses: ./.github/actions/setup-yarn
+        with:
+          working-directory: ${{ env.WORKING_DIR }}
 
       - name: Setup Bun.js
         uses: oven-sh/setup-bun@v2
@@ -330,15 +312,16 @@ jobs:
           bun-version: latest
 
       - name: Install package dependencies
-        working-directory: ${{ env.WORKING_DIR }}
-        run: ${{ matrix.pm }} install
+        uses: ./.github/actions/install-deps
+        with:
+          pm: ${{ matrix.pm }}
+          working-directory: ${{ env.WORKING_DIR }}
 
-      - name: Run codegen
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          bunx nitro-codegen --logLevel="debug"
-          ${{ matrix.pm }} run build
-          node post-script.js
+      - name: Run codegen and build
+        uses: ./.github/actions/run-codegen-build
+        with:
+          pm: ${{ matrix.pm }}
+          working-directory: ${{ env.WORKING_DIR }}
 
       - name: Setup Java for Android builds
         uses: actions/setup-java@v5
@@ -346,10 +329,6 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
           cache: 'gradle'
-
-      - name: Make gradlew executable
-        working-directory: ${{ env.WORKING_DIR }}/example/android
-        run: chmod +x ./gradlew
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -360,20 +339,11 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles(format('{0}/example/android/**/*.gradle*', env.WORKING_DIR)) }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-
-      - name: Clean and generate codegen artifacts
-        working-directory: ${{ env.WORKING_DIR }}/example/android
-        run: |
-          ./gradlew clean
-          ./gradlew generateCodegenArtifactsFromSchema
-
       - name: Build Android project
-        working-directory: ${{ env.WORKING_DIR }}/example/android
-        run: ./gradlew assemble${{ matrix.mode }} --no-daemon --build-cache
-
-      - name: Stop Gradle daemon
-        working-directory: ${{ env.WORKING_DIR }}/example/android
-        run: ./gradlew --stop
+        uses: ./.github/actions/android-gradle-build
+        with:
+          android-dir: ${{ env.WORKING_DIR }}/example/android
+          mode: ${{ matrix.mode }}
 
   # E2E tests (Android)
   e2e-android:
@@ -423,15 +393,16 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install dependencies
-        working-directory: ${{ env.WORKING_DIR }}
-        run: ${{ matrix.pm }} install
+        uses: ./.github/actions/install-deps
+        with:
+          pm: ${{ matrix.pm }}
+          working-directory: ${{ env.WORKING_DIR }}
 
       - name: Run codegen and build
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          bunx nitro-codegen --logLevel="debug"
-          ${{ matrix.pm }} run build
-          node post-script.js
+        uses: ./.github/actions/run-codegen-build
+        with:
+          pm: ${{ matrix.pm }}
+          working-directory: ${{ env.WORKING_DIR }}
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -507,15 +478,16 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install Dependencies
-        working-directory: ${{ env.WORKING_DIR }}
-        run: ${{ matrix.pm }} install
+        uses: ./.github/actions/install-deps
+        with:
+          pm: ${{ matrix.pm }}
+          working-directory: ${{ env.WORKING_DIR }}
 
       - name: Run codegen and build
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          bunx nitro-codegen --logLevel="debug"
-          ${{ matrix.pm }} run build
-          node post-script.js
+        uses: ./.github/actions/run-codegen-build
+        with:
+          pm: ${{ matrix.pm }}
+          working-directory: ${{ env.WORKING_DIR }}
 
       - name: Cache Pods
         uses: actions/cache@v4
@@ -542,4 +514,3 @@ jobs:
           name: maestro-artifacts-ios-${{ matrix.package-type }}
           path: e2e-artifacts
           include-hidden-files: true
-

@@ -1,0 +1,19 @@
+name: Setup Yarn in working directory
+description: Configure Yarn v4 with node-modules linker for the given directory
+inputs:
+  working-directory:
+    description: Directory to run yarn config
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -euo pipefail
+        corepack enable
+        cd "${{ inputs.working-directory }}"
+        yarn set version 4.6.0
+        yarn config set enableImmutableInstalls false
+        yarn config set nodeLinker node-modules
+        touch yarn.lock
+
