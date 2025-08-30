@@ -142,7 +142,9 @@ module.exports = api => {
 };`
 
 export const exampleTsConfig = (finalModuleName: string) => `{
-  "extends": "@react-native/typescript-config/tsconfig.json",
+  "extends": "@react-native/typescript-config",
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["**/node_modules", "**/Pods"],
   "compilerOptions": {
     "strict": true,
     "baseUrl": ".",
