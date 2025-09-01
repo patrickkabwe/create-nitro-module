@@ -1,3 +1,10 @@
+## [3.2.1](https://github.com/patrickkabwe/create-nitro-module/compare/v3.2.0...v3.2.1) (2025-09-01)
+
+### 🛠️ Other changes
+
+* **deps:** update nitro-codegen and react-native-nitro-modules to version 0.29.2 ([5175f6b](https://github.com/patrickkabwe/create-nitro-module/commit/5175f6b2d97861ea845e26d547b4a906646d62f6))
+* update Node.js engine requirement from >=18 to >=22 in package.json ([970c0df](https://github.com/patrickkabwe/create-nitro-module/commit/970c0df6d9c5d5cbd6dfa25dc770841abd5b43b9))
+
 ## [3.2.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.1.0...v3.2.0) (2025-08-30)
 
 ### ✨ Features
