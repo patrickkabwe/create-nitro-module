@@ -93,7 +93,7 @@ jobs:
 
       - name: Setup Node.js
         if: matrix.pm == 'yarn' || matrix.pm == 'pnpm'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22.x
 
@@ -220,7 +220,7 @@ jobs:
 
       - name: Setup Node.js
         if: matrix.pm == 'yarn'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22.x
 
@@ -302,7 +302,7 @@ jobs:
 
       - name: Setup Node.js
         if: matrix.pm == 'yarn'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22.x
 
