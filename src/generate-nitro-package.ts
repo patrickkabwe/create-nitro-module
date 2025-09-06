@@ -52,6 +52,7 @@ const __dirname = path.dirname(__filename)
 
 export class NitroModuleFactory {
     private generators: Map<SupportedLang, FileGenerator>
+    private nitroModulesVersion: string | null = null
 
     constructor(private config: GenerateModuleConfig) {
         const androidGenerator = new AndroidFileGenerator()
@@ -102,6 +103,22 @@ export class NitroModuleFactory {
             this.config.spinner.start(messages.installing)
             await this.installDependenciesAndRunCodegen()
             this.config.spinner.stop(kleur.cyan(messages.installing + 'Done'))
+        }
+    }
+
+    private async getLatestVersion(pkg: string): Promise<string | null> {
+        try {
+            const { stdout } = await execAsync(`npm view ${pkg} version`)
+            const v = stdout?.toString().trim()
+            return v?.length ? v : null
+        } catch (_) {
+            try {
+                const { stdout } = await execAsync(`pnpm view ${pkg} version`)
+                const v = stdout?.toString().trim()
+                return v?.length ? v : null
+            } catch {
+                return null
+            }
         }
     }
 
@@ -165,6 +182,26 @@ export class NitroModuleFactory {
             build: `${this.config.pm} run typecheck && bob build`,
             codegen: `nitro-codegen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`,
             postcodegen: this.getPostCodegenScript(),
+        }
+
+        // Resolve and pin latest Nitro tools to concrete versions
+        const nitroGen = 'nitro-codegen'
+        const nitroModules = 'react-native-nitro-modules'
+        const [nitroModulesVersion, nitroCodegenVersion] = await Promise.all([
+            this.getLatestVersion(nitroModules),
+            this.getLatestVersion(nitroGen),
+        ])
+        this.nitroModulesVersion = nitroModulesVersion
+        newWorkspacePackageJsonFile.devDependencies = {
+            ...newWorkspacePackageJsonFile.devDependencies,
+            [nitroModules]:
+                nitroModulesVersion ??
+                newWorkspacePackageJsonFile.devDependencies?.[nitroModules] ??
+                templatePackageJson.devDependencies[nitroModules],
+            [nitroGen]:
+                nitroCodegenVersion ??
+                newWorkspacePackageJsonFile.devDependencies?.[nitroGen] ??
+                templatePackageJson.devDependencies[nitroGen],
         }
 
         newWorkspacePackageJsonFile.keywords = [
@@ -323,7 +360,7 @@ export class NitroModuleFactory {
         const nitroKey = `react-native-nitro-modules`
         exampleAppPackageJson.dependencies = {
             ...exampleAppPackageJson.dependencies,
-            [nitroKey]: templatePackageJson.devDependencies[nitroKey] ?? '*',
+            [nitroKey]: this.nitroModulesVersion ?? '*',
         }
 
         exampleAppPackageJson.devDependencies = {

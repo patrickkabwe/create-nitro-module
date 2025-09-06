@@ -1,22 +1,21 @@
 name: Run codegen and build
 description: Run nitro codegen, build the package, and execute post-script
 inputs:
-  pm:
-    description: Package manager (bun|yarn|pnpm|npm)
-    required: true
-  working-directory:
-    description: Directory to run in
-    required: true
+    pm:
+        description: Package manager (bun|yarn|pnpm|npm)
+        required: true
+    working-directory:
+        description: Directory to run in
+        required: true
 runs:
-  using: composite
-  steps:
-    - shell: bash
-      run: |
-        set -euo pipefail
-        cd "${{ inputs.working-directory }}"
-        bunx nitro-codegen --logLevel="debug"
-        ${{ inputs.pm }} run build
-        if [ -f post-script.js ]; then
-          node post-script.js
-        fi
-
+    using: composite
+    steps:
+        - shell: bash
+          run: |
+              set -euo pipefail
+              cd "${{ inputs.working-directory }}"
+              bunx nitro-codegen --logLevel="debug"
+              ${{ inputs.pm }} run build
+              if [ -f post-script.js ]; then
+                node post-script.js
+              fi

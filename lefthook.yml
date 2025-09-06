@@ -1,20 +1,20 @@
 commit-msg:
-  commands:
-    commitlint:
-      run: bun commitlint {1}
-      
+    commands:
+        commitlint:
+            run: bun commitlint {1}
+
 pre-commit:
-  parallel: true
-  commands:
-    lint:
-      glob:
-        - "*.json"
-        - "*.ts"
-        - "*.tsx"
-      run: bun lint {staged_files}
-    format:
-      glob:
-        - "*.json"
-        - "*.ts"
-        - "*.tsx"
-      run: bun format {staged_files}
+    parallel: true
+    commands:
+        lint:
+            glob:
+                - '*.json'
+                - '*.ts'
+                - '*.tsx'
+            run: bun lint {staged_files}
+        format:
+            glob:
+                - '*.json'
+                - '*.ts'
+                - '*.tsx'
+            run: bun format {staged_files}

@@ -1,29 +1,33 @@
 version: 2
 updates:
-  - package-ecosystem: 'github-actions'
-    directory: '/'
-    schedule:
-      interval: 'daily'
-    labels:
-      - 'dependencies'
+    - package-ecosystem: 'github-actions'
+      directory: '/'
+      schedule:
+          interval: 'daily'
+      labels:
+          - 'dependencies'
 
-  - package-ecosystem: bun
-    directories:
-      - '/'
-      - '/assets/template'
-    schedule:
-      interval: 'daily'
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    groups:
-      rncli:
-        patterns:
-          - '@react-native-community/cli*'
-      babel:
-        patterns:
-          - '@babel/*'
-      react-native:
-        patterns:
-          - '@react-native/*'
-          - 'react-native'
+    - package-ecosystem: bun
+      directories:
+          - '/'
+          - '/assets/template'
+      schedule:
+          interval: 'daily'
+      commit-message:
+          prefix: 'chore'
+          include: 'scope'
+      groups:
+          rncli:
+              patterns:
+                  - '@react-native-community/cli*'
+          babel:
+              patterns:
+                  - '@babel/*'
+          react-native:
+              patterns:
+                  - '@react-native/*'
+                  - 'react-native'
+          nitro:
+              patterns:
+                  - 'nitro-codegen'
+                  - 'react-native-nitro-modules'

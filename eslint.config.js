@@ -29,6 +29,14 @@ export default defineConfig([
             'n/no-process-exit': 'off',
             'n/no-missing-import': 'off',
             'n/no-unsupported-features/node-builtins': 'warn',
+            '@typescript-eslint/no-unused-vars': [
+                'error',
+                {
+                    argsIgnorePattern: '^_',
+                    varsIgnorePattern: '^_',
+                    caughtErrorsIgnorePattern: '^_',
+                },
+            ],
         },
     },
     {
