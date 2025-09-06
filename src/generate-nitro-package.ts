@@ -185,27 +185,23 @@ export class NitroModuleFactory {
         }
 
         // Resolve and pin latest Nitro tools to concrete versions
+        const nitroGen = 'nitro-codegen'
+        const nitroModules = 'react-native-nitro-modules'
         const [nitroModulesVersion, nitroCodegenVersion] = await Promise.all([
-            this.getLatestVersion('react-native-nitro-modules'),
-            this.getLatestVersion('nitro-codegen'),
+            this.getLatestVersion(nitroModules),
+            this.getLatestVersion(nitroGen),
         ])
         this.nitroModulesVersion = nitroModulesVersion
         newWorkspacePackageJsonFile.devDependencies = {
             ...newWorkspacePackageJsonFile.devDependencies,
-            'react-native-nitro-modules':
+            [nitroModules]:
                 nitroModulesVersion ??
-                newWorkspacePackageJsonFile.devDependencies?.[
-                    'react-native-nitro-modules'
-                ] ??
-                templatePackageJson.devDependencies[
-                    'react-native-nitro-modules'
-                ],
-            'nitro-codegen':
+                newWorkspacePackageJsonFile.devDependencies?.[nitroModules] ??
+                templatePackageJson.devDependencies[nitroModules],
+            [nitroGen]:
                 nitroCodegenVersion ??
-                newWorkspacePackageJsonFile.devDependencies?.[
-                    'nitro-codegen'
-                ] ??
-                templatePackageJson.devDependencies['nitro-codegen'],
+                newWorkspacePackageJsonFile.devDependencies?.[nitroGen] ??
+                templatePackageJson.devDependencies[nitroGen],
         }
 
         newWorkspacePackageJsonFile.keywords = [
