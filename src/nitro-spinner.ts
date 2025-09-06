@@ -15,7 +15,7 @@ export class NitroSpinner {
     private isSpinning: boolean
     private spinnerInterval: NodeJS.Timeout | null
     private readonly stdout: NodeJS.WriteStream
-    public text: string  = ""
+    public text: string = ''
 
     constructor(options: LoggerOptions = {}) {
         this.frames = options.frames ?? [

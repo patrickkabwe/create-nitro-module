@@ -40,11 +40,11 @@ MyNitroApp
 - **ios/**: Contains the iOS-specific code and configuration.
 - **src/**: Contains the source code of your React Native app.
 - **packages/**: Contains the JavaScript/TypeScript module packages.
-  - **my-nitro-module/**: Example of a nitro module.
-    - **_**_tests_**_/**: Contains test files.
-    - **android/**: Contains the Android native module implementation.
-    - **ios/**: Contains the iOS native module implementation.
-    - **src/**: Contains the native module specs.
+    - **my-nitro-module/**: Example of a nitro module.
+        - **\_**_tests_**\_/**: Contains test files.
+        - **android/**: Contains the Android native module implementation.
+        - **ios/**: Contains the iOS native module implementation.
+        - **src/**: Contains the native module specs.
 - **package.json**: Contains the metadata about the project and its dependencies.
 - **tsconfig.json**: Contains the TypeScript configuration.
 - **README.md**: Contains the documentation for your project.

@@ -193,9 +193,19 @@ export class NitroModuleFactory {
         newWorkspacePackageJsonFile.devDependencies = {
             ...newWorkspacePackageJsonFile.devDependencies,
             'react-native-nitro-modules':
-                nitroModulesVersion ?? newWorkspacePackageJsonFile.devDependencies?.['react-native-nitro-modules'] ?? templatePackageJson.devDependencies['react-native-nitro-modules'],
+                nitroModulesVersion ??
+                newWorkspacePackageJsonFile.devDependencies?.[
+                    'react-native-nitro-modules'
+                ] ??
+                templatePackageJson.devDependencies[
+                    'react-native-nitro-modules'
+                ],
             'nitro-codegen':
-                nitroCodegenVersion ?? newWorkspacePackageJsonFile.devDependencies?.['nitro-codegen'] ?? templatePackageJson.devDependencies['nitro-codegen'],
+                nitroCodegenVersion ??
+                newWorkspacePackageJsonFile.devDependencies?.[
+                    'nitro-codegen'
+                ] ??
+                templatePackageJson.devDependencies['nitro-codegen'],
         }
 
         newWorkspacePackageJsonFile.keywords = [

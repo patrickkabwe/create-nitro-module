@@ -1,33 +1,32 @@
 name: iOS xcodebuild
 description: Build iOS workspace/scheme with xcpretty
 inputs:
-  ios-dir:
-    description: Path to example/ios directory
-    required: true
-  scheme:
-    description: Xcode scheme to build
-    required: true
-  mode:
-    description: Build configuration (Debug|Release)
-    required: true
+    ios-dir:
+        description: Path to example/ios directory
+        required: true
+    scheme:
+        description: Xcode scheme to build
+        required: true
+    mode:
+        description: Build configuration (Debug|Release)
+        required: true
 runs:
-  using: composite
-  steps:
-    - shell: bash
-      run: |
-        set -euo pipefail
-        gem install xcpretty
-        cd "${{ inputs.ios-dir }}"
-        set -o pipefail && xcodebuild \
-          CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
-          -derivedDataPath build -UseModernBuildSystem=YES \
-          -workspace "${SCHEME}.xcworkspace" \
-          -scheme "${SCHEME}" \
-          -sdk iphonesimulator \
-          -configuration "${{ inputs.mode }}" \
-          -destination 'platform=iOS Simulator,name=iPhone 16' \
-          build \
-          CODE_SIGNING_ALLOWED=NO | xcpretty
-      env:
-        SCHEME: ${{ inputs.scheme }}
-
+    using: composite
+    steps:
+        - shell: bash
+          run: |
+              set -euo pipefail
+              gem install xcpretty
+              cd "${{ inputs.ios-dir }}"
+              set -o pipefail && xcodebuild \
+                CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
+                -derivedDataPath build -UseModernBuildSystem=YES \
+                -workspace "${SCHEME}.xcworkspace" \
+                -scheme "${SCHEME}" \
+                -sdk iphonesimulator \
+                -configuration "${{ inputs.mode }}" \
+                -destination 'platform=iOS Simulator,name=iPhone 16' \
+                build \
+                CODE_SIGNING_ALLOWED=NO | xcpretty
+          env:
+              SCHEME: ${{ inputs.scheme }}

@@ -1,528 +1,530 @@
 name: Packages CI - Build, E2E, PM Tests
 
 on:
-  push:
-    branches: [next]
-    paths:
-      - 'src/**'
-      - '.github/workflows/**'
-      - '.github/actions/**'
-      - 'package.json'
-      - 'bun.lock'
-      - 'assets/template/**'
-  pull_request:
-    branches: [main, next]
-    paths:
-      - 'src/**'
-      - '.github/workflows/**'
-      - '.github/actions/**'
-      - 'package.json'
-      - 'bun.lock'
-      - 'assets/template/**'
-  workflow_dispatch:
+    push:
+        branches: [next]
+        paths:
+            - 'src/**'
+            - '.github/workflows/**'
+            - '.github/actions/**'
+            - 'package.json'
+            - 'bun.lock'
+            - 'assets/template/**'
+    pull_request:
+        branches: [main, next]
+        paths:
+            - 'src/**'
+            - '.github/workflows/**'
+            - '.github/actions/**'
+            - 'package.json'
+            - 'bun.lock'
+            - 'assets/template/**'
+    workflow_dispatch:
+    schedule:
+        - cron: '0 0 * * *' # Every day at midnight
 
 permissions:
-  contents: write
-  actions: write
+    contents: write
+    actions: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
-  lint-and-build:
-    name: Lint and Build CLI
-    runs-on: ubuntu-latest
-    outputs:
-      bun-cache-key: ${{ runner.os }}-bun
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v5
-
-      - name: Setup Bun.js
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Cache bun dependencies
-        id: bun-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock', '**/bun.lockb') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Lint Code
-        run: bun lint
-
-      - name: Build CLI
-        run: bun run build
-
-      - name: Test CLI help commands
-        run: |
-          node lib/cli/index.js --help
-          node lib/cli/index.js create --help
-
-  generate-packages:
-    name: Generate with ${{ matrix.pm }} - ${{ matrix.package-type }}
-    needs: lint-and-build
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        pm: ['bun', 'yarn']
-        package-type: ['module', 'view']
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Configure Git
-        run: |
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
-
-      - name: Setup pnpm
-        if: matrix.pm == 'pnpm'
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - name: Setup Node.js
-        if: matrix.pm == 'yarn' || matrix.pm == 'pnpm'
-        uses: actions/setup-node@v5
-        with:
-          node-version: 22.x
-
-      - name: Setup Bun.js
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Cache dependencies (bun)
-        if: matrix.pm == 'bun'
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: ${{ needs.lint-and-build.outputs.bun-cache-key }}-${{ hashFiles('**/bun.lockb') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
-
-      - name: Install npm dependencies (bun)
-        run: bun install
-
-      - name: Build CLI and Link Locally
-        run: |
-          bun run build
-          ${{matrix.pm}} link
-
-      - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
-        if: matrix.pm != 'pnpm'
-        run: ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --skip-install --ci --package-type ${{ matrix.package-type }}
-
-      - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }} (pnpm)
-        if: matrix.pm == 'pnpm'
-        run: create-nitro-module test-${{ matrix.package-type }} --skip-install --ci --package-type ${{ matrix.package-type }}
-
-      - name: Verify generated package structure
-        run: |
-          PACKAGE_DIR="react-native-test-${{ matrix.package-type }}"
-          if [ ! -d "$PACKAGE_DIR" ]; then
-            echo "❌ Package directory not found: $PACKAGE_DIR"
-            ls -la
-            exit 1
-          fi
-          echo "✅ Package directory created: $PACKAGE_DIR"
-          cd "$PACKAGE_DIR"
-          REQUIRED_FILES=(
-            "package.json"
-            "README.md"
-            "src/"
-            "android/"
-            "ios/"
-            "example/"
-          )
-          for file in "${REQUIRED_FILES[@]}"; do
-            if [ ! -e "$file" ]; then
-              echo "❌ Missing required file/directory: $file"
-              ls -la
-              exit 1
-            fi
-            echo "✅ Found: $file"
-          done
-
-      - name: Test package.json content
-        run: |
-          cd "react-native-test-${{ matrix.package-type }}"
-          if ! grep -q "react-native-test-${{ matrix.package-type }}" package.json; then
-            echo "❌ Package name not correct in package.json" && cat package.json && exit 1
-          fi
-          if ! grep -q '"scripts"' package.json; then
-            echo "❌ Scripts section missing from package.json" && exit 1
-          fi
-          echo "✅ package.json structure validated"
-
-      - name: Upload generated package
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-${{ matrix.package-type }}-${{ matrix.pm }}
-          path: react-native-test-${{ matrix.package-type }}
-          include-hidden-files: true
-          if-no-files-found: error
-          retention-days: 7
-
-  # Package manager build tests (iOS)
-  test-ios-build:
-    name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
-    needs: generate-packages
-    runs-on: macOS-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        pm: ['bun', 'yarn']
-        package-type: ['module', 'view']
-        mode: ['Debug', 'Release']
-    env:
-      WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
-      SCHEME: ${{ matrix.package-type == 'module' && 'TestModuleExample' || 'TestViewExample' }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Create working directory
-        run: mkdir -p ${{ env.WORKING_DIR }}
-
-      - name: Download generated package
-        uses: actions/download-artifact@v5
-        with:
-          name: test-${{ matrix.package-type }}-${{ matrix.pm }}
-          path: ${{ env.WORKING_DIR }}
-
-      - name: List package structure
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          echo "Package structure:"
-          find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
-
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: 16.4
-
-      - name: Setup Ruby and CocoaPods
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-
-      - name: Setup Node.js
-        if: matrix.pm == 'yarn'
-        uses: actions/setup-node@v5
-        with:
-          node-version: 22.x
-
-      - name: Setup Yarn
-        if: matrix.pm == 'yarn'
-        uses: ./.github/actions/setup-yarn
-        with:
-          working-directory: ${{ env.WORKING_DIR }}
-
-      - name: Setup Bun.js
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install package dependencies
-        uses: ./.github/actions/install-deps
-        with:
-          pm: ${{ matrix.pm }}
-          working-directory: ${{ env.WORKING_DIR }}
-
-      - name: Run codegen and build
-        uses: ./.github/actions/run-codegen-build
-        with:
-          pm: ${{ matrix.pm }}
-          working-directory: ${{ env.WORKING_DIR }}
-
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cocoapods/repos
-            ${{ env.WORKING_DIR }}/example/ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles(format('{0}/example/ios/Podfile.lock', env.WORKING_DIR)) }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
-      - name: Install CocoaPods dependencies
-        working-directory: ${{ env.WORKING_DIR }}/example
-        run: ${{ matrix.pm }} pod
-
-      - name: Build iOS project
-        uses: ./.github/actions/ios-build-xcode
-        with:
-          ios-dir: ${{ env.WORKING_DIR }}/example/ios
-          scheme: ${{ env.SCHEME }}
-          mode: ${{ matrix.mode }}
-
-  # Package manager build tests (Android)
-  test-android-build:
-    name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
-    needs: generate-packages
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        pm: ['bun', 'yarn']
-        package-type: ['module', 'view']
-        mode: ['Debug', 'Release']
-    env:
-      WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Create working directory
-        run: mkdir -p ${{ env.WORKING_DIR }}
-
-      - name: Download generated package
-        uses: actions/download-artifact@v5
-        with:
-          name: test-${{ matrix.package-type }}-${{ matrix.pm }}
-          path: ${{ env.WORKING_DIR }}
-
-      - name: List package structure
-        working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          echo "Package structure:"
-          find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
-
-      - name: Setup Node.js
-        if: matrix.pm == 'yarn'
-        uses: actions/setup-node@v5
-        with:
-          node-version: 22.x
-
-      - name: Setup Yarn
-        if: matrix.pm == 'yarn'
-        uses: ./.github/actions/setup-yarn
-        with:
-          working-directory: ${{ env.WORKING_DIR }}
-
-      - name: Setup Bun.js
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install package dependencies
-        uses: ./.github/actions/install-deps
-        with:
-          pm: ${{ matrix.pm }}
-          working-directory: ${{ env.WORKING_DIR }}
-
-      - name: Run codegen and build
-        uses: ./.github/actions/run-codegen-build
-        with:
-          pm: ${{ matrix.pm }}
-          working-directory: ${{ env.WORKING_DIR }}
-
-      - name: Setup Java for Android builds
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles(format('{0}/example/android/**/*.gradle*', env.WORKING_DIR)) }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Build Android project
-        uses: ./.github/actions/android-gradle-build
-        with:
-          android-dir: ${{ env.WORKING_DIR }}/example/android
-          mode: ${{ matrix.mode }}
-
-  # E2E tests (Android)
-  e2e-android:
-    if: always()
-    name: Android E2E Test
-    needs: generate-packages
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package-type: ['module', 'view']
-        mode: ['Release']
-        pm: ['bun']
-    env:
-      WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Enable KVM (Android emulator)
-        if: runner.os == 'Linux'
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Create working directory
-        run: mkdir -p ${{ env.WORKING_DIR }}
-
-      - name: Download generated package
-        uses: actions/download-artifact@v5
-        with:
-          name: test-${{ matrix.package-type }}-${{ matrix.pm }}
-          path: ${{ env.WORKING_DIR }}
-
-      - name: List package structure
-        working-directory: ${{ env.WORKING_DIR }}
-        run: find . -type f | head -30
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Cache Bun dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
-
-      - name: Install dependencies
-        uses: ./.github/actions/install-deps
-        with:
-          pm: ${{ matrix.pm }}
-          working-directory: ${{ env.WORKING_DIR }}
-
-      - name: Run codegen and build
-        uses: ./.github/actions/run-codegen-build
-        with:
-          pm: ${{ matrix.pm }}
-          working-directory: ${{ env.WORKING_DIR }}
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Maestro CLI
-        uses: ./.github/actions/setup-maestro
-
-      - name: Run Android Emulator and E2E Tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 35
-          target: google_apis
-          arch: x86_64
-          profile: Galaxy Nexus
-          emulator-options: -no-snapshot -memory 4096 -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: true
-          script: |
-            adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
-            ${{ matrix.pm }} android:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package-type }}
-
-  # E2E tests (iOS)
-  e2e-ios:
-    if: always()
-    name: iOS E2E Test
-    needs: generate-packages
-    runs-on: macOS-15
-    strategy:
-      matrix:
-        package-type: ['module', 'view']
-        mode: ['Release']
-        pm: ['bun']
-    env:
-      MAESTRO_DRIVER_STARTUP_TIMEOUT: 300_000
-      MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: true
-      WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: 16.4
-
-      - name: Create working directory
-        run: mkdir -p ${{ env.WORKING_DIR }}
-
-      - name: Download generated module
-        uses: actions/download-artifact@v5
-        with:
-          name: test-${{ matrix.package-type }}-${{ matrix.pm }}
-          path: ${{ env.WORKING_DIR }}
-
-      - name: List package structure
-        working-directory: ${{ env.WORKING_DIR }}
-        run: find . -type f | head -30
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Cache Bun dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
-
-      - name: Install Dependencies
-        uses: ./.github/actions/install-deps
-        with:
-          pm: ${{ matrix.pm }}
-          working-directory: ${{ env.WORKING_DIR }}
-
-      - name: Run codegen and build
-        uses: ./.github/actions/run-codegen-build
-        with:
-          pm: ${{ matrix.pm }}
-          working-directory: ${{ env.WORKING_DIR }}
-
-      - name: Cache Pods
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.WORKING_DIR }}/example/ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
-      - name: Run pod install
-        working-directory: ${{ env.WORKING_DIR }}/example/ios
-        run: pod install
-
-      - name: Install Maestro CLI
-        uses: ./.github/actions/setup-maestro
-
-      - name: Run tests
-        run: ${{ matrix.pm }} ios:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package-type }}
-
-      - name: Upload test artifacts
+    lint-and-build:
+        name: Lint and Build CLI
+        runs-on: ubuntu-latest
+        outputs:
+            bun-cache-key: ${{ runner.os }}-bun
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@v5
+
+            - name: Setup Bun.js
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Cache bun dependencies
+              id: bun-cache
+              uses: actions/cache@v4
+              with:
+                  path: ~/.bun/install/cache
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun-
+
+            - name: Install dependencies
+              run: bun install
+
+            - name: Lint Code
+              run: bun lint
+
+            - name: Build CLI
+              run: bun run build
+
+            - name: Test CLI help commands
+              run: |
+                  node lib/cli/index.js --help
+                  node lib/cli/index.js create --help
+
+    generate-packages:
+        name: Generate with ${{ matrix.pm }} - ${{ matrix.package-type }}
+        needs: lint-and-build
+        runs-on: macos-latest
+        strategy:
+            matrix:
+                pm: ['bun', 'yarn']
+                package-type: ['module', 'view']
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        steps:
+            - uses: actions/checkout@v5
+
+            - name: Configure Git
+              run: |
+                  git config --global user.name "GitHub Actions Bot"
+                  git config --global user.email "actions@github.com"
+
+            - name: Setup pnpm
+              if: matrix.pm == 'pnpm'
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
+            - name: Setup Node.js
+              if: matrix.pm == 'yarn' || matrix.pm == 'pnpm'
+              uses: actions/setup-node@v5
+              with:
+                  node-version: 22.x
+
+            - name: Setup Bun.js
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Cache dependencies (bun)
+              if: matrix.pm == 'bun'
+              uses: actions/cache@v4
+              with:
+                  path: ~/.bun/install/cache
+                  key: ${{ needs.lint-and-build.outputs.bun-cache-key }}-${{ hashFiles('**/bun.lockb') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun-
+
+            - name: Install npm dependencies (bun)
+              run: bun install
+
+            - name: Build CLI and Link Locally
+              run: |
+                  bun run build
+                  ${{matrix.pm}} link
+
+            - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
+              if: matrix.pm != 'pnpm'
+              run: ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --skip-install --ci --package-type ${{ matrix.package-type }}
+
+            - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }} (pnpm)
+              if: matrix.pm == 'pnpm'
+              run: create-nitro-module test-${{ matrix.package-type }} --skip-install --ci --package-type ${{ matrix.package-type }}
+
+            - name: Verify generated package structure
+              run: |
+                  PACKAGE_DIR="react-native-test-${{ matrix.package-type }}"
+                  if [ ! -d "$PACKAGE_DIR" ]; then
+                    echo "❌ Package directory not found: $PACKAGE_DIR"
+                    ls -la
+                    exit 1
+                  fi
+                  echo "✅ Package directory created: $PACKAGE_DIR"
+                  cd "$PACKAGE_DIR"
+                  REQUIRED_FILES=(
+                    "package.json"
+                    "README.md"
+                    "src/"
+                    "android/"
+                    "ios/"
+                    "example/"
+                  )
+                  for file in "${REQUIRED_FILES[@]}"; do
+                    if [ ! -e "$file" ]; then
+                      echo "❌ Missing required file/directory: $file"
+                      ls -la
+                      exit 1
+                    fi
+                    echo "✅ Found: $file"
+                  done
+
+            - name: Test package.json content
+              run: |
+                  cd "react-native-test-${{ matrix.package-type }}"
+                  if ! grep -q "react-native-test-${{ matrix.package-type }}" package.json; then
+                    echo "❌ Package name not correct in package.json" && cat package.json && exit 1
+                  fi
+                  if ! grep -q '"scripts"' package.json; then
+                    echo "❌ Scripts section missing from package.json" && exit 1
+                  fi
+                  echo "✅ package.json structure validated"
+
+            - name: Upload generated package
+              uses: actions/upload-artifact@v4
+              with:
+                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  path: react-native-test-${{ matrix.package-type }}
+                  include-hidden-files: true
+                  if-no-files-found: error
+                  retention-days: 7
+
+    # Package manager build tests (iOS)
+    test-ios-build:
+        name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
+        needs: generate-packages
+        runs-on: macOS-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                pm: ['bun', 'yarn']
+                package-type: ['module', 'view']
+                mode: ['Debug', 'Release']
+        env:
+            WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
+            SCHEME: ${{ matrix.package-type == 'module' && 'TestModuleExample' || 'TestViewExample' }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v5
+
+            - name: Create working directory
+              run: mkdir -p ${{ env.WORKING_DIR }}
+
+            - name: Download generated package
+              uses: actions/download-artifact@v5
+              with:
+                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  path: ${{ env.WORKING_DIR }}
+
+            - name: List package structure
+              working-directory: ${{ env.WORKING_DIR }}
+              run: |
+                  echo "Package structure:"
+                  find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
+
+            - name: Setup Xcode
+              uses: maxim-lobanov/setup-xcode@v1
+              with:
+                  xcode-version: 16.4
+
+            - name: Setup Ruby and CocoaPods
+              uses: ruby/setup-ruby@v1
+              with:
+                  ruby-version: '3.2'
+                  bundler-cache: true
+
+            - name: Setup Node.js
+              if: matrix.pm == 'yarn'
+              uses: actions/setup-node@v5
+              with:
+                  node-version: 22.x
+
+            - name: Setup Yarn
+              if: matrix.pm == 'yarn'
+              uses: ./.github/actions/setup-yarn
+              with:
+                  working-directory: ${{ env.WORKING_DIR }}
+
+            - name: Setup Bun.js
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install package dependencies
+              uses: ./.github/actions/install-deps
+              with:
+                  pm: ${{ matrix.pm }}
+                  working-directory: ${{ env.WORKING_DIR }}
+
+            - name: Run codegen and build
+              uses: ./.github/actions/run-codegen-build
+              with:
+                  pm: ${{ matrix.pm }}
+                  working-directory: ${{ env.WORKING_DIR }}
+
+            - name: Cache CocoaPods
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cocoapods/repos
+                      ${{ env.WORKING_DIR }}/example/ios/Pods
+                  key: ${{ runner.os }}-pods-${{ hashFiles(format('{0}/example/ios/Podfile.lock', env.WORKING_DIR)) }}
+                  restore-keys: |
+                      ${{ runner.os }}-pods-
+
+            - name: Install CocoaPods dependencies
+              working-directory: ${{ env.WORKING_DIR }}/example
+              run: ${{ matrix.pm }} pod
+
+            - name: Build iOS project
+              uses: ./.github/actions/ios-build-xcode
+              with:
+                  ios-dir: ${{ env.WORKING_DIR }}/example/ios
+                  scheme: ${{ env.SCHEME }}
+                  mode: ${{ matrix.mode }}
+
+    # Package manager build tests (Android)
+    test-android-build:
+        name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
+        needs: generate-packages
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                pm: ['bun', 'yarn']
+                package-type: ['module', 'view']
+                mode: ['Debug', 'Release']
+        env:
+            WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v5
+
+            - name: Create working directory
+              run: mkdir -p ${{ env.WORKING_DIR }}
+
+            - name: Download generated package
+              uses: actions/download-artifact@v5
+              with:
+                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  path: ${{ env.WORKING_DIR }}
+
+            - name: List package structure
+              working-directory: ${{ env.WORKING_DIR }}
+              run: |
+                  echo "Package structure:"
+                  find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
+
+            - name: Setup Node.js
+              if: matrix.pm == 'yarn'
+              uses: actions/setup-node@v5
+              with:
+                  node-version: 22.x
+
+            - name: Setup Yarn
+              if: matrix.pm == 'yarn'
+              uses: ./.github/actions/setup-yarn
+              with:
+                  working-directory: ${{ env.WORKING_DIR }}
+
+            - name: Setup Bun.js
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install package dependencies
+              uses: ./.github/actions/install-deps
+              with:
+                  pm: ${{ matrix.pm }}
+                  working-directory: ${{ env.WORKING_DIR }}
+
+            - name: Run codegen and build
+              uses: ./.github/actions/run-codegen-build
+              with:
+                  pm: ${{ matrix.pm }}
+                  working-directory: ${{ env.WORKING_DIR }}
+
+            - name: Setup Java for Android builds
+              uses: actions/setup-java@v5
+              with:
+                  distribution: 'zulu'
+                  java-version: '17'
+                  cache: 'gradle'
+
+            - name: Cache Gradle
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.gradle/caches
+                      ~/.gradle/wrapper
+                  key: ${{ runner.os }}-gradle-${{ hashFiles(format('{0}/example/android/**/*.gradle*', env.WORKING_DIR)) }}
+                  restore-keys: |
+                      ${{ runner.os }}-gradle-
+            - name: Build Android project
+              uses: ./.github/actions/android-gradle-build
+              with:
+                  android-dir: ${{ env.WORKING_DIR }}/example/android
+                  mode: ${{ matrix.mode }}
+
+    # E2E tests (Android)
+    e2e-android:
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: maestro-artifacts-ios-${{ matrix.package-type }}
-          path: e2e-artifacts
-          include-hidden-files: true
+        name: Android E2E Test
+        needs: generate-packages
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                package-type: ['module', 'view']
+                mode: ['Release']
+                pm: ['bun']
+        env:
+            WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v5
+
+            - name: Enable KVM (Android emulator)
+              if: runner.os == 'Linux'
+              run: |
+                  echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+                  sudo udevadm control --reload-rules
+                  sudo udevadm trigger --name-match=kvm
+
+            - name: Create working directory
+              run: mkdir -p ${{ env.WORKING_DIR }}
+
+            - name: Download generated package
+              uses: actions/download-artifact@v5
+              with:
+                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  path: ${{ env.WORKING_DIR }}
+
+            - name: List package structure
+              working-directory: ${{ env.WORKING_DIR }}
+              run: find . -type f | head -30
+
+            - name: Setup Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Cache Bun dependencies
+              uses: actions/cache@v4
+              with:
+                  path: ~/.bun/install/cache
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun-
+
+            - name: Install dependencies
+              uses: ./.github/actions/install-deps
+              with:
+                  pm: ${{ matrix.pm }}
+                  working-directory: ${{ env.WORKING_DIR }}
+
+            - name: Run codegen and build
+              uses: ./.github/actions/run-codegen-build
+              with:
+                  pm: ${{ matrix.pm }}
+                  working-directory: ${{ env.WORKING_DIR }}
+
+            - name: Setup Java
+              uses: actions/setup-java@v5
+              with:
+                  distribution: 'zulu'
+                  java-version: '17'
+                  cache: 'gradle'
+
+            - name: Setup Android SDK
+              uses: android-actions/setup-android@v3
+
+            - name: Install Maestro CLI
+              uses: ./.github/actions/setup-maestro
+
+            - name: Run Android Emulator and E2E Tests
+              uses: reactivecircus/android-emulator-runner@v2
+              with:
+                  api-level: 35
+                  target: google_apis
+                  arch: x86_64
+                  profile: Galaxy Nexus
+                  emulator-options: -no-snapshot -memory 4096 -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+                  disable-animations: true
+                  script: |
+                      adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+                      ${{ matrix.pm }} android:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package-type }}
+
+    # E2E tests (iOS)
+    e2e-ios:
+        if: always()
+        name: iOS E2E Test
+        needs: generate-packages
+        runs-on: macOS-15
+        strategy:
+            matrix:
+                package-type: ['module', 'view']
+                mode: ['Release']
+                pm: ['bun']
+        env:
+            MAESTRO_DRIVER_STARTUP_TIMEOUT: 300_000
+            MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: true
+            WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v5
+
+            - name: Setup Xcode
+              uses: maxim-lobanov/setup-xcode@v1
+              with:
+                  xcode-version: 16.4
+
+            - name: Create working directory
+              run: mkdir -p ${{ env.WORKING_DIR }}
+
+            - name: Download generated module
+              uses: actions/download-artifact@v5
+              with:
+                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  path: ${{ env.WORKING_DIR }}
+
+            - name: List package structure
+              working-directory: ${{ env.WORKING_DIR }}
+              run: find . -type f | head -30
+
+            - name: Setup Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Cache Bun dependencies
+              uses: actions/cache@v4
+              with:
+                  path: ~/.bun/install/cache
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun-
+
+            - name: Install Dependencies
+              uses: ./.github/actions/install-deps
+              with:
+                  pm: ${{ matrix.pm }}
+                  working-directory: ${{ env.WORKING_DIR }}
+
+            - name: Run codegen and build
+              uses: ./.github/actions/run-codegen-build
+              with:
+                  pm: ${{ matrix.pm }}
+                  working-directory: ${{ env.WORKING_DIR }}
+
+            - name: Cache Pods
+              uses: actions/cache@v4
+              with:
+                  path: ${{ env.WORKING_DIR }}/example/ios/Pods
+                  key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pods-
+
+            - name: Run pod install
+              working-directory: ${{ env.WORKING_DIR }}/example/ios
+              run: pod install
+
+            - name: Install Maestro CLI
+              uses: ./.github/actions/setup-maestro
+
+            - name: Run tests
+              run: ${{ matrix.pm }} ios:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package-type }}
+
+            - name: Upload test artifacts
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: maestro-artifacts-ios-${{ matrix.package-type }}
+                  path: e2e-artifacts
+                  include-hidden-files: true

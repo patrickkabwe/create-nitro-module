@@ -50,3 +50,7 @@ updates:
       react-native:
         patterns:
           - '@react-native/*'
+      nitro:
+        patterns:
+          - 'nitro-codegen'
+          - 'react-native-nitro-modules'

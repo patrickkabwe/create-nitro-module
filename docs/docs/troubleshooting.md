@@ -17,7 +17,6 @@ This section provides solutions to common issues you might encounter while using
 2. **Missing Header Files**
 
     If Xcode reports missing header files, follow these steps:
-
     - Clean the build folder in Xcode (`Product` -> `Clean Build Folder`).
     - Ensure all native dependencies are properly linked.
     - Rebuild the project.
@@ -37,7 +36,6 @@ This section provides solutions to common issues you might encounter while using
 2. **Missing Dependencies**
 
     If you encounter missing dependencies, check the following:
-
     - Ensure `build.gradle` contains the correct dependencies.
     - Sync the project with Gradle files.
     - Invalidate caches and restart Android Studio.
