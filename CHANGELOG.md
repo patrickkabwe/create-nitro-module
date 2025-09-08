@@ -1,3 +1,23 @@
+## [3.3.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.2.1...v3.3.0) (2025-09-08)
+
+### ✨ Features
+
+* **cli:** pin nitro deps to exact latest and allow '_' unused vars in ESLint ([2918419](https://github.com/patrickkabwe/create-nitro-module/commit/29184194aed5d3a56592e96fa6b7b155e99d33bb))
+
+### 🔄 Code Refactors
+
+* streamline dependency version resolution for nitro tools ([41200c7](https://github.com/patrickkabwe/create-nitro-module/commit/41200c781c53947052c983e418e68c6409490a6d))
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump @types/node from 24.3.0 to 24.3.1 ([93b6ab3](https://github.com/patrickkabwe/create-nitro-module/commit/93b6ab3e3351adf1e50415d9ae5281b8f4ebc707))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([a06aed9](https://github.com/patrickkabwe/create-nitro-module/commit/a06aed9fd0d5c115040a71fc7b2a3489574a48d6))
+* **deps-dev:** bump @typescript-eslint/parser from 8.41.0 to 8.42.0 ([c2f8e4c](https://github.com/patrickkabwe/create-nitro-module/commit/c2f8e4cbc3df5322cf7cd0b8e372f6c523c617bf))
+* **deps-dev:** bump eslint from 9.34.0 to 9.35.0 ([5d4f2ff](https://github.com/patrickkabwe/create-nitro-module/commit/5d4f2ff4a43681d4ab12e30d7eeaab110919423a))
+* **deps-dev:** bump lefthook from 1.12.3 to 1.12.4 ([558825c](https://github.com/patrickkabwe/create-nitro-module/commit/558825cd90fe8220c22845a24b3aeab51ee4de72))
+* **deps:** bump actions/setup-node from 4 to 5 ([4732338](https://github.com/patrickkabwe/create-nitro-module/commit/473233868f756dd2a7f28fbddf04228eca99628e))
+* format and update configuration files for consistency ([c8466a9](https://github.com/patrickkabwe/create-nitro-module/commit/c8466a983fbd9aabb77042c6c083a2b9357e5559))
+
 ## [3.2.1](https://github.com/patrickkabwe/create-nitro-module/compare/v3.2.0...v3.2.1) (2025-09-01)
 
 ### 🛠️ Other changes
