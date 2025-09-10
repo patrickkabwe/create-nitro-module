@@ -180,16 +180,16 @@ export class NitroModuleFactory {
         newWorkspacePackageJsonFile.scripts = {
             ...newWorkspacePackageJsonFile.scripts,
             build: `${this.config.pm} run typecheck && bob build`,
-            codegen: `nitro-codegen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`,
+            codegen: `nitrogen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`,
             postcodegen: this.getPostCodegenScript(),
         }
 
         // Resolve and pin latest Nitro tools to concrete versions
-        const nitroGen = 'nitro-codegen'
+        const nitrogen = 'nitrogen'
         const nitroModules = 'react-native-nitro-modules'
-        const [nitroModulesVersion, nitroCodegenVersion] = await Promise.all([
+        const [nitroModulesVersion, nitrogenVersion] = await Promise.all([
             this.getLatestVersion(nitroModules),
-            this.getLatestVersion(nitroGen),
+            this.getLatestVersion(nitrogen),
         ])
         this.nitroModulesVersion = nitroModulesVersion
         newWorkspacePackageJsonFile.devDependencies = {
@@ -198,10 +198,10 @@ export class NitroModuleFactory {
                 nitroModulesVersion ??
                 newWorkspacePackageJsonFile.devDependencies?.[nitroModules] ??
                 templatePackageJson.devDependencies[nitroModules],
-            [nitroGen]:
-                nitroCodegenVersion ??
-                newWorkspacePackageJsonFile.devDependencies?.[nitroGen] ??
-                templatePackageJson.devDependencies[nitroGen],
+            [nitrogen]:
+                nitrogenVersion ??
+                newWorkspacePackageJsonFile.devDependencies?.[nitrogen] ??
+                templatePackageJson.devDependencies[nitrogen],
         }
 
         newWorkspacePackageJsonFile.keywords = [
@@ -310,8 +310,8 @@ export class NitroModuleFactory {
             this.config.pm === 'bun'
                 ? 'bunx'
                 : this.config.pm === 'pnpm'
-                  ? 'pnpx'
-                  : 'npx -y'
+                    ? 'pnpx'
+                    : 'npx -y'
 
         const reactNativeVersion =
             templatePackageJson.devDependencies['react-native']
@@ -497,7 +497,7 @@ export class NitroModuleFactory {
         await execAsync(`${this.config.pm} install`, { cwd: this.config.cwd })
         let packageManager =
             this.config.pm === 'npm' ? 'npx --yes' : this.config.pm
-        let codegenCommand = `${packageManager} nitro-codegen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
+        let codegenCommand = `${packageManager} nitrogen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
         await execAsync(codegenCommand, { cwd: this.config.cwd })
     }
 

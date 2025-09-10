@@ -29,5 +29,5 @@ updates:
                   - 'react-native'
           nitro:
               patterns:
-                  - 'nitro-codegen'
+                  - 'nitrogen'
                   - 'react-native-nitro-modules'
