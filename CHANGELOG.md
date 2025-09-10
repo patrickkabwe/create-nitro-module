@@ -1,3 +1,15 @@
+## [3.3.1](https://github.com/patrickkabwe/create-nitro-module/compare/v3.3.0...v3.3.1) (2025-09-10)
+
+### 🔄 Code Refactors
+
+* adjust indentation in generate-nitro-package.ts for improved readability ([5b7b94c](https://github.com/patrickkabwe/create-nitro-module/commit/5b7b94c5f8faa4478d344227706b5e7637967d91))
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([f9a097e](https://github.com/patrickkabwe/create-nitro-module/commit/f9a097e26cb62ea4467a30a931b28d5b8abed23f))
+* **deps-dev:** bump @typescript-eslint/parser from 8.42.0 to 8.43.0 ([4c52221](https://github.com/patrickkabwe/create-nitro-module/commit/4c522215dcdd4ffbbeb9827c2d2899aaba34b16d))
+* update nitro dependencies and commands to use 'nitrogen' instead of 'nitro-codegen' ([0038b22](https://github.com/patrickkabwe/create-nitro-module/commit/0038b22b1fb740c48f378cc8c05362888a901b40))
+
 ## [3.3.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.2.1...v3.3.0) (2025-09-08)
 
 ### ✨ Features
