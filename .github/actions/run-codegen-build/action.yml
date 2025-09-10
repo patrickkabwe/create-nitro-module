@@ -14,7 +14,7 @@ runs:
           run: |
               set -euo pipefail
               cd "${{ inputs.working-directory }}"
-              bunx nitro-codegen --logLevel="debug"
+              bunx nitrogen --logLevel="debug"
               ${{ inputs.pm }} run build
               if [ -f post-script.js ]; then
                 node post-script.js
