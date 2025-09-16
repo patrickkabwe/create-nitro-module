@@ -181,7 +181,9 @@ export class NitroModuleFactory {
             ...newWorkspacePackageJsonFile.scripts,
             build: `${this.config.pm} run typecheck && bob build`,
             codegen: `nitrogen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`,
-            postcodegen: this.getPostCodegenScript(),
+            postcodegen: !this.config.langs.includes(SupportedLang.KOTLIN)
+                ? this.getPostCodegenScript()
+                : undefined,
         }
 
         // Resolve and pin latest Nitro tools to concrete versions
