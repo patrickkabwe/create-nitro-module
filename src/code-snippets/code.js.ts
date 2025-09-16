@@ -164,6 +164,30 @@ export const postScript = (moduleName: string, isHybridView: boolean) => `/**
 */
 const path = require('node:path')
 const { writeFile, readFile } = require('node:fs/promises')
+${isHybridView ? "const { readdir } = require('node:fs/promises')" : ''}
+
+${
+    isHybridView
+        ? `
+const updateViewManagerFiles = async (file) => {
+  const viewManagerFile = path.join(
+    process.cwd(),
+    'nitrogen/generated/android/kotlin/com/margelo/nitro/${moduleName.toLowerCase()}/views',
+    file
+  )
+
+  const viewManagerStr = await readFile(viewManagerFile, { encoding: 'utf8' })
+  await writeFile(
+    viewManagerFile,
+    viewManagerStr.replace(
+      /com\\.margelo\\.nitro\\.${moduleName.toLowerCase()}\\.\\*/g,
+      'com.${moduleName.toLowerCase()}.*'
+    )
+  )
+}  
+`
+        : ''
+}
 
 const androidWorkaround = async () => {
  const androidOnLoadFile = path.join(
@@ -174,14 +198,22 @@ const androidWorkaround = async () => {
  ${
      isHybridView
          ? `
- const viewManagerFile = path.join(
-   process.cwd(),
-   'nitrogen/generated/android/kotlin/com/margelo/nitro/${moduleName.toLowerCase()}/views',
-   'Hybrid${moduleName}Manager.kt'
+ const viewManagerDir = await readdir(
+  path.join(
+    process.cwd(),
+    'nitrogen/generated/android/kotlin/com/margelo/nitro/${moduleName.toLowerCase()}/views'
+  )
+ )
+ const viewManagerFiles = viewManagerDir.filter((file) =>
+   file.endsWith('Manager.kt')
+ )
+ const res = await Promise.allSettled(
+   viewManagerFiles.map(updateViewManagerFiles)
  )
 
- const viewManagerStr = await readFile(viewManagerFile, { encoding: 'utf8' })
- await writeFile(viewManagerFile, viewManagerStr.replace(/com\\.margelo\\.nitro\\.${moduleName.toLowerCase()}\\.\\*/g, 'com.${moduleName.toLowerCase()}.*'))
+ if (res.some((r) => r.status === 'rejected')) {
+   throw new Error(\`Error updating view manager files: \$\{res\}\`)
+ }
 `
          : ''
  }
