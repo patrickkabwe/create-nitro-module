@@ -1,3 +1,18 @@
+## [3.3.2](https://github.com/patrickkabwe/create-nitro-module/compare/v3.3.1...v3.3.2) (2025-09-16)
+
+### 🐛 Bug Fixes
+
+* include all view manager files in post-script.js ([af08747](https://github.com/patrickkabwe/create-nitro-module/commit/af0874700782f375e1ac2ded720b1471ece5be1a))
+* skip postcodegen when kotlin is enabled ([d249e98](https://github.com/patrickkabwe/create-nitro-module/commit/d249e989bb1b87b6c7a7ca82dfd7c941f8660eec))
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump @types/node from 24.3.1 to 24.4.0 ([738aeaa](https://github.com/patrickkabwe/create-nitro-module/commit/738aeaabb51e3d07daff7cc0160d45184a65814a))
+* **deps-dev:** bump eslint-plugin-n from 17.21.3 to 17.22.0 ([3effa3e](https://github.com/patrickkabwe/create-nitro-module/commit/3effa3e921d7cbe3e649381aa64d43eb321eb8a2))
+* **deps-dev:** bump lefthook from 1.12.4 to 1.13.0 ([a9fc6df](https://github.com/patrickkabwe/create-nitro-module/commit/a9fc6dfdd7c8b77dd75a2a84b99a75af4c36a6dc))
+* **deps-dev:** bump semantic-release from 24.2.7 to 24.2.8 ([614999c](https://github.com/patrickkabwe/create-nitro-module/commit/614999ca06013724d6eb2a01dddc65d3d528778d))
+* **deps:** downgrade react-native from 0.81.4 to 0.81.1 ([55405d7](https://github.com/patrickkabwe/create-nitro-module/commit/55405d7a5314240c0980615a627fe85207574641))
+
 ## [3.3.1](https://github.com/patrickkabwe/create-nitro-module/compare/v3.3.0...v3.3.1) (2025-09-10)
 
 ### 🔄 Code Refactors
