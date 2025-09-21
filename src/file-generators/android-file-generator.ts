@@ -178,15 +178,15 @@ export class AndroidFileGenerator implements FileGenerator {
     }
 
     private async generatePackageFile(config: GenerateModuleConfig) {
-        const androidPackageFile = `${toPascalCase(config.packageName)}Package.java`
+        const androidPackageFile = `${toPascalCase(config.packageName)}Package.kt`
         const prefixPath = `android/src/main/java`
         const isHybridView = config.packageType === Nitro.View
         const androidPackageFilePath = path.join(
             config.cwd,
             prefixPath + `/com/${ANDROID_NAME_SPACE_TAG}`,
             isHybridView
-                ? `${ANDROID_CXX_LIB_NAME_TAG}Package_view.java`
-                : `${ANDROID_CXX_LIB_NAME_TAG}Package.java`
+                ? `${ANDROID_CXX_LIB_NAME_TAG}Package_view.kt`
+                : `${ANDROID_CXX_LIB_NAME_TAG}Package.kt`
         )
 
         const replacements = {
