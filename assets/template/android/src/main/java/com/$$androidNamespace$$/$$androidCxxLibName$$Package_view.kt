@@ -14,8 +14,8 @@ public class $$androidCxxLibName$$Package : TurboReactPackage() {
 
   override fun getReactModuleInfoProvider(): ReactModuleInfoProvider = ReactModuleInfoProvider { emptyMap() }
   
-  override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager> {
-    val viewManagers = ArrayList<ViewManager>()
+  override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
+    val viewManagers = ArrayList<ViewManager<*, *>>()
     viewManagers.add(Hybrid$$androidCxxLibName$$Manager())
     return viewManagers
   }
