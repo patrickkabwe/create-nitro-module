@@ -6,7 +6,7 @@ PLATFORM=${1:-}
 EXAMPLE_DIR=${2:-}
 PACKAGE_TYPE=${3:-}
 
-echo "🚀 Running e2e tests for $PLATFORM"
+echo "🚀 Running e2e video recording for $PLATFORM"
 
 # Validate passed platform
 case $PLATFORM in
@@ -121,27 +121,30 @@ echo ""
 
 test_file="e2e-tests/$PACKAGE_TYPE.e2e.yaml"
 
-echo "🧪 Using test file: $test_file"
+echo "🎬 Using flow file for recording: $test_file"
 
 if [ ! -f "$test_file" ]; then
-  echo "❌ Error! Test file not found: $test_file"
+  echo "❌ Error! Flow file not found: $test_file"
   echo ""
   exit 1
 fi
 
-testCmd="maestro test \"$test_file\" -e APP_ID=$APP_ID --flatten-debug-output"
-echo "🎯 Running test: $testCmd"
+# Create output directory for videos
+mkdir -p e2e-artifacts
+
+recordCmd="maestro record \"$test_file\" -e APP_ID=$APP_ID --local"
+echo "🎯 Recording test video: $recordCmd"
 echo "📱 APP_ID: $APP_ID"
 
 
-if ! eval "$testCmd --debug-output e2e-artifacts/$PACKAGE_TYPE"; then
-    echo "Test ${test_file} failed. Retrying in 30 seconds..."
+if ! eval "$recordCmd e2e-artifacts/$PACKAGE_TYPE.mp4"; then
+    echo "Recording ${test_file} failed. Retrying in 30 seconds..."
     sleep 30
-    if ! eval "$testCmd --debug-output e2e-artifacts/$PACKAGE_TYPE-retry-1"; then
-        echo "Test ${test_file} failed again. Retrying for the last time in 120 seconds..."
+    if ! eval "$recordCmd e2e-artifacts/$PACKAGE_TYPE-retry-1.mp4"; then
+        echo "Recording ${test_file} failed again. Retrying for the last time in 120 seconds..."
         sleep 120
-        if ! eval "$testCmd --debug-output e2e-artifacts/$PACKAGE_TYPE-retry-2"; then
-            echo "Test ${test_file} failed again. Exiting..."
+        if ! eval "$recordCmd e2e-artifacts/$PACKAGE_TYPE-retry-2.mp4"; then
+            echo "Recording ${test_file} failed again. Exiting..."
             exit 1
         fi
     fi
