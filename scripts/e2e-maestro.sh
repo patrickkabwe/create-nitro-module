@@ -132,18 +132,18 @@ fi
 # Create output directory for videos
 mkdir -p e2e-artifacts
 
-recordCmd="maestro record \"$test_file\" -e APP_ID=$APP_ID --local --debug-output"
+recordCmd="maestro record \"$test_file\" -e APP_ID=$APP_ID --local"
 echo "🎯 Recording test video: $recordCmd"
 echo "📱 APP_ID: $APP_ID"
 
 
-if ! eval "$recordCmd e2e-artifacts/$PACKAGE_TYPE.mp4"; then
+if ! eval "$recordCmd --debug-output e2e-artifacts/$PACKAGE_TYPE"; then
     echo "Recording ${test_file} failed. Retrying in 30 seconds..."
     sleep 30
-    if ! eval "$recordCmd e2e-artifacts/$PACKAGE_TYPE-retry-1.mp4"; then
+    if ! eval "$recordCmd --debug-output e2e-artifacts/$PACKAGE_TYPE-retry-1"; then
         echo "Recording ${test_file} failed again. Retrying for the last time in 120 seconds..."
         sleep 120
-        if ! eval "$recordCmd e2e-artifacts/$PACKAGE_TYPE-retry-2.mp4"; then
+        if ! eval "$recordCmd --debug-output e2e-artifacts/$PACKAGE_TYPE-retry-2"; then
             echo "Recording ${test_file} failed again. Exiting..."
             exit 1
         fi
