@@ -517,11 +517,39 @@ jobs:
               working-directory: ${{ env.WORKING_DIR }}/example/ios
               run: pod install
 
+            - name: Setup ccache
+              run: |
+                  brew install ccache
+                  ccache --version
+                  ccache --zero-stats
+
+            - name: Cache ccache
+              uses: actions/cache@v4
+              with:
+                  path: ~/Library/Caches/ccache
+                  key: ${{ runner.os }}-ccache-${{ matrix.package-type }}-${{ github.sha }}
+                  restore-keys: |
+                      ${{ runner.os }}-ccache-${{ matrix.package-type }}-
+                      ${{ runner.os }}-ccache-
+
+            - name: Configure ccache
+              run: |
+                  ccache --set-config=max_size=2G
+                  ccache --set-config=compression=true
+                  ccache --set-config=compression_level=6
+
             - name: Install Maestro CLI
               uses: ./.github/actions/setup-maestro
 
             - name: Run tests
+              env:
+                  USE_CCACHE: 1
+                  CCACHE_DIR: ~/Library/Caches/ccache
               run: ${{ matrix.pm }} ios:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package-type }}
+
+            - name: Print ccache statistics
+              if: always()
+              run: ccache --show-stats
 
             - name: Upload test artifacts
               if: always()

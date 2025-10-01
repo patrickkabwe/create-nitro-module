@@ -50,6 +50,17 @@ if [ "$PLATFORM" == "ios" ]; then
 
   # Build the app with optimizations and pretty output
   export USE_CCACHE=1
+  # Configure ccache if available (optional optimization)
+  if command -v ccache >/dev/null 2>&1; then
+    export CCACHE_DIR="${CCACHE_DIR:-$HOME/Library/Caches/ccache}"
+    mkdir -p "$CCACHE_DIR"
+    export PATH="/opt/homebrew/bin:$PATH"
+    echo "✅ ccache is available"
+    echo "📦 ccache directory: $CCACHE_DIR"
+    ccache --max-size=2G 2>/dev/null || true
+  else
+    echo "⚠️  ccache not found (optional). Install with: brew install ccache"
+  fi
 
   buildCmd="xcodebuild \
     -workspace $SCHEME.xcworkspace \
