@@ -2,11 +2,15 @@
 
 trap 'exit' INT
 
+# Save the script directory (project root)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
+
 PLATFORM=${1:-}
 EXAMPLE_DIR=${2:-}
 PACKAGE_TYPE=${3:-}
 
 echo "🚀 Running e2e video recording for $PLATFORM"
+echo "📂 Project root: $SCRIPT_DIR"
 
 # Validate passed platform
 case $PLATFORM in
@@ -48,15 +52,16 @@ if [ "$PLATFORM" == "ios" ]; then
   export USE_CCACHE=1
 
   buildCmd="xcodebuild \
-    CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
-    -derivedDataPath build \
-    -UseModernBuildSystem=YES \
     -workspace $SCHEME.xcworkspace \
-    -configuration Release \
     -scheme $SCHEME \
+    -configuration Release \
     -destination id=$iphone16Id \
-    -parallelizeTargets \
+    -derivedDataPath build \
     -jobs $(sysctl -n hw.ncpu) \
+    ONLY_ACTIVE_ARCH=YES \
+    ARCHS=arm64 \
+    VALID_ARCHS=arm64 \
+    EXCLUDED_ARCHS=x86_64 \
     CODE_SIGNING_ALLOWED=NO"
 
   echo "🔨 Building iOS app..."
@@ -92,7 +97,8 @@ if [ "$PLATFORM" == "ios" ]; then
   echo "📲 Installing app from: $APP_PATH"
   xcrun simctl install $iphone16Id "$APP_PATH"
   
-  cd ../../..
+  # Return to project root
+  cd "$SCRIPT_DIR"
 else
   cd $EXAMPLE_DIR/android
   chmod +x ./gradlew
@@ -113,7 +119,9 @@ else
   # Stop Gradle daemon to free up memory
   echo "🧹 Stopping Gradle daemon..."
   ./gradlew --stop
-  cd ../../..
+  
+  # Return to project root
+  cd "$SCRIPT_DIR"
 fi
 
 echo "📂 Script directory: $(pwd)"
@@ -132,7 +140,7 @@ fi
 # Create output directory for videos
 mkdir -p e2e-artifacts
 
-recordCmd="maestro record \"$test_file\" -e APP_ID=$APP_ID --local"
+recordCmd="maestro record \"$test_file\" -e APP_ID=$APP_ID"
 echo "🎯 Recording test video: $recordCmd"
 echo "📱 APP_ID: $APP_ID"
 
