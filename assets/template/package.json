@@ -61,7 +61,7 @@
     "react-native-nitro-modules": "^0.2942",
     "conventional-changelog-conventionalcommits": "^9.1.0",
     "semantic-release": "^24.2.9",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "react": "*",
