@@ -297,6 +297,10 @@ export class NitroModuleFactory {
             'LICENSE',
         ]
 
+        if (this.config.pm === 'bun') {
+            filesToCopy.push('bunfig.toml')
+        }
+
         await copyTemplateFiles(
             this.config,
             [__dirname, '..', 'assets', 'template'],
