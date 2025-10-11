@@ -295,6 +295,7 @@ export class NitroModuleFactory {
             '.github',
             'release.config.cjs',
             'LICENSE',
+            'bunfig.toml',
         ]
 
         await copyTemplateFiles(

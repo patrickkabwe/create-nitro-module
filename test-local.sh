@@ -79,7 +79,7 @@ EOF
 chmod +x test-module.exp
 
 # Install, build and link bun
-bun install --linker=hoisted
+bun install
 bun run build
 bun link
 

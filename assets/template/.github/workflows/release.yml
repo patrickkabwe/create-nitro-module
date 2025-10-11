@@ -38,7 +38,7 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install npm dependencies (bun)
-        run: bun install --linker=hoisted
+        run: bun install
 
       - name: Build lib
         run: bun run build

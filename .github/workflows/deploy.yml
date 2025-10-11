@@ -32,7 +32,7 @@ jobs:
                   bun-version: latest
 
             - name: Install dependencies
-              run: bun install --linker=hoisted --frozen-lockfile
+              run: bun install --frozen-lockfile
 
             - name: Build website
               id: build
