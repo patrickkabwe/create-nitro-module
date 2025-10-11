@@ -1,3 +1,50 @@
+## [3.4.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.3.2...v3.4.0) (2025-10-11)
+
+### ✨ Features
+
+* migrate Android package files from Java to Kotlin ([fb57707](https://github.com/patrickkabwe/create-nitro-module/commit/fb577073c6c9b43e0a3d10c94813868eaff8f56e))
+* **nitro:** conditionally include bunfig.toml in files to copy based on package manager ([f2852ef](https://github.com/patrickkabwe/create-nitro-module/commit/f2852efab8735ab34805ae9662998f876319f3f4))
+
+### 🐛 Bug Fixes
+
+* update createViewManagers method signature to use generic ViewManager types ([971d0f2](https://github.com/patrickkabwe/create-nitro-module/commit/971d0f2dd22e2da7412105bba6f9ca725ce5fb38))
+
+### 🛠️ Other changes
+
+* **actions:** modify bun install command to conditionally use --linker=hoisted ([4d6eb26](https://github.com/patrickkabwe/create-nitro-module/commit/4d6eb2617aef7c39cf4ea8f5fb067ea9970c3e12))
+* **actions:** update Maestro CLI installation to version 1.40.0 ([1a9c819](https://github.com/patrickkabwe/create-nitro-module/commit/1a9c8190b06d13fd53d2d02516a5f3a1661efbb6))
+* **ci:** integrate ccache for improved build performance in CI workflow ([98d771a](https://github.com/patrickkabwe/create-nitro-module/commit/98d771aaa343143094f7f7a41c5f8fcea4185d98))
+* **config:** add bunfig.toml with --linker=hoisted flag ([f55f409](https://github.com/patrickkabwe/create-nitro-module/commit/f55f4092a3da285138d876e34ff3e1c521b93099))
+* **deps-dev:** bump @commitlint/cli from 19.8.1 to 20.0.0 ([f3de7f9](https://github.com/patrickkabwe/create-nitro-module/commit/f3de7f9b45cd13f1f07222f9d9e43722a0248ac1))
+* **deps-dev:** bump @commitlint/cli from 20.0.0 to 20.1.0 ([660df9e](https://github.com/patrickkabwe/create-nitro-module/commit/660df9e6cc11769b103cb59048e54431458b8e72))
+* **deps-dev:** bump @commitlint/config-conventional ([cbd1a21](https://github.com/patrickkabwe/create-nitro-module/commit/cbd1a21d463e6eb53d109f663e38ced814c8b2fa))
+* **deps-dev:** bump @types/node from 24.4.0 to 24.5.2 ([dc64f45](https://github.com/patrickkabwe/create-nitro-module/commit/dc64f45cb6602301083a67f9e9fcb3a516eba887))
+* **deps-dev:** bump @types/node from 24.5.2 to 24.7.0 ([18ce478](https://github.com/patrickkabwe/create-nitro-module/commit/18ce47849eb8eeb6ac03f0a5c8798face3122081))
+* **deps-dev:** bump @types/node from 24.7.0 to 24.7.1 ([c02d803](https://github.com/patrickkabwe/create-nitro-module/commit/c02d803f6216e93a2cd8200d58ce16f3d7965997))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([44277ab](https://github.com/patrickkabwe/create-nitro-module/commit/44277abe0ebe1300c4912f6dc386ac58cdff22af))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([3a34416](https://github.com/patrickkabwe/create-nitro-module/commit/3a344169ac69d7a81d1ead57cb0c16e08b1d4586))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([c1b184f](https://github.com/patrickkabwe/create-nitro-module/commit/c1b184fd6e84fb293d57cc305336f16109f305f6))
+* **deps-dev:** bump @typescript-eslint/parser from 8.43.0 to 8.46.0 ([ba57430](https://github.com/patrickkabwe/create-nitro-module/commit/ba57430cb0fa6ae50a936bf72621a2f9d805760d))
+* **deps-dev:** bump eslint from 9.35.0 to 9.36.0 ([f8cdd86](https://github.com/patrickkabwe/create-nitro-module/commit/f8cdd86bcbe5b1ed978fa93be07f605bc25a9374))
+* **deps-dev:** bump eslint from 9.36.0 to 9.37.0 ([cc09370](https://github.com/patrickkabwe/create-nitro-module/commit/cc0937057f7c7ef2830cde5b3b64c3fed0f8e3d3))
+* **deps-dev:** bump eslint-plugin-n from 17.22.0 to 17.23.0 ([3d1a65e](https://github.com/patrickkabwe/create-nitro-module/commit/3d1a65e04726162ee6e18a485b509c628b7d9d19))
+* **deps-dev:** bump eslint-plugin-n from 17.23.0 to 17.23.1 ([064f1aa](https://github.com/patrickkabwe/create-nitro-module/commit/064f1aa68ecab1258122d84a57c11dc75704c0e6))
+* **deps-dev:** bump lefthook from 1.13.0 to 1.13.1 ([775795c](https://github.com/patrickkabwe/create-nitro-module/commit/775795c52c5212a893c4899d2bff9d05982f7309))
+* **deps-dev:** bump lefthook from 1.13.1 to 1.13.5 ([2ef01b0](https://github.com/patrickkabwe/create-nitro-module/commit/2ef01b08477ec9bb5470c47671215c4b8b1c4e91))
+* **deps-dev:** bump lefthook from 1.13.5 to 1.13.6 ([5af6512](https://github.com/patrickkabwe/create-nitro-module/commit/5af65128102ac74fae007066a3557456c1f8bab7))
+* **deps-dev:** bump semantic-release from 24.2.8 to 24.2.9 ([60c94c9](https://github.com/patrickkabwe/create-nitro-module/commit/60c94c9cca89bcd627b892676d2b949c93eca86e))
+* **deps-dev:** bump semantic-release in /assets/template ([65e1c47](https://github.com/patrickkabwe/create-nitro-module/commit/65e1c47f0768262da64c77c94db588da621bfdfc))
+* **deps-dev:** bump typescript from 5.8.3 to 5.9.3 ([005f283](https://github.com/patrickkabwe/create-nitro-module/commit/005f283e66ae114554b6fe855056612720228de1))
+* **deps:** bump commander from 14.0.0 to 14.0.1 ([fbf1cdb](https://github.com/patrickkabwe/create-nitro-module/commit/fbf1cdb91dec57b087c4a19e52da05185d6225d5))
+* **deps:** bump up react-native to 0.82 ([3d2e5fd](https://github.com/patrickkabwe/create-nitro-module/commit/3d2e5fd6afd8c054e492822bfd6f66425a88523c))
+* **deps:** update bun install commands to use --linker=hoisted across workflows and scripts ([13a6965](https://github.com/patrickkabwe/create-nitro-module/commit/13a69656d0756ad2304793973c6eed06f59bb63c))
+* **deps:** update react and react-native to versions 19.1.1 and 0.82.0-rc.5 ([1659920](https://github.com/patrickkabwe/create-nitro-module/commit/16599208e41cae95fc3b0a1e64d9c6becbe8fb95))
+* **deps:** update react-native to version 0.81.4 ([463f959](https://github.com/patrickkabwe/create-nitro-module/commit/463f9598be881de85c69d0093d7e176f69412568))
+* **scripts:** add debug output option to e2e-maestro.sh recording command ([eb1a84b](https://github.com/patrickkabwe/create-nitro-module/commit/eb1a84b8aeef1d0eae5c6f1b296ce668eb3aa0f8))
+* **scripts:** enhance e2e-maestro.sh with project root path ([ff06e4e](https://github.com/patrickkabwe/create-nitro-module/commit/ff06e4e5d7d8e35e1142e74d00bd024337f52318))
+* **scripts:** update e2e-maestro.sh ([1140ac8](https://github.com/patrickkabwe/create-nitro-module/commit/1140ac8856ff1499d9be5af03a3a016c284d1f79))
+* **scripts:** update e2e-maestro.sh to include --local flag in recording command ([d654c74](https://github.com/patrickkabwe/create-nitro-module/commit/d654c745d8b5f244ccdc6d93ad7c7208505e846d))
+
 ## [3.3.2](https://github.com/patrickkabwe/create-nitro-module/compare/v3.3.1...v3.3.2) (2025-09-16)
 
 ### 🐛 Bug Fixes
