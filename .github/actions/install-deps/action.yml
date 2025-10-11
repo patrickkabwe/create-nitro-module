@@ -18,4 +18,8 @@ runs:
                 bun|yarn|pnpm|npm) ;;
                 *) echo "Unsupported pm: ${{ inputs.pm }}" >&2; exit 1;;
               esac
-              ${{ inputs.pm }} install
+              if [ "${{ inputs.pm }}" = "bun" ]; then
+                ${{ inputs.pm }} install --linker=hoisted
+              else
+                ${{ inputs.pm }} install
+              fi
