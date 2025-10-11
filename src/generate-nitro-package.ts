@@ -295,8 +295,11 @@ export class NitroModuleFactory {
             '.github',
             'release.config.cjs',
             'LICENSE',
-            'bunfig.toml',
         ]
+
+        if (this.config.pm === 'bun') {
+            filesToCopy.push('bunfig.toml')
+        }
 
         await copyTemplateFiles(
             this.config,
