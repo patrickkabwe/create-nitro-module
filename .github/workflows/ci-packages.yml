@@ -58,7 +58,7 @@ jobs:
                       ${{ runner.os }}-bun-
 
             - name: Install dependencies
-              run: bun install
+              run: bun install --linker=hoisted
 
             - name: Lint Code
               run: bun lint
@@ -116,7 +116,7 @@ jobs:
                       ${{ runner.os }}-bun-
 
             - name: Install npm dependencies (bun)
-              run: bun install
+              run: bun install --linker=hoisted
 
             - name: Build CLI and Link Locally
               run: |

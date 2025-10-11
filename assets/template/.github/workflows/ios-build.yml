@@ -62,7 +62,7 @@ jobs:
           xcode-version: 16.4
 
       - name: Install dependencies (bun)
-        run: bun install
+        run: bun install --linker=hoisted
 
       - name: Disable new architecture in Podfile
         if: matrix.arch == 'old'
