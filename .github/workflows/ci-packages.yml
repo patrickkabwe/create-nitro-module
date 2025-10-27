@@ -170,7 +170,7 @@ jobs:
                   echo "✅ package.json structure validated"
 
             - name: Upload generated package
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: react-native-test-${{ matrix.package-type }}
@@ -553,7 +553,7 @@ jobs:
 
             - name: Upload test artifacts
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                   name: maestro-artifacts-ios-${{ matrix.package-type }}
                   path: e2e-artifacts
