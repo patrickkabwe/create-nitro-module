@@ -170,7 +170,7 @@ jobs:
                   echo "✅ package.json structure validated"
 
             - name: Upload generated package
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: react-native-test-${{ matrix.package-type }}
@@ -200,7 +200,7 @@ jobs:
               run: mkdir -p ${{ env.WORKING_DIR }}
 
             - name: Download generated package
-              uses: actions/download-artifact@v5
+              uses: actions/download-artifact@v6
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
@@ -293,7 +293,7 @@ jobs:
               run: mkdir -p ${{ env.WORKING_DIR }}
 
             - name: Download generated package
-              uses: actions/download-artifact@v5
+              uses: actions/download-artifact@v6
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
@@ -383,7 +383,7 @@ jobs:
               run: mkdir -p ${{ env.WORKING_DIR }}
 
             - name: Download generated package
-              uses: actions/download-artifact@v5
+              uses: actions/download-artifact@v6
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
@@ -471,7 +471,7 @@ jobs:
               run: mkdir -p ${{ env.WORKING_DIR }}
 
             - name: Download generated module
-              uses: actions/download-artifact@v5
+              uses: actions/download-artifact@v6
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
@@ -553,7 +553,7 @@ jobs:
 
             - name: Upload test artifacts
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                   name: maestro-artifacts-ios-${{ matrix.package-type }}
                   path: e2e-artifacts
