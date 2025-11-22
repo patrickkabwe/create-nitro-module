@@ -5,7 +5,7 @@ import {
     androidManifestCode,
     getKotlinCode,
     getKotlinViewCode,
-} from '../code-snippets/code.android'
+} from '../code-snippets/code.kotlin'
 import { postScript } from '../code-snippets/code.js'
 import { ANDROID_CXX_LIB_NAME_TAG, ANDROID_NAME_SPACE_TAG } from '../constants'
 import {

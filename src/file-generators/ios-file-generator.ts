@@ -1,7 +1,7 @@
 import { cp } from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { getSwiftCode, getSwiftViewCode } from '../code-snippets/code.ios'
+import { getSwiftCode, getSwiftViewCode } from '../code-snippets/code.swift'
 import { IOS_MODULE_NAME_TAG } from '../constants'
 import {
     Nitro,
