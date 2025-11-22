@@ -41,7 +41,7 @@ jobs:
             bun-cache-key: ${{ runner.os }}-bun
         steps:
             - name: Checkout Repo
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
@@ -82,7 +82,7 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         steps:
-            - uses: actions/checkout@v5
+            - uses: actions/checkout@v6
 
             - name: Configure Git
               run: |
@@ -194,7 +194,7 @@ jobs:
             SCHEME: ${{ matrix.package-type == 'module' && 'TestModuleExample' || 'TestViewExample' }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -287,7 +287,7 @@ jobs:
             WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -370,7 +370,7 @@ jobs:
             WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - name: Enable KVM (Android emulator)
               if: runner.os == 'Linux'
@@ -460,7 +460,7 @@ jobs:
             WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - name: Setup Xcode
               uses: maxim-lobanov/setup-xcode@v1
