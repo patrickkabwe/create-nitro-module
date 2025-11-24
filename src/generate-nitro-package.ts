@@ -5,7 +5,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import util from 'node:util'
 import templatePackageJson from '../assets/template/package.json'
-import { androidSettingsGradleCode } from './code-snippets/code.android'
+import { androidSettingsGradleCode } from './code-snippets/code.kotlin'
 import {
     appExampleCode,
     babelConfig,
