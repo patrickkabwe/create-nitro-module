@@ -24,7 +24,7 @@ runs:
               max_retries=3
               attempt=1
               
-              until [ "$attempt" -gt "$max_retries" ]
+              while [ "$attempt" -le "$max_retries" ]
               do
                 echo "xcodebuild attempt $attempt of $max_retries"
                 
@@ -39,7 +39,7 @@ runs:
                   build \
                   CODE_SIGNING_ALLOWED=NO | xcpretty; then
                   echo "xcodebuild succeeded on attempt $attempt"
-                  break
+                  exit 0
                 fi
                 
                 if [ "$attempt" -eq "$max_retries" ]; then
