@@ -68,13 +68,11 @@ export interface FileGenerator {
     generate(config: GenerateModuleConfig): Promise<void>
 }
 
-export const PLATFORM_LANGUAGE_MAP: Record<
-    SupportedPlatform,
-    SupportedLang[]
-> = {
-    [SupportedPlatform.IOS]: [SupportedLang.SWIFT, SupportedLang.CPP],
-    [SupportedPlatform.ANDROID]: [SupportedLang.KOTLIN, SupportedLang.CPP],
-}
+export const PLATFORM_LANGUAGE_MAP: Record<SupportedPlatform, SupportedLang[]> =
+    {
+        [SupportedPlatform.IOS]: [SupportedLang.SWIFT, SupportedLang.CPP],
+        [SupportedPlatform.ANDROID]: [SupportedLang.KOTLIN, SupportedLang.CPP],
+    }
 
 export type InstructionsParams = {
     moduleName: string
