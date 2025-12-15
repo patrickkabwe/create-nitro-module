@@ -1,3 +1,51 @@
+## [3.5.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.4.0...v3.5.0) (2025-12-15)
+
+### ✨ Features
+
+* add retry logic to iOS xcodebuild action ([e7d2fdc](https://github.com/patrickkabwe/create-nitro-module/commit/e7d2fdc5a372f296648ee7555eec7d404ee54887))
+* align nitro view specs and auto-select languages ([1e01775](https://github.com/patrickkabwe/create-nitro-module/commit/1e01775290c8562f012ab6c527634555f95899d9))
+
+### 🐛 Bug Fixes
+
+* correct retry loop logic in iOS xcodebuild action ([c25c13f](https://github.com/patrickkabwe/create-nitro-module/commit/c25c13fd2b77fbc5d6dd6c6991ab47fd1fa630c3))
+* rename native code snippet files ([4ae61d2](https://github.com/patrickkabwe/create-nitro-module/commit/4ae61d22d45bd07125c2031a1c99fc8f82adce0a))
+* update hermesCommand path in NitroModuleFactory ([56b378c](https://github.com/patrickkabwe/create-nitro-module/commit/56b378c555a69b485f84279180cac5d3517f248d))
+* update platform language mapping and improve generator logic ([2cfa89d](https://github.com/patrickkabwe/create-nitro-module/commit/2cfa89d57cd73df9d089483fa64dad742f5d16fa))
+
+### 🔄 Code Refactors
+
+* format PLATFORM_LANGUAGE_MAP for improved readability ([f84148d](https://github.com/patrickkabwe/create-nitro-module/commit/f84148d67216a9926aefdceba6e251f61c4839fb))
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump @types/node from 24.10.0 to 24.10.1 ([88e3ddc](https://github.com/patrickkabwe/create-nitro-module/commit/88e3ddc1c05c59906d4140fb1dd14a9bba1f19ce))
+* **deps-dev:** bump @types/node from 24.7.1 to 24.7.2 ([4c0d67d](https://github.com/patrickkabwe/create-nitro-module/commit/4c0d67dfb1ea27c2d623c3212e14eebb1467de94))
+* **deps-dev:** bump @types/node from 24.7.2 to 24.9.2 ([b41acb9](https://github.com/patrickkabwe/create-nitro-module/commit/b41acb95ba43574ae44ebe3f3f9b08c27515ba4a))
+* **deps-dev:** bump @types/node from 24.9.2 to 24.10.0 ([2c92844](https://github.com/patrickkabwe/create-nitro-module/commit/2c92844a57b894584af7029b1b3db6db7dd89c1c))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([8d99291](https://github.com/patrickkabwe/create-nitro-module/commit/8d992916a7acf2030ce6a5d4c0b536243691f82f))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([b1d59a4](https://github.com/patrickkabwe/create-nitro-module/commit/b1d59a4e17606336c22de7ae4e6e9326bbde6966))
+* **deps-dev:** bump @typescript-eslint/parser from 8.46.0 to 8.46.1 ([3f88b70](https://github.com/patrickkabwe/create-nitro-module/commit/3f88b7081957d2751561b51e2fdaad43ccb38397))
+* **deps-dev:** bump @typescript-eslint/parser from 8.46.1 to 8.46.3 ([03eaf07](https://github.com/patrickkabwe/create-nitro-module/commit/03eaf07405ad456a26e4b9d43c27df98e85df17d))
+* **deps-dev:** bump @typescript-eslint/parser from 8.46.3 to 8.46.4 ([61a1153](https://github.com/patrickkabwe/create-nitro-module/commit/61a1153ab713f5e795c2e23d6064e34ff41e9147))
+* **deps-dev:** bump eslint from 9.37.0 to 9.38.0 ([2245a30](https://github.com/patrickkabwe/create-nitro-module/commit/2245a304723b0a69dac5d90a4f8582c41e915574))
+* **deps-dev:** bump eslint from 9.38.0 to 9.39.1 ([99ac5f0](https://github.com/patrickkabwe/create-nitro-module/commit/99ac5f00b3974c3c703d9321861d86d818c69cfd))
+* **deps-dev:** bump lefthook from 1.13.6 to 2.0.2 ([6393886](https://github.com/patrickkabwe/create-nitro-module/commit/639388670ed8afa09a3e9b7b784b7bbe4f2844a9))
+* **deps-dev:** bump lefthook from 2.0.2 to 2.0.3 ([21e3c2c](https://github.com/patrickkabwe/create-nitro-module/commit/21e3c2c0056b9f3f016f1a4762aa0ab7ec368776))
+* **deps-dev:** bump lefthook from 2.0.3 to 2.0.4 ([71257b5](https://github.com/patrickkabwe/create-nitro-module/commit/71257b5f0ee4cb149c6a645a0ad6b991758682be))
+* **deps-dev:** bump semantic-release from 24.2.9 to 25.0.1 ([bcf5a37](https://github.com/patrickkabwe/create-nitro-module/commit/bcf5a37ed4ce399b4e906f171595ab2ea476d2e8))
+* **deps-dev:** bump the nitro group across 1 directory with 2 updates ([feb27ff](https://github.com/patrickkabwe/create-nitro-module/commit/feb27ff34023dfcb0640f21415056916a84eb632))
+* **deps-dev:** bump the nitro group across 1 directory with 2 updates ([3239b66](https://github.com/patrickkabwe/create-nitro-module/commit/3239b66892bd8295ec33927a301d715334e547b3))
+* **deps:** bump actions/cache from 4 to 5 ([f9f1855](https://github.com/patrickkabwe/create-nitro-module/commit/f9f18559ebc0044d68426ff0f345122460d24fe0))
+* **deps:** bump actions/checkout from 5 to 6 ([49ba93c](https://github.com/patrickkabwe/create-nitro-module/commit/49ba93cbe6a87ab451442d84a6e74597f667f5d9))
+* **deps:** bump actions/download-artifact from 5 to 6 ([3a7ec96](https://github.com/patrickkabwe/create-nitro-module/commit/3a7ec96b33ec0ca78d65573a98d53c8b01ead203))
+* **deps:** bump actions/download-artifact from 6 to 7 ([167f12d](https://github.com/patrickkabwe/create-nitro-module/commit/167f12d0c5468de6a3e13ef12cda26ba33a1c828))
+* **deps:** bump actions/setup-node from 5 to 6 ([6071e26](https://github.com/patrickkabwe/create-nitro-module/commit/6071e267bc62d1ecc2a78eec893da7044b39540b))
+* **deps:** bump actions/upload-artifact from 4 to 5 ([02ea555](https://github.com/patrickkabwe/create-nitro-module/commit/02ea5550b450710b7813f58d997b2a240aa4fe9f))
+* **deps:** bump actions/upload-artifact from 5 to 6 ([ba676fe](https://github.com/patrickkabwe/create-nitro-module/commit/ba676fe7ebce097a107c494178875c5c4b1e45c4))
+* **deps:** bump commander from 14.0.1 to 14.0.2 ([e6b8c27](https://github.com/patrickkabwe/create-nitro-module/commit/e6b8c27a959224c5831b970c09db8029c4605e32))
+* **deps:** bump tsup from 8.5.0 to 8.5.1 ([e6b76f6](https://github.com/patrickkabwe/create-nitro-module/commit/e6b76f64f8a8ca816e97f9d06c0ce70db973ec10))
+* update Node.js version in package.json and GitHub Actions workflow ([8c68bc5](https://github.com/patrickkabwe/create-nitro-module/commit/8c68bc5c5bfc790df4c50915f7b5e4acc10a84e6))
+
 ## [3.4.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.3.2...v3.4.0) (2025-10-11)
 
 ### ✨ Features
