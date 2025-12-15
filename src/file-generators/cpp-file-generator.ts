@@ -48,14 +48,28 @@ export class CppFileGenerator implements FileGenerator {
                     'android/CMakeLists.txt',
                     cmakeListsContent
                 )
-            } else if (
+                continue
+            }
+
+            if (
                 generator instanceof IOSFileGenerator &&
                 config.platforms.includes(SupportedPlatform.IOS)
             ) {
                 await generator.generate(config)
-            } else {
-                throw new Error('Unsupported platform')
+                continue
             }
+
+            // Skip generators for platforms that were not selected
+            if (
+                (generator instanceof AndroidFileGenerator &&
+                    !config.platforms.includes(SupportedPlatform.ANDROID)) ||
+                (generator instanceof IOSFileGenerator &&
+                    !config.platforms.includes(SupportedPlatform.IOS))
+            ) {
+                continue
+            }
+
+            throw new Error('Unsupported platform')
         }
     }
 
