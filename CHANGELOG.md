@@ -1,3 +1,9 @@
+## [3.5.3](https://github.com/patrickkabwe/create-nitro-module/compare/v3.5.2...v3.5.3) (2025-12-15)
+
+### 🛠️ Other changes
+
+* **release:** update release configuration to include npm plugin ([1fafe53](https://github.com/patrickkabwe/create-nitro-module/commit/1fafe53e70be6133818ce189069b3d616fa1a8f2))
+
 ## [3.5.2](https://github.com/patrickkabwe/create-nitro-module/compare/v3.5.1...v3.5.2) (2025-12-15)
 
 ### 🛠️ Other changes
