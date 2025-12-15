@@ -460,7 +460,7 @@ export class NitroModuleFactory {
             '// cliFile = file("../../node_modules/react-native/cli.js")':
                 'cliFile = file("../../../node_modules/react-native/cli.js")',
             '// hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"':
-                'hermesCommand = "$rootDir/../../node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc"',
+                'hermesCommand = "$rootDir/../../node_modules/hermes-compiler/hermesc/%OS-BIN%/hermesc"',
         }
 
         const androidBuildGradleData = await replacePlaceholder({

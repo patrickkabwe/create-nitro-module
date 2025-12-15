@@ -18,15 +18,37 @@ runs:
               set -euo pipefail
               gem install xcpretty
               cd "${{ inputs.ios-dir }}"
-              set -o pipefail && xcodebuild \
-                CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
-                -derivedDataPath build -UseModernBuildSystem=YES \
-                -workspace "${SCHEME}.xcworkspace" \
-                -scheme "${SCHEME}" \
-                -sdk iphonesimulator \
-                -configuration "${{ inputs.mode }}" \
-                -destination 'platform=iOS Simulator,name=iPhone 16' \
-                build \
-                CODE_SIGNING_ALLOWED=NO | xcpretty
+              
+              set -o pipefail
+              
+              max_retries=3
+              attempt=1
+              
+              while [ "$attempt" -le "$max_retries" ]
+              do
+                echo "xcodebuild attempt $attempt of $max_retries"
+                
+                if xcodebuild \
+                  CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
+                  -derivedDataPath build -UseModernBuildSystem=YES \
+                  -workspace "${SCHEME}.xcworkspace" \
+                  -scheme "${SCHEME}" \
+                  -sdk iphonesimulator \
+                  -configuration "${{ inputs.mode }}" \
+                  -destination 'platform=iOS Simulator,name=iPhone 16' \
+                  build \
+                  CODE_SIGNING_ALLOWED=NO | xcpretty; then
+                  echo "xcodebuild succeeded on attempt $attempt"
+                  exit 0
+                fi
+                
+                if [ "$attempt" -eq "$max_retries" ]; then
+                  echo "xcodebuild failed after $max_retries attempts"
+                  exit 1
+                fi
+                
+                attempt=$((attempt + 1))
+                echo "Retrying xcodebuild..."
+              done
           env:
               SCHEME: ${{ inputs.scheme }}
