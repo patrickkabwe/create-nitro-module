@@ -10,8 +10,7 @@ import { createFolder, createModuleFile, mapPlatformToLanguage } from '../utils'
 
 export class JSFileGenerator implements FileGenerator {
     async generate(config: GenerateModuleConfig): Promise<void> {
-        const nitroSpecFolder =
-            config.packageType === Nitro.View ? '/src/views' : '/src/specs'
+        const nitroSpecFolder = '/src/specs'
 
         await createFolder(config.cwd, nitroSpecFolder)
         const platformToLangMap = mapPlatformToLanguage(
@@ -41,7 +40,7 @@ export class JSFileGenerator implements FileGenerator {
     ): Promise<void> {
         await createModuleFile(
             config.cwd,
-            `/src/views/${config.packageName}.nitro.ts`,
+            `/src/specs/${config.packageName}.nitro.ts`,
             nitroViewSpecCode(config.packageName, platformLang)
         )
         await createModuleFile(
