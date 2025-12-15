@@ -31,7 +31,7 @@ A CLI tool that simplifies creating React Native modules powered by Nitro Module
 ├── ios
 ├── src
 │    ├── index.ts
-│    └── specs|views
+│    └── specs
 │         └── awesome-library.nitro.ts
 │   ├── nitrogen
 │   ├── nitro.json

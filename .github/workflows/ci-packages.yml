@@ -50,7 +50,7 @@ jobs:
 
             - name: Cache bun dependencies
               id: bun-cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: ~/.bun/install/cache
                   key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
@@ -108,7 +108,7 @@ jobs:
 
             - name: Cache dependencies (bun)
               if: matrix.pm == 'bun'
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: ~/.bun/install/cache
                   key: ${{ needs.lint-and-build.outputs.bun-cache-key }}-${{ hashFiles('**/bun.lockb') }}
@@ -170,7 +170,7 @@ jobs:
                   echo "✅ package.json structure validated"
 
             - name: Upload generated package
-              uses: actions/upload-artifact@v5
+              uses: actions/upload-artifact@v6
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: react-native-test-${{ matrix.package-type }}
@@ -200,7 +200,7 @@ jobs:
               run: mkdir -p ${{ env.WORKING_DIR }}
 
             - name: Download generated package
-              uses: actions/download-artifact@v6
+              uses: actions/download-artifact@v7
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
@@ -252,7 +252,7 @@ jobs:
                   working-directory: ${{ env.WORKING_DIR }}
 
             - name: Cache CocoaPods
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: |
                       ~/.cocoapods/repos
@@ -293,7 +293,7 @@ jobs:
               run: mkdir -p ${{ env.WORKING_DIR }}
 
             - name: Download generated package
-              uses: actions/download-artifact@v6
+              uses: actions/download-artifact@v7
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
@@ -341,7 +341,7 @@ jobs:
                   cache: 'gradle'
 
             - name: Cache Gradle
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: |
                       ~/.gradle/caches
@@ -383,7 +383,7 @@ jobs:
               run: mkdir -p ${{ env.WORKING_DIR }}
 
             - name: Download generated package
-              uses: actions/download-artifact@v6
+              uses: actions/download-artifact@v7
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
@@ -398,7 +398,7 @@ jobs:
                   bun-version: latest
 
             - name: Cache Bun dependencies
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: ~/.bun/install/cache
                   key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
@@ -471,7 +471,7 @@ jobs:
               run: mkdir -p ${{ env.WORKING_DIR }}
 
             - name: Download generated module
-              uses: actions/download-artifact@v6
+              uses: actions/download-artifact@v7
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
@@ -486,7 +486,7 @@ jobs:
                   bun-version: latest
 
             - name: Cache Bun dependencies
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: ~/.bun/install/cache
                   key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
@@ -506,7 +506,7 @@ jobs:
                   working-directory: ${{ env.WORKING_DIR }}
 
             - name: Cache Pods
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: ${{ env.WORKING_DIR }}/example/ios/Pods
                   key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
@@ -524,7 +524,7 @@ jobs:
                   ccache --zero-stats
 
             - name: Cache ccache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: ~/Library/Caches/ccache
                   key: ${{ runner.os }}-ccache-${{ matrix.package-type }}-${{ github.sha }}
@@ -553,7 +553,7 @@ jobs:
 
             - name: Upload test artifacts
               if: always()
-              uses: actions/upload-artifact@v5
+              uses: actions/upload-artifact@v6
               with:
                   name: maestro-artifacts-ios-${{ matrix.package-type }}
                   path: e2e-artifacts
