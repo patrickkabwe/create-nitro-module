@@ -1,6 +1,6 @@
 {
     "name": "create-nitro-module",
-    "version": "3.5.0",
+    "version": "3.5.1",
     "description": "A CLI tool that simplifies creating React Native modules powered by Nitro Modules.",
     "private": false,
     "type": "module",
@@ -39,7 +39,7 @@
     ],
     "license": "MIT",
     "bin": {
-        "create-nitro-module": "./lib/cli/index.js"
+        "create-nitro-module": "lib/cli/index.js"
     },
     "repository": {
         "type": "git",
