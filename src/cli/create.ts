@@ -174,18 +174,34 @@ const selectLanguages = async (
     return selectedLangs
 }
 
+const resolveViewLanguages = (platforms: SupportedPlatform[]) => {
+    const langs = new Set<SupportedLang>()
+    if (platforms.includes(SupportedPlatform.IOS)) {
+        langs.add(SupportedLang.SWIFT)
+    }
+    if (platforms.includes(SupportedPlatform.ANDROID)) {
+        langs.add(SupportedLang.KOTLIN)
+    }
+    return Array.from(langs)
+}
+
 const getUserAnswers = async (
     name: string,
     usedPm?: PackageManager,
     options?: CreateModuleOptions
 ): Promise<UserAnswers> => {
     if (options?.ci) {
+        const platforms = [SupportedPlatform.IOS, SupportedPlatform.ANDROID]
+        const packageType = options?.packageType || Nitro.Module
         return {
             packageName: name,
             description: `${kleur.yellow(`react-native-${name}`)} is a react native package built with Nitro`,
-            platforms: [SupportedPlatform.IOS, SupportedPlatform.ANDROID],
-            packageType: options?.packageType || Nitro.Module,
-            langs: [SupportedLang.SWIFT, SupportedLang.KOTLIN],
+            platforms,
+            packageType,
+            langs:
+                packageType === Nitro.View
+                    ? resolveViewLanguages(platforms)
+                    : [SupportedLang.SWIFT, SupportedLang.KOTLIN],
             pm: usedPm || 'pnpm',
         }
     }
@@ -264,11 +280,13 @@ const getUserAnswers = async (
                 if (!results.platforms || !results.packageType) {
                     throw new Error('Missing required selections')
                 }
-                const selectedLangs = await selectLanguages(
+                if (results.packageType === Nitro.View) {
+                    return resolveViewLanguages(results.platforms)
+                }
+                return await selectLanguages(
                     results.platforms,
                     results.packageType
                 )
-                return selectedLangs
             },
             pm: async () => {
                 if (usedPm) {
