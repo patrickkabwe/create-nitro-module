@@ -1,3 +1,9 @@
+## [3.5.2](https://github.com/patrickkabwe/create-nitro-module/compare/v3.5.1...v3.5.2) (2025-12-15)
+
+### 🛠️ Other changes
+
+* **release:** 3.5.2 [skip ci] ([d4238be](https://github.com/patrickkabwe/create-nitro-module/commit/d4238be17622983a4206691c750d0eb5002350ae))
+
 ## [3.5.1](https://github.com/patrickkabwe/create-nitro-module/compare/v3.5.0...v3.5.1) (2025-12-15)
 
 ### 🛠️ Other changes
