@@ -357,7 +357,6 @@ jobs:
 
     # E2E tests (Android)
     e2e-android:
-        if: always()
         name: Android E2E Test
         needs: generate-packages
         runs-on: ubuntu-latest
@@ -445,7 +444,6 @@ jobs:
 
     # E2E tests (iOS)
     e2e-ios:
-        if: always()
         name: iOS E2E Test
         needs: generate-packages
         runs-on: macOS-15
