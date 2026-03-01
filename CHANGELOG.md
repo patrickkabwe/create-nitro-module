@@ -1,3 +1,32 @@
+## [3.5.4](https://github.com/patrickkabwe/create-nitro-module/compare/v3.5.3...v3.5.4) (2026-03-01)
+
+### 🛠️ Other changes
+
+* **ci:** remove old-arch template tests and stop on lint failure ([34739d6](https://github.com/patrickkabwe/create-nitro-module/commit/34739d6a3002005f08d99b838d5241716e2e9f8b))
+* **deps-dev:** bump @commitlint/cli from 20.2.0 to 20.4.1 ([66d2c7a](https://github.com/patrickkabwe/create-nitro-module/commit/66d2c7a3475c3cbbf96b78190c1c71939c1650d5))
+* **deps-dev:** bump @commitlint/config-conventional ([3380dff](https://github.com/patrickkabwe/create-nitro-module/commit/3380dffb5257f3b09e6a2ea5fb6fb535e498ac80))
+* **deps-dev:** bump @types/node from 24.10.1 to 25.0.2 ([da6f9bb](https://github.com/patrickkabwe/create-nitro-module/commit/da6f9bb26c97f1d72d67bccd287cb940886e37db))
+* **deps-dev:** bump @types/node from 25.0.2 to 25.0.3 ([eabfac5](https://github.com/patrickkabwe/create-nitro-module/commit/eabfac5b22734d9fd141e58b262a13c90eaf13f0))
+* **deps-dev:** bump @types/node from 25.0.3 to 25.3.0 ([dee9494](https://github.com/patrickkabwe/create-nitro-module/commit/dee9494ca8f5ad3d6ce32257cdffac91846e25ce))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([70b3f3f](https://github.com/patrickkabwe/create-nitro-module/commit/70b3f3f7a02c1beb4537fd75a4e920f947864db1))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([9524be3](https://github.com/patrickkabwe/create-nitro-module/commit/9524be300b07f7ecd7000755d17c9ce0ab35cb5b))
+* **deps-dev:** bump @typescript-eslint/parser from 8.49.0 to 8.50.0 ([572c682](https://github.com/patrickkabwe/create-nitro-module/commit/572c6821eddb9aa06feb32c6c8c462e1bb7c9f58))
+* **deps-dev:** bump @typescript-eslint/parser from 8.50.0 to 8.53.0 ([eae260e](https://github.com/patrickkabwe/create-nitro-module/commit/eae260eadf88ef221443eb176f7f57f497eff702))
+* **deps-dev:** bump @typescript-eslint/parser from 8.53.0 to 8.56.0 ([e96cf07](https://github.com/patrickkabwe/create-nitro-module/commit/e96cf079c9ffff55eb6aade7dd1b8a50a21bd00f))
+* **deps-dev:** bump eslint from 9.39.1 to 9.39.2 ([e63e0a7](https://github.com/patrickkabwe/create-nitro-module/commit/e63e0a7f3cb76bf875835b1395169c2d060dc50a))
+* **deps-dev:** bump eslint-plugin-n from 17.23.1 to 17.23.2 ([ecd4aeb](https://github.com/patrickkabwe/create-nitro-module/commit/ecd4aeb1a809646ebec1231b518561900bfd64e8))
+* **deps-dev:** bump lefthook from 2.0.12 to 2.1.0 ([25d3856](https://github.com/patrickkabwe/create-nitro-module/commit/25d38568f7f7c9fc29d6402daba075c5310d9de5))
+* **deps-dev:** bump lefthook from 2.0.4 to 2.0.12 ([0cbb0bc](https://github.com/patrickkabwe/create-nitro-module/commit/0cbb0bcb67deb3e0ea885c8b3c3175fc123a71a9))
+* **deps-dev:** bump prettier from 3.7.4 to 3.8.0 ([3a584b5](https://github.com/patrickkabwe/create-nitro-module/commit/3a584b56a4e1e40ded1a95eeba32675ce92d39f2))
+* **deps-dev:** bump react-native ([9e37597](https://github.com/patrickkabwe/create-nitro-module/commit/9e37597d85e7bf46f6b960c6d1f4f901ad914a3d))
+* **deps-dev:** bump semantic-release from 25.0.2 to 25.0.3 ([b7dcb88](https://github.com/patrickkabwe/create-nitro-module/commit/b7dcb88800eee8bce701bcf268e3aceee6b5d366))
+* **deps-dev:** bump semantic-release in /assets/template ([a240ff5](https://github.com/patrickkabwe/create-nitro-module/commit/a240ff58fc695e7a0a696b7686f3998f599fa4c8))
+* **deps-dev:** bump the nitro group across 1 directory with 2 updates ([850e4c2](https://github.com/patrickkabwe/create-nitro-module/commit/850e4c24e17fd0f30e8e42dc1cb91da6ccdd560b))
+* **deps-dev:** bump the nitro group across 1 directory with 2 updates ([7755996](https://github.com/patrickkabwe/create-nitro-module/commit/77559967ac22bb389e4ed10259ab6e0d887c7b71))
+* **deps:** bump actions/download-artifact from 7 to 8 ([18c15d9](https://github.com/patrickkabwe/create-nitro-module/commit/18c15d9ec2504849fdde2eb67d4f320721859154))
+* **deps:** bump actions/upload-artifact from 6 to 7 ([a218f98](https://github.com/patrickkabwe/create-nitro-module/commit/a218f98efbf2b3217df03af0814dcb7c14c156b9))
+* update dependencies in package.json and add 'example' to .gitignore ([9e1a9a8](https://github.com/patrickkabwe/create-nitro-module/commit/9e1a9a82393d7adef0cbf675ed1dd5a0a2bb9354))
+
 ## [3.5.3](https://github.com/patrickkabwe/create-nitro-module/compare/v3.5.2...v3.5.3) (2025-12-15)
 
 ### 🛠️ Other changes
