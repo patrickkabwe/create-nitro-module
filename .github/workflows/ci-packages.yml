@@ -200,7 +200,7 @@ jobs:
               run: mkdir -p ${{ env.WORKING_DIR }}
 
             - name: Download generated package
-              uses: actions/download-artifact@v7
+              uses: actions/download-artifact@v8
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
@@ -293,7 +293,7 @@ jobs:
               run: mkdir -p ${{ env.WORKING_DIR }}
 
             - name: Download generated package
-              uses: actions/download-artifact@v7
+              uses: actions/download-artifact@v8
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
@@ -382,7 +382,7 @@ jobs:
               run: mkdir -p ${{ env.WORKING_DIR }}
 
             - name: Download generated package
-              uses: actions/download-artifact@v7
+              uses: actions/download-artifact@v8
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
@@ -469,7 +469,7 @@ jobs:
               run: mkdir -p ${{ env.WORKING_DIR }}
 
             - name: Download generated module
-              uses: actions/download-artifact@v7
+              uses: actions/download-artifact@v8
               with:
                   name: test-${{ matrix.package-type }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
