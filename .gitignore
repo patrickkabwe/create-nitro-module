@@ -79,3 +79,4 @@ tsconfig.tsbuildinfo
 *.exp
 *test-module
 *awesome-library
+example
