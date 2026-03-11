@@ -2,10 +2,26 @@ import kleur from 'kleur'
 import { execSync } from 'node:child_process'
 import { access, cp, mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { GenerateModuleConfig, SupportedLang } from './types'
+import {
+    GenerateModuleConfig,
+    PlatformLangMap,
+    SupportedLang,
+    SupportedPlatform,
+} from './types'
+
+type AutolinkingImplementation = {
+    language: string
+    implementationClassName: string
+}
+
+type AutolinkingEntry = {
+    all?: AutolinkingImplementation
+    ios?: AutolinkingImplementation
+    android?: AutolinkingImplementation
+}
 
 type AutolinkingConfig = {
-    [key: string]: Partial<Record<SupportedLang | 'cpp', string>>
+    [key: string]: AutolinkingEntry
 }
 
 export const LANGS = ['c++', 'swift', 'kotlin'] as const
@@ -63,84 +79,46 @@ export const toPascalCase = (str: string) => {
         .join('')
 }
 
-export const mapPlatformToLanguage = (
-    platforms: string[],
-    selectedLangs: string[]
-): Record<string, string> => {
-    const result: Record<string, string> = {}
-    const [cpp, swift, kotlin] = LANGS
-
-    platforms.forEach(platform => {
-        if (selectedLangs.includes(swift) || selectedLangs.includes(kotlin)) {
-            result[platform] = platform === 'ios' ? swift : kotlin
-        } else {
-            result[platform] = cpp
-        }
-    })
-
-    return result
-}
-
 export const generateAutolinking = (
     moduleName: string,
-    langs: SupportedLang[]
+    platformLangs: PlatformLangMap
 ): AutolinkingConfig => {
-    if (
-        !langs.some(lang =>
-            [SupportedLang.SWIFT, SupportedLang.KOTLIN].includes(lang)
-        )
-    ) {
+    const className = `Hybrid${moduleName}`
+    const langs = Object.values(platformLangs)
+
+    // If all platforms use C++, use the "all" shorthand
+    if (langs.every(lang => lang === SupportedLang.CPP)) {
         return {
             [moduleName]: {
-                cpp: `Hybrid${moduleName}`,
+                all: { language: 'cpp', implementationClassName: className },
             },
         }
     }
 
-    const languageConfig = langs.reduce(
-        (config, lang) => {
-            if ([SupportedLang.SWIFT, SupportedLang.KOTLIN].includes(lang)) {
-                config[lang] = `Hybrid${moduleName}`
-            }
-            return config
-        },
-        {} as Partial<Record<SupportedLang, string>>
-    )
+    const entry: AutolinkingEntry = {}
 
-    return Object.keys(languageConfig).length > 0
-        ? { [moduleName]: languageConfig }
-        : {}
+    const langToNitroLang = (lang: SupportedLang): string => {
+        return lang === SupportedLang.CPP ? 'cpp' : lang
+    }
+
+    if (platformLangs[SupportedPlatform.IOS]) {
+        entry.ios = {
+            language: langToNitroLang(platformLangs[SupportedPlatform.IOS]),
+            implementationClassName: className,
+        }
+    }
+    if (platformLangs[SupportedPlatform.ANDROID]) {
+        entry.android = {
+            language: langToNitroLang(platformLangs[SupportedPlatform.ANDROID]),
+            implementationClassName: className,
+        }
+    }
+
+    return { [moduleName]: entry }
 }
 
 export const validateTemplate = (answer: string[]) => {
     return answer.length > 0 || 'You must choose at least one template'
-}
-
-export const validateLang = (choices: string[]) => {
-    if (!choices.length) {
-        return 'You must choose at least one lang'
-    }
-
-    if (
-        choices.includes(SupportedLang.SWIFT) &&
-        choices.includes(SupportedLang.KOTLIN) &&
-        choices.includes(SupportedLang.CPP)
-    ) {
-        return 'You can not choose swift, kotlin and c++. use either swift with kotlin or c++'
-    }
-    if (
-        choices.includes(SupportedLang.SWIFT) &&
-        choices.includes(SupportedLang.CPP)
-    ) {
-        return 'You can not choose swift and c++. use either swift with kotlin or c++'
-    }
-    if (
-        choices.includes(SupportedLang.KOTLIN) &&
-        choices.includes(SupportedLang.CPP)
-    ) {
-        return 'You can not choose kotlin and c++. use either swift with kotlin or c++'
-    }
-    return true
 }
 
 export const dirExist = async (dir: string) => {

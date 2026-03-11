@@ -30,10 +30,10 @@ import { CppFileGenerator } from './file-generators/cpp-file-generator'
 import { IOSFileGenerator } from './file-generators/ios-file-generator'
 import { JSFileGenerator } from './file-generators/js-file-generator'
 import {
-    FileGenerator,
     GenerateModuleConfig,
     Nitro,
     SupportedLang,
+    SupportedPlatform,
 } from './types'
 import {
     copyTemplateFiles,
@@ -51,21 +51,21 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 export class NitroModuleFactory {
-    private generators: Map<SupportedLang, FileGenerator>
     private nitroModulesVersion: string | null = null
 
+    private androidGenerator: AndroidFileGenerator
+    private iosGenerator: IOSFileGenerator
+    private cppGenerator: CppFileGenerator
+    private jsGenerator: JSFileGenerator
+
     constructor(private config: GenerateModuleConfig) {
-        const androidGenerator = new AndroidFileGenerator()
-        const iosGenerator = new IOSFileGenerator()
-        this.generators = new Map<SupportedLang, FileGenerator>([
-            [SupportedLang.KOTLIN, androidGenerator],
-            [SupportedLang.SWIFT, iosGenerator],
-            [
-                SupportedLang.CPP,
-                new CppFileGenerator([androidGenerator, iosGenerator]),
-            ],
-            [SupportedLang.JS, new JSFileGenerator()],
+        this.androidGenerator = new AndroidFileGenerator()
+        this.iosGenerator = new IOSFileGenerator()
+        this.cppGenerator = new CppFileGenerator([
+            this.androidGenerator,
+            this.iosGenerator,
         ])
+        this.jsGenerator = new JSFileGenerator()
         this.config.funcName = 'sum'
         this.config.prefix = 'react-native-'
         this.config.finalPackageName = `${this.config.prefix}${this.config.packageName}`
@@ -77,14 +77,30 @@ export class NitroModuleFactory {
 
     async createNitroModule() {
         await createFolder(this.config.cwd)
-        const supportedLanguages = [...this.config.langs, SupportedLang.JS]
-        for (const lang of supportedLanguages) {
-            const generator = this.generators.get(lang)
-            if (!generator) {
-                throw new Error(`Unsupported language: ${lang}`)
+
+        const langs = Object.values(this.config.platformLangs)
+        const allCpp =
+            langs.length > 0 && langs.every(l => l === SupportedLang.CPP)
+
+        if (allCpp) {
+            // All platforms use C++ — use composite CppFileGenerator
+            await this.cppGenerator.generate(this.config)
+        } else {
+            // Mixed or native-only: generate C++ files if any platform uses C++,
+            // then run per-platform generators individually
+            if (langs.includes(SupportedLang.CPP)) {
+                await this.cppGenerator.generateCppCodeFiles(this.config)
             }
-            await generator.generate(this.config)
+            if (this.config.platformLangs[SupportedPlatform.IOS] != null) {
+                await this.iosGenerator.generate(this.config)
+            }
+            if (this.config.platformLangs[SupportedPlatform.ANDROID] != null) {
+                await this.androidGenerator.generate(this.config)
+            }
         }
+
+        // Always generate JS/TS files
+        await this.jsGenerator.generate(this.config)
         await this.copyNitroTemplateFiles()
         await this.replaceNitroJsonPlaceholders()
         await this.updatePackageJsonConfig(this.config.skipExample)
@@ -136,7 +152,7 @@ export class NitroModuleFactory {
         const newNitroJsonContent = JSON.parse(nitroJsonContent)
         newNitroJsonContent.autolinking = generateAutolinking(
             toPascalCase(this.config.packageName),
-            this.config.langs
+            this.config.platformLangs
         )
         await createModuleFile(
             this.config.cwd,
@@ -180,8 +196,10 @@ export class NitroModuleFactory {
         newWorkspacePackageJsonFile.scripts = {
             ...newWorkspacePackageJsonFile.scripts,
             build: `${this.config.pm} run typecheck && bob build`,
-            codegen: `nitrogen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`,
-            postcodegen: !this.config.langs.includes(SupportedLang.KOTLIN)
+            codegen: `nitrogen --logLevel="debug" && ${this.config.pm} run build${Object.values(this.config.platformLangs).includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`,
+            postcodegen: !Object.values(this.config.platformLangs).includes(
+                SupportedLang.KOTLIN
+            )
                 ? this.getPostCodegenScript()
                 : undefined,
         }
@@ -503,7 +521,7 @@ export class NitroModuleFactory {
         await execAsync(`${this.config.pm} install`, { cwd: this.config.cwd })
         let packageManager =
             this.config.pm === 'npm' ? 'npx --yes' : this.config.pm
-        let codegenCommand = `${packageManager} nitrogen --logLevel="debug" && ${this.config.pm} run build${this.config.langs.includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
+        let codegenCommand = `${packageManager} nitrogen --logLevel="debug" && ${this.config.pm} run build${Object.values(this.config.platformLangs).includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
         await execAsync(codegenCommand, { cwd: this.config.cwd })
     }
 

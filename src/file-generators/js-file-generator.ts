@@ -5,21 +5,20 @@ import {
     nitroViewSpecCode,
 } from '../code-snippets/code.js'
 import type { FileGenerator, GenerateModuleConfig } from '../types'
-import { Nitro } from '../types'
-import { createFolder, createModuleFile, mapPlatformToLanguage } from '../utils'
+import { Nitro, SupportedLang } from '../types'
+import { createFolder, createModuleFile } from '../utils'
 
 export class JSFileGenerator implements FileGenerator {
     async generate(config: GenerateModuleConfig): Promise<void> {
         const nitroSpecFolder = '/src/specs'
 
         await createFolder(config.cwd, nitroSpecFolder)
-        const platformToLangMap = mapPlatformToLanguage(
-            config.platforms,
-            config.langs
-        )
 
-        const platformLang = Object.entries(platformToLangMap)
-            .map(([platform, lang]) => `${platform}: '${lang.toLowerCase()}'`)
+        const platformLang = Object.entries(config.platformLangs)
+            .map(
+                ([platform, lang]) =>
+                    `${platform}: '${lang === SupportedLang.CPP ? 'c++' : lang}'`
+            )
             .join(', ')
 
         switch (config.packageType) {

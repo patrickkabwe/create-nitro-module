@@ -13,6 +13,7 @@ import {
     GenerateModuleConfig,
     Nitro,
     SupportedLang,
+    SupportedPlatform,
 } from '../types'
 import {
     createFolder,
@@ -71,7 +72,10 @@ export class AndroidFileGenerator implements FileGenerator {
         )
 
         // Only generate Kotlin file(s) if Kotlin is supported
-        if (config.langs.includes(SupportedLang.KOTLIN)) {
+        if (
+            config.platformLangs[SupportedPlatform.ANDROID] ===
+            SupportedLang.KOTLIN
+        ) {
             // Generate HybridObject file
             const isHybridView = config.packageType === Nitro.View
             await createModuleFile(
