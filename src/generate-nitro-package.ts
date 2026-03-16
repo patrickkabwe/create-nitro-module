@@ -96,6 +96,12 @@ export class NitroModuleFactory {
             }
             if (this.config.platformLangs[SupportedPlatform.ANDROID] != null) {
                 await this.androidGenerator.generate(this.config)
+                if (
+                    this.config.platformLangs[SupportedPlatform.ANDROID] ===
+                    SupportedLang.CPP
+                ) {
+                    await this.cppGenerator.updateAndroidCMakeLists(this.config)
+                }
             }
         }
 
