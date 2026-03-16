@@ -28,21 +28,41 @@ esac
 APP_ID=""
 SCHEME=""
 
-if [ "$PACKAGE_TYPE" == "module" ]; then
-    APP_ID="com.testmoduleexample"
-    SCHEME="TestModuleExample"
-elif [ "$PACKAGE_TYPE" == "view" ]; then
-    APP_ID="com.testviewexample"
-    SCHEME="TestViewExample"
-else
+if [ "$PACKAGE_TYPE" != "module" ] && [ "$PACKAGE_TYPE" != "view" ]; then
     echo "Error! You must pass either 'module' or 'view'"
     echo ""
     exit 1
 fi
 
+PACKAGE_ROOT_NAME="$(basename "$(cd "$EXAMPLE_DIR/.." && pwd)")"
+PACKAGE_NAME="${PACKAGE_ROOT_NAME#react-native-}"
+APP_ID="com.${PACKAGE_NAME//-/}example"
+
+to_pascal_case() {
+  local input="$1"
+  local result=""
+  local word=""
+
+  input="${input//-/ }"
+  input="${input//_/ }"
+
+  for word in $input; do
+    local lower_word="${word,,}"
+    result+="${lower_word^}"
+  done
+
+  printf '%s' "$result"
+}
+
+SCHEME="$(to_pascal_case "$PACKAGE_NAME")Example"
 
 if [ "$PLATFORM" == "ios" ]; then
-  cd $EXAMPLE_DIR/ios
+  cd "$EXAMPLE_DIR/ios"
+
+  WORKSPACE_NAME="$(find . -maxdepth 1 -name "*.xcworkspace" ! -name "Pods.xcworkspace" -exec basename {} .xcworkspace \; | head -1)"
+  if [ -n "$WORKSPACE_NAME" ]; then
+    SCHEME="$WORKSPACE_NAME"
+  fi
   
   # Get iPhone 16 simulator ID dynamically
   iphone16Id=$(xcrun simctl list devices | grep "iPhone 16 (" | grep -E '\(Booted\)|\(Shutdown\)' | head -1 | grep -E -o '\([0-9A-F-]{36}\)' | tr -d '()')
@@ -111,7 +131,7 @@ if [ "$PLATFORM" == "ios" ]; then
   # Return to project root
   cd "$SCRIPT_DIR"
 else
-  cd $EXAMPLE_DIR/android
+  cd "$EXAMPLE_DIR/android"
   chmod +x ./gradlew
   
   # Build with optimizations and pretty output

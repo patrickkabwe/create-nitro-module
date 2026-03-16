@@ -342,7 +342,6 @@ jobs:
             matrix: ${{ fromJson(needs.define-matrix.outputs.ios-build) }}
         env:
             WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
-            SCHEME: ${{ matrix.package_type == 'module' && 'TestModuleExample' || 'TestViewExample' }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v6
@@ -420,7 +419,6 @@ jobs:
               uses: ./.github/actions/ios-build-xcode
               with:
                   ios-dir: ${{ env.WORKING_DIR }}/example/ios
-                  scheme: ${{ env.SCHEME }}
                   mode: ${{ matrix.mode }}
 
     test-android-build:
