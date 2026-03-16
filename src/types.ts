@@ -29,7 +29,9 @@ export type PlatformLang = {
 
 export type CreateModuleOptions = {
     ci?: boolean
+    langs?: string
     moduleDir?: string
+    platforms?: string
     skipExample?: boolean
     skipInstall?: boolean
     packageType?: Nitro
@@ -57,7 +59,7 @@ export type GenerateModuleConfig = {
     packageType: Nitro
     packageName: string
     finalPackageName: string
-} & Omit<CreateModuleOptions, 'moduleDir'>
+} & Omit<CreateModuleOptions, 'moduleDir' | 'langs' | 'platforms'>
 
 export interface FileGenerator {
     /**

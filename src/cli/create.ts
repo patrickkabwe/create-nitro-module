@@ -21,12 +21,124 @@ import {
     validatePackageName,
 } from '../utils'
 
+const SUPPORTED_PLATFORM_VALUES = Object.values(SupportedPlatform)
+const SUPPORTED_LANG_VALUES: SupportedLang[] = [
+    SupportedLang.SWIFT,
+    SupportedLang.KOTLIN,
+    SupportedLang.CPP,
+]
+
+const parseListOption = (value?: string) =>
+    value
+        ?.split(',')
+        .map(item => item.trim().toLowerCase())
+        .filter(Boolean) ?? []
+
+const getAllowedLanguageSelections = (
+    platforms: SupportedPlatform[],
+    packageType: Nitro
+) => {
+    const availableLanguages = Array.from(
+        new Set(platforms.flatMap(platform => PLATFORM_LANGUAGE_MAP[platform]))
+    ).filter(lang => packageType !== Nitro.View || lang !== SupportedLang.CPP)
+
+    if (
+        platforms.includes(SupportedPlatform.IOS) &&
+        platforms.includes(SupportedPlatform.ANDROID)
+    ) {
+        return [
+            [SupportedLang.SWIFT, SupportedLang.KOTLIN],
+            ...(packageType === Nitro.Module ? [[SupportedLang.CPP]] : []),
+        ]
+    }
+
+    return availableLanguages.map(lang => [lang])
+}
+
+const hasMatchingSelection = (
+    selectedLangs: SupportedLang[],
+    allowedSelection: SupportedLang[]
+) =>
+    selectedLangs.length === allowedSelection.length &&
+    selectedLangs.every(lang => allowedSelection.includes(lang))
+
+const formatLanguageSelection = (langs: SupportedLang[]) =>
+    langs.map(lang => (lang === SupportedLang.CPP ? 'c++' : lang)).join(', ')
+
+const parsePlatformsOption = (value?: string) => {
+    const platforms = Array.from(
+        new Set(
+            parseListOption(value).map(platform => {
+                if (
+                    !SUPPORTED_PLATFORM_VALUES.includes(
+                        platform as SupportedPlatform
+                    )
+                ) {
+                    throw new Error(
+                        `Invalid platform "${platform}". Supported platforms: ${SUPPORTED_PLATFORM_VALUES.join(', ')}`
+                    )
+                }
+
+                return platform as SupportedPlatform
+            })
+        )
+    )
+
+    return platforms.length > 0
+        ? platforms
+        : [SupportedPlatform.IOS, SupportedPlatform.ANDROID]
+}
+
+const parseLangsOption = (
+    value: string | undefined,
+    platforms: SupportedPlatform[],
+    packageType: Nitro
+) => {
+    const allowedSelections = getAllowedLanguageSelections(
+        platforms,
+        packageType
+    )
+
+    if (!value) {
+        return packageType === Nitro.View
+            ? resolveViewLanguages(platforms)
+            : allowedSelections[0]
+    }
+
+    const langs = Array.from(
+        new Set(
+            parseListOption(value).map(lang => {
+                if (!SUPPORTED_LANG_VALUES.includes(lang as SupportedLang)) {
+                    throw new Error(
+                        `Invalid language "${lang}". Supported languages: ${SUPPORTED_LANG_VALUES.join(', ')}`
+                    )
+                }
+
+                return lang as SupportedLang
+            })
+        )
+    )
+
+    const isAllowedSelection = allowedSelections.some(selection =>
+        hasMatchingSelection(langs, selection)
+    )
+
+    if (!isAllowedSelection) {
+        throw new Error(
+            `Invalid language selection for ${platforms.join(', ')} (${packageType}). Allowed selections: ${allowedSelections.map(formatLanguageSelection).join(' | ')}`
+        )
+    }
+
+    return langs
+}
+
 export const createModule = async (
     packageName: string,
     options: CreateModuleOptions
 ) => {
     let packageType = Nitro.Module
     let moduleFactory: NitroModuleFactory | null = null
+    let spinnerStarted = false
     const spinner = p.spinner()
     try {
         if (options.moduleDir) {
@@ -98,6 +210,7 @@ export const createModule = async (
         spinner.start(
             messages.creating.replace('{packageType}', capitalize(packageType))
         )
+        spinnerStarted = true
 
         await moduleFactory.createNitroModule()
 
@@ -123,12 +236,20 @@ export const createModule = async (
             )
             rmSync(modulePath, { recursive: true, force: true })
         }
-        spinner.stop(
-            kleur.red(
-                `Failed to create Nitro ${packageType}: ${(error as Error).message}`
-            ),
-            1
-        )
+        if (spinnerStarted) {
+            spinner.stop(
+                kleur.red(
+                    `Failed to create Nitro ${packageType}: ${(error as Error).message}`
+                )
+            )
+        } else {
+            console.log(
+                kleur.red(
+                    `Failed to create Nitro ${packageType}: ${(error as Error).message}`
+                )
+            )
+        }
+        process.exit(1)
     }
 }
 
@@ -136,34 +257,32 @@ const selectLanguages = async (
     platforms: SupportedPlatform[],
     packageType: Nitro
 ) => {
-    const availableLanguages = Array.from(
-        new Set(platforms.flatMap(platform => PLATFORM_LANGUAGE_MAP[platform]))
-    ).filter(lang => packageType !== Nitro.View || lang !== SupportedLang.CPP)
+    const options = getAllowedLanguageSelections(platforms, packageType).map(
+        langs => {
+            if (
+                langs.includes(SupportedLang.SWIFT) &&
+                langs.includes(SupportedLang.KOTLIN)
+            ) {
+                return {
+                    label: 'Swift & Kotlin',
+                    value: langs,
+                    hint: `Use Swift and Kotlin to build your Nitro ${packageType.toLowerCase()} for iOS and Android`,
+                }
+            }
 
-    const options =
-        platforms.includes(SupportedPlatform.IOS) &&
-        platforms.includes(SupportedPlatform.ANDROID)
-            ? [
-                  {
-                      label: 'Swift & Kotlin',
-                      value: [SupportedLang.SWIFT, SupportedLang.KOTLIN],
-                      hint: `Use Swift and Kotlin to build your Nitro ${packageType.toLowerCase()} for iOS and Android`,
-                  },
-                  ...(packageType === Nitro.Module
-                      ? [
-                            {
-                                label: 'C++',
-                                value: [SupportedLang.CPP],
-                                hint: 'Use C++ to share code between iOS and Android',
-                            },
-                        ]
-                      : []),
-              ]
-            : availableLanguages.map(lang => ({
-                  label: capitalize(lang),
-                  value: [lang],
-                  hint: `Use ${lang === SupportedLang.CPP ? 'C++' : capitalize(lang)} to build your Nitro ${packageType.toLowerCase()} for ${platforms.join(' and ')}`,
-              }))
+            const [lang] = langs
+            return {
+                label: capitalize(lang === SupportedLang.CPP ? 'c++' : lang),
+                value: langs,
+                hint:
+                    lang === SupportedLang.CPP &&
+                    platforms.includes(SupportedPlatform.IOS) &&
+                    platforms.includes(SupportedPlatform.ANDROID)
+                        ? 'Use C++ to share code between iOS and Android'
+                        : `Use ${lang === SupportedLang.CPP ? 'C++' : capitalize(lang)} to build your Nitro ${packageType.toLowerCase()} for ${platforms.join(' and ')}`,
+            }
+        }
+    )
 
     const selectedLangs = await p.select({
         message: kleur.cyan('Which language(s) would you like to use?'),
@@ -191,17 +310,15 @@ const getUserAnswers = async (
     options?: CreateModuleOptions
 ): Promise<UserAnswers> => {
     if (options?.ci) {
-        const platforms = [SupportedPlatform.IOS, SupportedPlatform.ANDROID]
+        const platforms = parsePlatformsOption(options.platforms)
         const packageType = options?.packageType || Nitro.Module
+
         return {
             packageName: name,
             description: `${kleur.yellow(`react-native-${name}`)} is a react native package built with Nitro`,
             platforms,
             packageType,
-            langs:
-                packageType === Nitro.View
-                    ? resolveViewLanguages(platforms)
-                    : [SupportedLang.SWIFT, SupportedLang.KOTLIN],
+            langs: parseLangsOption(options.langs, platforms, packageType),
             pm: usedPm || 'pnpm',
         }
     }
