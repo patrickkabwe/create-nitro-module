@@ -2,4 +2,4 @@ appId: ${APP_ID}
 ---
 - launchApp
 - assertVisible:
-      id: 'test-view'
+      id: ${MODULE_ID}
