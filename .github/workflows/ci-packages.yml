@@ -503,7 +503,7 @@ jobs:
 
     e2e-android:
         name: Android E2E - ${{ matrix.package_type }} - ${{ matrix.scenario }}
-        needs: [test-ios-build, test-android-build, define-matrix]
+        needs: [test-android-build, define-matrix]
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
@@ -587,7 +587,7 @@ jobs:
 
     e2e-ios:
         name: iOS E2E - ${{ matrix.package_type }} - ${{ matrix.scenario }}
-        needs: [test-ios-build, test-android-build, define-matrix]
+        needs: [test-ios-build, define-matrix]
         runs-on: macOS-15
         strategy:
             fail-fast: false
