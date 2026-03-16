@@ -519,9 +519,9 @@ export class NitroModuleFactory {
 
     private async installDependenciesAndRunCodegen() {
         await execAsync(`${this.config.pm} install`, { cwd: this.config.cwd })
-        let packageManager =
+        const packageManager =
             this.config.pm === 'npm' ? 'npx --yes' : this.config.pm
-        let codegenCommand = `${packageManager} nitrogen --logLevel="debug" && ${this.config.pm} run build${Object.values(this.config.platformLangs).includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
+        const codegenCommand = `${packageManager} nitrogen --logLevel="debug" && ${this.config.pm} run build${Object.values(this.config.platformLangs).includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
         await execAsync(codegenCommand, { cwd: this.config.cwd })
     }
 

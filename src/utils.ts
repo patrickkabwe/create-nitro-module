@@ -3,8 +3,8 @@ import { execSync } from 'node:child_process'
 import { access, cp, mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import {
-    GenerateModuleConfig,
-    PlatformLangMap,
+    type GenerateModuleConfig,
+    type PlatformLangMap,
     SupportedLang,
     SupportedPlatform,
 } from './types'
@@ -152,7 +152,7 @@ export const replacePlaceholder = async ({
     replacements: Record<string, string>
     data?: string
 }) => {
-    let fileContent
+    let fileContent: string
     if (data) {
         fileContent = data
     } else if (filePath) {
