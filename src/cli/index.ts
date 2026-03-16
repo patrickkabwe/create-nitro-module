@@ -11,6 +11,8 @@ program
     .version(`CLI Version: ${packageJson.version}`, '-v, --version')
     .argument('[name]', 'name of the module to create')
     .option('-t, --package-type <packageType>', 'type of the package to create')
+    .option('--platforms <platforms>', 'comma-separated platforms to target')
+    .option('--langs <langs>', 'comma-separated languages to generate')
     .option(
         '-d, --module-dir <moduleDirectory>',
         'directory to create the module in'

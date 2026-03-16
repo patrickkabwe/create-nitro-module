@@ -23,7 +23,7 @@ on:
             - 'assets/template/**'
     workflow_dispatch:
     schedule:
-        - cron: '0 0 * * *' # Every day at midnight
+        - cron: '0 0 * * *'
 
 permissions:
     contents: write
@@ -37,8 +37,6 @@ jobs:
     lint-and-build:
         name: Lint and Build CLI
         runs-on: ubuntu-latest
-        outputs:
-            bun-cache-key: ${{ runner.os }}-bun
         steps:
             - name: Checkout Repo
               uses: actions/checkout@v6
@@ -49,7 +47,6 @@ jobs:
                   bun-version: latest
 
             - name: Cache bun dependencies
-              id: bun-cache
               uses: actions/cache@v5
               with:
                   path: ~/.bun/install/cache
@@ -71,14 +68,145 @@ jobs:
                   node lib/cli/index.js --help
                   node lib/cli/index.js create --help
 
+    define-matrix:
+        name: Define Package Matrices
+        runs-on: ubuntu-latest
+        outputs:
+            generation: ${{ steps.set-matrix.outputs.generation }}
+            ios-build: ${{ steps.set-matrix.outputs.ios_build }}
+            android-build: ${{ steps.set-matrix.outputs.android_build }}
+            ios-e2e: ${{ steps.set-matrix.outputs.ios_e2e }}
+            android-e2e: ${{ steps.set-matrix.outputs.android_e2e }}
+        steps:
+            - name: Build workflow matrices
+              id: set-matrix
+              shell: bash
+              run: |
+                  node <<'NODE' >> "$GITHUB_OUTPUT"
+                  const pms = ['bun', 'yarn']
+                  const scenarios = [
+                    {
+                      package_type: 'module',
+                      scenario: 'swift-kotlin',
+                      platforms: 'ios,android',
+                      langs: 'swift,kotlin',
+                      runs_ios: true,
+                      runs_android: true,
+                    },
+                    {
+                      package_type: 'module',
+                      scenario: 'cpp',
+                      platforms: 'ios,android',
+                      langs: 'c++',
+                      runs_ios: true,
+                      runs_android: true,
+                    },
+                    {
+                      package_type: 'module',
+                      scenario: 'swift',
+                      platforms: 'ios',
+                      langs: 'swift',
+                      runs_ios: true,
+                      runs_android: false,
+                    },
+                    {
+                      package_type: 'module',
+                      scenario: 'kotlin',
+                      platforms: 'android',
+                      langs: 'kotlin',
+                      runs_ios: false,
+                      runs_android: true,
+                    },
+                    {
+                      package_type: 'module',
+                      scenario: 'cpp-ios',
+                      platforms: 'ios',
+                      langs: 'c++',
+                      runs_ios: true,
+                      runs_android: false,
+                    },
+                    {
+                      package_type: 'module',
+                      scenario: 'cpp-android',
+                      platforms: 'android',
+                      langs: 'c++',
+                      runs_ios: false,
+                      runs_android: true,
+                    },
+                    {
+                      package_type: 'view',
+                      scenario: 'swift-kotlin',
+                      platforms: 'ios,android',
+                      langs: 'swift,kotlin',
+                      runs_ios: true,
+                      runs_android: true,
+                    },
+                    {
+                      package_type: 'view',
+                      scenario: 'swift',
+                      platforms: 'ios',
+                      langs: 'swift',
+                      runs_ios: true,
+                      runs_android: false,
+                    },
+                    {
+                      package_type: 'view',
+                      scenario: 'kotlin',
+                      platforms: 'android',
+                      langs: 'kotlin',
+                      runs_ios: false,
+                      runs_android: true,
+                    },
+                  ]
+
+                  const enrich = (item, extra = {}) => ({
+                    ...item,
+                    ...extra,
+                    package_dir: `react-native-test-${item.package_type}-${item.scenario}`,
+                  })
+
+                  const generation = pms.flatMap(pm =>
+                    scenarios.map(item => enrich(item, { pm }))
+                  )
+                  const iosBuild = pms.flatMap(pm =>
+                    scenarios
+                      .filter(item => item.runs_ios)
+                      .flatMap(item =>
+                        ['Debug', 'Release'].map(mode =>
+                          enrich(item, { pm, mode })
+                        )
+                      )
+                  )
+                  const androidBuild = pms.flatMap(pm =>
+                    scenarios
+                      .filter(item => item.runs_android)
+                      .flatMap(item =>
+                        ['Debug', 'Release'].map(mode =>
+                          enrich(item, { pm, mode })
+                        )
+                      )
+                  )
+                  const iosE2E = scenarios
+                    .filter(item => item.runs_ios)
+                    .map(item => enrich(item, { pm: 'bun', mode: 'Release' }))
+                  const androidE2E = scenarios
+                    .filter(item => item.runs_android)
+                    .map(item => enrich(item, { pm: 'bun', mode: 'Release' }))
+
+                  console.log(`generation=${JSON.stringify({ include: generation })}`)
+                  console.log(`ios_build=${JSON.stringify({ include: iosBuild })}`)
+                  console.log(`android_build=${JSON.stringify({ include: androidBuild })}`)
+                  console.log(`ios_e2e=${JSON.stringify({ include: iosE2E })}`)
+                  console.log(`android_e2e=${JSON.stringify({ include: androidE2E })}`)
+                  NODE
+
     generate-packages:
-        name: Generate with ${{ matrix.pm }} - ${{ matrix.package-type }}
-        needs: lint-and-build
+        name: Generate ${{ matrix.package_type }} - ${{ matrix.scenario }} - ${{ matrix.pm }}
+        needs: [lint-and-build, define-matrix]
         runs-on: macos-latest
         strategy:
-            matrix:
-                pm: ['bun', 'yarn']
-                package-type: ['module', 'view']
+            fail-fast: false
+            matrix: ${{ fromJson(needs.define-matrix.outputs.generation) }}
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         steps:
@@ -89,14 +217,8 @@ jobs:
                   git config --global user.name "GitHub Actions Bot"
                   git config --global user.email "actions@github.com"
 
-            - name: Setup pnpm
-              if: matrix.pm == 'pnpm'
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10
-
             - name: Setup Node.js
-              if: matrix.pm == 'yarn' || matrix.pm == 'pnpm'
+              if: matrix.pm == 'yarn'
               uses: actions/setup-node@v6
               with:
                   node-version: 22.x
@@ -107,91 +229,120 @@ jobs:
                   bun-version: latest
 
             - name: Cache dependencies (bun)
-              if: matrix.pm == 'bun'
               uses: actions/cache@v5
               with:
                   path: ~/.bun/install/cache
-                  key: ${{ needs.lint-and-build.outputs.bun-cache-key }}-${{ hashFiles('**/bun.lockb') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
-            - name: Install npm dependencies (bun)
+            - name: Install repository dependencies
               run: bun install
 
             - name: Build CLI and Link Locally
               run: |
                   bun run build
-                  ${{matrix.pm}} link
+                  ${{ matrix.pm }} link
 
-            - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }}
-              if: matrix.pm != 'pnpm'
-              run: ${{ matrix.pm }} create nitro-module test-${{ matrix.package-type }} --skip-install --ci --package-type ${{ matrix.package-type }}
-
-            - name: Generate ${{ matrix.package-type }} with ${{ matrix.pm }} (pnpm)
-              if: matrix.pm == 'pnpm'
-              run: create-nitro-module test-${{ matrix.package-type }} --skip-install --ci --package-type ${{ matrix.package-type }}
+            - name: Generate package
+              run: |
+                  ${{ matrix.pm }} create nitro-module test-${{ matrix.package_type }}-${{ matrix.scenario }} \
+                    --skip-install \
+                    --ci \
+                    --package-type ${{ matrix.package_type }} \
+                    --platforms ${{ matrix.platforms }} \
+                    --langs ${{ matrix.langs }}
 
             - name: Verify generated package structure
+              shell: bash
               run: |
-                  PACKAGE_DIR="react-native-test-${{ matrix.package-type }}"
+                  PACKAGE_DIR="${{ matrix.package_dir }}"
                   if [ ! -d "$PACKAGE_DIR" ]; then
-                    echo "❌ Package directory not found: $PACKAGE_DIR"
+                    echo "Package directory not found: $PACKAGE_DIR"
                     ls -la
                     exit 1
                   fi
-                  echo "✅ Package directory created: $PACKAGE_DIR"
+
                   cd "$PACKAGE_DIR"
-                  REQUIRED_FILES=(
+
+                  REQUIRED_PATHS=(
                     "package.json"
                     "README.md"
                     "src/"
-                    "android/"
-                    "ios/"
                     "example/"
                   )
-                  for file in "${REQUIRED_FILES[@]}"; do
-                    if [ ! -e "$file" ]; then
-                      echo "❌ Missing required file/directory: $file"
+
+                  if [ "${{ matrix.runs_android }}" = "true" ]; then
+                    REQUIRED_PATHS+=("android/")
+                  fi
+
+                  if [ "${{ matrix.runs_ios }}" = "true" ]; then
+                    REQUIRED_PATHS+=("ios/")
+                  fi
+
+                  for path in "${REQUIRED_PATHS[@]}"; do
+                    if [ ! -e "$path" ]; then
+                      echo "Missing required file/directory: $path"
                       ls -la
                       exit 1
                     fi
-                    echo "✅ Found: $file"
+                    echo "Found: $path"
                   done
 
+                  if [ "${{ matrix.runs_android }}" != "true" ] && [ -e "android" ]; then
+                    echo "Unexpected android directory for scenario ${{ matrix.scenario }}"
+                    exit 1
+                  fi
+
+                  if [ "${{ matrix.runs_ios }}" != "true" ] && [ -e "ios" ]; then
+                    echo "Unexpected ios directory for scenario ${{ matrix.scenario }}"
+                    exit 1
+                  fi
+
+                  if [ "${{ matrix.runs_ios }}" = "true" ] && ! find . -maxdepth 1 -name "*.podspec" | grep -q .; then
+                    echo "Expected podspec for iOS-enabled scenario"
+                    exit 1
+                  fi
+
+                  if [ "${{ matrix.runs_ios }}" != "true" ] && find . -maxdepth 1 -name "*.podspec" | grep -q .; then
+                    echo "Unexpected podspec for Android-only scenario"
+                    exit 1
+                  fi
+
             - name: Test package.json content
+              shell: bash
               run: |
-                  cd "react-native-test-${{ matrix.package-type }}"
-                  if ! grep -q "react-native-test-${{ matrix.package-type }}" package.json; then
-                    echo "❌ Package name not correct in package.json" && cat package.json && exit 1
+                  cd "${{ matrix.package_dir }}"
+                  if ! grep -q "react-native-test-${{ matrix.package_type }}-${{ matrix.scenario }}" package.json; then
+                    echo "Package name not correct in package.json"
+                    cat package.json
+                    exit 1
                   fi
                   if ! grep -q '"scripts"' package.json; then
-                    echo "❌ Scripts section missing from package.json" && exit 1
+                    echo "Scripts section missing from package.json"
+                    exit 1
                   fi
-                  echo "✅ package.json structure validated"
+                  echo "package.json structure validated"
 
             - name: Upload generated package
               uses: actions/upload-artifact@v7
               with:
-                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
-                  path: react-native-test-${{ matrix.package-type }}
+                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
+                  path: ${{ matrix.package_dir }}
                   include-hidden-files: true
                   if-no-files-found: error
                   retention-days: 7
 
-    # Package manager build tests (iOS)
     test-ios-build:
-        name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
-        needs: generate-packages
+        name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package_type }} - ${{ matrix.scenario }} (${{ matrix.mode }})
+        needs: [generate-packages, define-matrix]
         runs-on: macOS-latest
         strategy:
             fail-fast: false
-            matrix:
-                pm: ['bun', 'yarn']
-                package-type: ['module', 'view']
-                mode: ['Debug', 'Release']
+            matrix: ${{ fromJson(needs.define-matrix.outputs.ios-build) }}
         env:
-            WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
-            SCHEME: ${{ matrix.package-type == 'module' && 'TestModuleExample' || 'TestViewExample' }}
+            WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
+            SCHEME: ${{ matrix.package_type == 'module' && 'TestModuleExample' || 'TestViewExample' }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v6
@@ -202,7 +353,7 @@ jobs:
             - name: Download generated package
               uses: actions/download-artifact@v8
               with:
-                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
 
             - name: List package structure
@@ -272,19 +423,15 @@ jobs:
                   scheme: ${{ env.SCHEME }}
                   mode: ${{ matrix.mode }}
 
-    # Package manager build tests (Android)
     test-android-build:
-        name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package-type }} (${{ matrix.mode }})
-        needs: generate-packages
+        name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package_type }} - ${{ matrix.scenario }} (${{ matrix.mode }})
+        needs: [generate-packages, define-matrix]
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
-            matrix:
-                pm: ['bun', 'yarn']
-                package-type: ['module', 'view']
-                mode: ['Debug', 'Release']
+            matrix: ${{ fromJson(needs.define-matrix.outputs.android-build) }}
         env:
-            WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
+            WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v6
@@ -295,7 +442,7 @@ jobs:
             - name: Download generated package
               uses: actions/download-artifact@v8
               with:
-                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
 
             - name: List package structure
@@ -349,24 +496,22 @@ jobs:
                   key: ${{ runner.os }}-gradle-${{ hashFiles(format('{0}/example/android/**/*.gradle*', env.WORKING_DIR)) }}
                   restore-keys: |
                       ${{ runner.os }}-gradle-
+
             - name: Build Android project
               uses: ./.github/actions/android-gradle-build
               with:
                   android-dir: ${{ env.WORKING_DIR }}/example/android
                   mode: ${{ matrix.mode }}
 
-    # E2E tests (Android)
     e2e-android:
-        name: Android E2E Test
-        needs: generate-packages
+        name: Android E2E - ${{ matrix.package_type }} - ${{ matrix.scenario }}
+        needs: [generate-packages, define-matrix]
         runs-on: ubuntu-latest
         strategy:
-            matrix:
-                package-type: ['module', 'view']
-                mode: ['Release']
-                pm: ['bun']
+            fail-fast: false
+            matrix: ${{ fromJson(needs.define-matrix.outputs.android-e2e) }}
         env:
-            WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
+            WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v6
@@ -384,7 +529,7 @@ jobs:
             - name: Download generated package
               uses: actions/download-artifact@v8
               with:
-                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
 
             - name: List package structure
@@ -440,22 +585,19 @@ jobs:
                   disable-animations: true
                   script: |
                       adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
-                      ${{ matrix.pm }} android:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package-type }}
+                      ${{ matrix.pm }} android:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package_type }}
 
-    # E2E tests (iOS)
     e2e-ios:
-        name: iOS E2E Test
-        needs: generate-packages
+        name: iOS E2E - ${{ matrix.package_type }} - ${{ matrix.scenario }}
+        needs: [generate-packages, define-matrix]
         runs-on: macOS-15
         strategy:
-            matrix:
-                package-type: ['module', 'view']
-                mode: ['Release']
-                pm: ['bun']
+            fail-fast: false
+            matrix: ${{ fromJson(needs.define-matrix.outputs.ios-e2e) }}
         env:
             MAESTRO_DRIVER_STARTUP_TIMEOUT: 300_000
             MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: true
-            WORKING_DIR: ${{ github.workspace }}/react-native-test-${{ matrix.package-type }}
+            WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v6
@@ -471,7 +613,7 @@ jobs:
             - name: Download generated module
               uses: actions/download-artifact@v8
               with:
-                  name: test-${{ matrix.package-type }}-${{ matrix.pm }}
+                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
 
             - name: List package structure
@@ -525,9 +667,9 @@ jobs:
               uses: actions/cache@v5
               with:
                   path: ~/Library/Caches/ccache
-                  key: ${{ runner.os }}-ccache-${{ matrix.package-type }}-${{ github.sha }}
+                  key: ${{ runner.os }}-ccache-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ github.sha }}
                   restore-keys: |
-                      ${{ runner.os }}-ccache-${{ matrix.package-type }}-
+                      ${{ runner.os }}-ccache-${{ matrix.package_type }}-${{ matrix.scenario }}-
                       ${{ runner.os }}-ccache-
 
             - name: Configure ccache
@@ -543,7 +685,7 @@ jobs:
               env:
                   USE_CCACHE: 1
                   CCACHE_DIR: ~/Library/Caches/ccache
-              run: ${{ matrix.pm }} ios:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package-type }}
+              run: ${{ matrix.pm }} ios:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package_type }}
 
             - name: Print ccache statistics
               if: always()
@@ -553,6 +695,6 @@ jobs:
               if: always()
               uses: actions/upload-artifact@v7
               with:
-                  name: maestro-artifacts-ios-${{ matrix.package-type }}
+                  name: maestro-artifacts-ios-${{ matrix.package_type }}-${{ matrix.scenario }}
                   path: e2e-artifacts
                   include-hidden-files: true

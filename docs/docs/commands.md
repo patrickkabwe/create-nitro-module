@@ -21,9 +21,13 @@ Arguments:
 
 Options:
   -v, --version                       output the version number
+  -t, --package-type <packageType>    type of the package to create
+  --platforms <platforms>             comma-separated platforms to target
+  --langs <langs>                     comma-separated languages to generate
   -d, --module-dir <moduleDirectory>  directory to create the module in
   -e, --skip-example                  skip example app generation
   -i, --skip-install                  skip installing dependencies
+  --ci                               run in CI mode
   -h, --help                          display help for command
 ```
 
