@@ -6,7 +6,7 @@ inputs:
         required: true
     scheme:
         description: Xcode scheme to build
-        required: true
+        required: false
     mode:
         description: Build configuration (Debug|Release)
         required: true
@@ -20,6 +20,20 @@ runs:
               cd "${{ inputs.ios-dir }}"
               
               set -o pipefail
+
+              WORKSPACE_NAME="$(find . -maxdepth 1 -name '*.xcworkspace' ! -name 'Pods.xcworkspace' -exec basename {} .xcworkspace \; | head -1)"
+              SCHEME_NAME="${{ inputs.scheme }}"
+
+              if [ -z "$WORKSPACE_NAME" ]; then
+                echo "No Xcode workspace found in ${{ inputs.ios-dir }}"
+                exit 1
+              fi
+
+              if [ -z "$SCHEME_NAME" ]; then
+                SCHEME_NAME="$WORKSPACE_NAME"
+              fi
+
+              echo "Building workspace ${WORKSPACE_NAME}.xcworkspace with scheme ${SCHEME_NAME}"
               
               max_retries=3
               attempt=1
@@ -31,8 +45,8 @@ runs:
                 if xcodebuild \
                   CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
                   -derivedDataPath build -UseModernBuildSystem=YES \
-                  -workspace "${SCHEME}.xcworkspace" \
-                  -scheme "${SCHEME}" \
+                  -workspace "${WORKSPACE_NAME}.xcworkspace" \
+                  -scheme "${SCHEME_NAME}" \
                   -sdk iphonesimulator \
                   -configuration "${{ inputs.mode }}" \
                   -destination 'platform=iOS Simulator,name=iPhone 16' \
@@ -50,5 +64,3 @@ runs:
                 attempt=$((attempt + 1))
                 echo "Retrying xcodebuild..."
               done
-          env:
-              SCHEME: ${{ inputs.scheme }}
