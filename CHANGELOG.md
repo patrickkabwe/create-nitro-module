@@ -1,3 +1,33 @@
+## [3.6.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.5.4...v3.6.0) (2026-03-16)
+
+### ✨ Features
+
+* add package type, platforms, and languages options ([1352541](https://github.com/patrickkabwe/create-nitro-module/commit/1352541d0c827b49b74410d5992bc6f8433824fa))
+* enable per-platform language selection and match with new nitro version ([b91c42b](https://github.com/patrickkabwe/create-nitro-module/commit/b91c42b1604a31603aecc474db91dc4cc37e1847))
+
+### 🐛 Bug Fixes
+
+* c++ with swift or kotlin modules creation ([001f36c](https://github.com/patrickkabwe/create-nitro-module/commit/001f36ca774a1900f98d8bc787e7e82aa670c200))
+* correct C++ language reference ([93c60a3](https://github.com/patrickkabwe/create-nitro-module/commit/93c60a37bdc15e9f80ee5b54be5b91d439f59c40))
+* include cpp header files to `CMakeLists.txt` when building on android ([ca6ffce](https://github.com/patrickkabwe/create-nitro-module/commit/ca6ffced9c920de65b5627c98ba14301763af085))
+* include cpp header files to `CMakeLists.txt` when building on android ([d73e2ef](https://github.com/patrickkabwe/create-nitro-module/commit/d73e2ef7bca18d1127f69d0a2c5d7e7758da81d6))
+* make Xcode scheme input optional ([48c33f7](https://github.com/patrickkabwe/create-nitro-module/commit/48c33f7fcdef40b270344c299f960aac1a4db4ba))
+* remove unnecessary dependency ([135b722](https://github.com/patrickkabwe/create-nitro-module/commit/135b722b90f1350de73a73d369e04765e30008da))
+* update E2E job dependencies to include iOS and Android build tests ([1ae5f09](https://github.com/patrickkabwe/create-nitro-module/commit/1ae5f0908701a160087d79d7cddc694737668786))
+* update E2E test configuration to use dynamic MODULE_ID ([20f97f1](https://github.com/patrickkabwe/create-nitro-module/commit/20f97f1f603f95be9c857c9e33f6114ad6067d75))
+
+### 🛠️ Other changes
+
+* bump up nitro ([4eb18cd](https://github.com/patrickkabwe/create-nitro-module/commit/4eb18cd5400020faf87d75af2b7bba7da5f8fefb))
+* bump up nitrogen and react-native-nitro-modules to version 0.35.2 ([0d1b3f0](https://github.com/patrickkabwe/create-nitro-module/commit/0d1b3f04655c8687cce2939e059b48ce1fe0ce48))
+* **deps-dev:** bump @commitlint/cli from 20.4.2 to 20.4.3 ([1586bdd](https://github.com/patrickkabwe/create-nitro-module/commit/1586bdd126c6bc4eaf87fe8fdb6220c22577e1fc))
+* **deps-dev:** bump @types/node from 25.3.0 to 25.3.5 ([af169a6](https://github.com/patrickkabwe/create-nitro-module/commit/af169a6171add9e31a0c320c9bae619cfceaf923))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([a9d9270](https://github.com/patrickkabwe/create-nitro-module/commit/a9d927072200bc1c111eb362d481a52f5fb1e25c))
+* **deps-dev:** bump @typescript-eslint/parser from 8.56.0 to 8.56.1 ([e7ddc8d](https://github.com/patrickkabwe/create-nitro-module/commit/e7ddc8d8fbdfbcf6f9360c5d0621e961ed996948))
+* **deps-dev:** bump lefthook from 2.1.0 to 2.1.2 ([a321f06](https://github.com/patrickkabwe/create-nitro-module/commit/a321f0606700488b6b2ebaff4df0b1dd36e787da))
+* **deps:** bump commander from 14.0.2 to 14.0.3 ([7fd8b45](https://github.com/patrickkabwe/create-nitro-module/commit/7fd8b4501f8f1e979066763a54f36bb80411dc17))
+* format code ([0b65245](https://github.com/patrickkabwe/create-nitro-module/commit/0b6524541dd0ecc0366fd8f418fb3a07c9f6464f))
+
 ## [3.5.4](https://github.com/patrickkabwe/create-nitro-module/compare/v3.5.3...v3.5.4) (2026-03-01)
 
 ### 🛠️ Other changes
