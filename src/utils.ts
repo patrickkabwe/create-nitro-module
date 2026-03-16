@@ -90,7 +90,10 @@ export const generateAutolinking = (
     if (langs.every(lang => lang === SupportedLang.CPP)) {
         return {
             [moduleName]: {
-                all: { language: SupportedLang.CPP, implementationClassName: className },
+                all: {
+                    language: SupportedLang.CPP,
+                    implementationClassName: className,
+                },
             },
         }
     }
