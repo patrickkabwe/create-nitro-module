@@ -30,7 +30,7 @@ import { CppFileGenerator } from './file-generators/cpp-file-generator'
 import { IOSFileGenerator } from './file-generators/ios-file-generator'
 import { JSFileGenerator } from './file-generators/js-file-generator'
 import {
-    GenerateModuleConfig,
+    type GenerateModuleConfig,
     Nitro,
     SupportedLang,
     SupportedPlatform,

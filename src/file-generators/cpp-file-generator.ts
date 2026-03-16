@@ -2,8 +2,8 @@ import { readFile } from 'fs/promises'
 import path from 'path'
 import { cppCode, hppCode } from '../code-snippets/code.cpp'
 import {
-    FileGenerator,
-    GenerateModuleConfig,
+    type FileGenerator,
+    type GenerateModuleConfig,
     SupportedPlatform,
 } from '../types'
 import { createFolder, createModuleFile, toPascalCase } from '../utils'

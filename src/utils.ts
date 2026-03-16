@@ -90,26 +90,22 @@ export const generateAutolinking = (
     if (langs.every(lang => lang === SupportedLang.CPP)) {
         return {
             [moduleName]: {
-                all: { language: 'cpp', implementationClassName: className },
+                all: { language: SupportedLang.CPP, implementationClassName: className },
             },
         }
     }
 
     const entry: AutolinkingEntry = {}
 
-    const langToNitroLang = (lang: SupportedLang): string => {
-        return lang === SupportedLang.CPP ? 'cpp' : lang
-    }
-
     if (platformLangs[SupportedPlatform.IOS]) {
         entry.ios = {
-            language: langToNitroLang(platformLangs[SupportedPlatform.IOS]),
+            language: platformLangs[SupportedPlatform.IOS],
             implementationClassName: className,
         }
     }
     if (platformLangs[SupportedPlatform.ANDROID]) {
         entry.android = {
-            language: langToNitroLang(platformLangs[SupportedPlatform.ANDROID]),
+            language: platformLangs[SupportedPlatform.ANDROID],
             implementationClassName: className,
         }
     }

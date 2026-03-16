@@ -9,8 +9,8 @@ import {
 import { postScript } from '../code-snippets/code.js'
 import { ANDROID_CXX_LIB_NAME_TAG, ANDROID_NAME_SPACE_TAG } from '../constants'
 import {
-    FileGenerator,
-    GenerateModuleConfig,
+    type FileGenerator,
+    type GenerateModuleConfig,
     Nitro,
     SupportedLang,
     SupportedPlatform,
