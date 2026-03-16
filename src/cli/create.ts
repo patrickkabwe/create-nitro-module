@@ -49,7 +49,13 @@ const getAllowedLanguageSelections = (
     ) {
         return [
             [SupportedLang.SWIFT, SupportedLang.KOTLIN],
-            ...(packageType === Nitro.Module ? [[SupportedLang.CPP]] : []),
+            ...(packageType === Nitro.Module
+                ? [
+                      [SupportedLang.CPP],
+                      [SupportedLang.SWIFT, SupportedLang.CPP],
+                      [SupportedLang.CPP, SupportedLang.KOTLIN],
+                  ]
+                : []),
         ]
     }
 
@@ -105,10 +111,14 @@ const getPlatformLangMap = (
 
     if (langs.includes(SupportedLang.SWIFT)) {
         result[SupportedPlatform.IOS] = SupportedLang.SWIFT
+    } else if (platforms.includes(SupportedPlatform.IOS)) {
+        result[SupportedPlatform.IOS] = SupportedLang.CPP
     }
 
     if (langs.includes(SupportedLang.KOTLIN)) {
         result[SupportedPlatform.ANDROID] = SupportedLang.KOTLIN
+    } else if (platforms.includes(SupportedPlatform.ANDROID)) {
+        result[SupportedPlatform.ANDROID] = SupportedLang.CPP
     }
 
     return result

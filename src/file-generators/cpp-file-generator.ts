@@ -74,6 +74,8 @@ export class CppFileGenerator implements FileGenerator {
     }
 
     async generateCppCodeFiles(config: GenerateModuleConfig) {
+        await createFolder(config.cwd, 'cpp')
+
         const cppPath = path.join(
             'cpp',
             `Hybrid${toPascalCase(config.packageName)}.cpp`
