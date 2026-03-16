@@ -171,9 +171,10 @@ fi
 # Create output directory for videos
 mkdir -p e2e-artifacts
 
-recordCmd="maestro record \"$test_file\" -e APP_ID=$APP_ID --local"
+recordCmd="maestro record \"$test_file\" -e APP_ID=$APP_ID -e MODULE_ID=$PACKAGE_NAME --local"
 echo "🎯 Recording test video: $recordCmd"
 echo "📱 APP_ID: $APP_ID"
+echo "🆔 MODULE_ID: $PACKAGE_NAME"
 
 
 if ! eval "$recordCmd --debug-output e2e-artifacts/$PACKAGE_TYPE"; then
