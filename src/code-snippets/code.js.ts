@@ -47,7 +47,7 @@ export const nitroModuleSpecCode = (
     moduleName: string,
     platformLang: string,
     funcName: string
-) => `import { type HybridObject } from 'react-native-nitro-modules'
+) => `import type { HybridObject } from 'react-native-nitro-modules'
 
 export interface ${toPascalCase(
     moduleName

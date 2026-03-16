@@ -6,13 +6,14 @@ import projectPackageJsonFile from '../../package.json'
 import { generateInstructions, messages } from '../constants'
 import { NitroModuleFactory } from '../generate-nitro-package'
 import {
-    CreateModuleOptions,
+    type CreateModuleOptions,
     Nitro,
-    PackageManager,
+    type PackageManager,
     PLATFORM_LANGUAGE_MAP,
+    type PlatformLangMap,
     SupportedLang,
     SupportedPlatform,
-    UserAnswers,
+    type UserAnswers,
 } from '../types'
 import {
     capitalize,
@@ -48,7 +49,13 @@ const getAllowedLanguageSelections = (
     ) {
         return [
             [SupportedLang.SWIFT, SupportedLang.KOTLIN],
-            ...(packageType === Nitro.Module ? [[SupportedLang.CPP]] : []),
+            ...(packageType === Nitro.Module
+                ? [
+                      [SupportedLang.CPP],
+                      [SupportedLang.SWIFT, SupportedLang.CPP],
+                      [SupportedLang.CPP, SupportedLang.KOTLIN],
+                  ]
+                : []),
         ]
     }
 
@@ -89,7 +96,35 @@ const parsePlatformsOption = (value?: string) => {
         : [SupportedPlatform.IOS, SupportedPlatform.ANDROID]
 }
 
-const parseLangsOption = (
+const getPlatformLangMap = (
+    platforms: SupportedPlatform[],
+    langs: SupportedLang[]
+): PlatformLangMap => {
+    const result: PlatformLangMap = {}
+
+    if (langs.length === 1) {
+        for (const platform of platforms) {
+            result[platform] = langs[0]
+        }
+        return result
+    }
+
+    if (langs.includes(SupportedLang.SWIFT)) {
+        result[SupportedPlatform.IOS] = SupportedLang.SWIFT
+    } else if (platforms.includes(SupportedPlatform.IOS)) {
+        result[SupportedPlatform.IOS] = SupportedLang.CPP
+    }
+
+    if (langs.includes(SupportedLang.KOTLIN)) {
+        result[SupportedPlatform.ANDROID] = SupportedLang.KOTLIN
+    } else if (platforms.includes(SupportedPlatform.ANDROID)) {
+        result[SupportedPlatform.ANDROID] = SupportedLang.CPP
+    }
+
+    return result
+}
+
+const parsePlatformLangsOption = (
     value: string | undefined,
     platforms: SupportedPlatform[],
     packageType: Nitro
@@ -100,9 +135,12 @@ const parseLangsOption = (
     )
 
     if (!value) {
-        return packageType === Nitro.View
-            ? resolveViewLanguages(platforms)
-            : allowedSelections[0]
+        return getPlatformLangMap(
+            platforms,
+            packageType === Nitro.View
+                ? Object.values(resolveViewLanguages(platforms))
+                : allowedSelections[0]
+        )
     }
 
     const langs = Array.from(
@@ -129,7 +167,7 @@ const parseLangsOption = (
         )
     }
 
-    return langs
+    return getPlatformLangMap(platforms, langs)
 }
 
 export const createModule = async (
@@ -167,7 +205,7 @@ export const createModule = async (
 
         moduleFactory = new NitroModuleFactory({
             description: answers.description,
-            langs: answers.langs,
+            platformLangs: answers.platformLangs,
             packageName,
             platforms: answers.platforms,
             pm: answers.pm,
@@ -181,7 +219,7 @@ export const createModule = async (
 
         const modulePath = path.join(
             process.cwd(),
-            'react-native-' + packageName.toLowerCase()
+            `react-native-${packageName.toLowerCase()}`
         )
         const dirExists = await dirExist(modulePath)
 
@@ -232,7 +270,7 @@ export const createModule = async (
         if (packageName) {
             const modulePath = path.join(
                 process.cwd(),
-                'react-native-' + packageName.toLowerCase()
+                `react-native-${packageName.toLowerCase()}`
             )
             rmSync(modulePath, { recursive: true, force: true })
         }
@@ -253,55 +291,49 @@ export const createModule = async (
     }
 }
 
-const selectLanguages = async (
+const selectPlatformLanguages = async (
     platforms: SupportedPlatform[],
     packageType: Nitro
-) => {
-    const options = getAllowedLanguageSelections(platforms, packageType).map(
-        langs => {
-            if (
-                langs.includes(SupportedLang.SWIFT) &&
-                langs.includes(SupportedLang.KOTLIN)
-            ) {
-                return {
-                    label: 'Swift & Kotlin',
-                    value: langs,
-                    hint: `Use Swift and Kotlin to build your Nitro ${packageType.toLowerCase()} for iOS and Android`,
-                }
-            }
+): Promise<PlatformLangMap | symbol> => {
+    const result: PlatformLangMap = {}
 
-            const [lang] = langs
-            return {
-                label: capitalize(lang === SupportedLang.CPP ? 'c++' : lang),
-                value: langs,
-                hint:
-                    lang === SupportedLang.CPP &&
-                    platforms.includes(SupportedPlatform.IOS) &&
-                    platforms.includes(SupportedPlatform.ANDROID)
-                        ? 'Use C++ to share code between iOS and Android'
-                        : `Use ${lang === SupportedLang.CPP ? 'C++' : capitalize(lang)} to build your Nitro ${packageType.toLowerCase()} for ${platforms.join(' and ')}`,
-            }
+    for (const platform of platforms) {
+        const availableLanguages = PLATFORM_LANGUAGE_MAP[platform].filter(
+            lang => packageType !== Nitro.View || lang !== SupportedLang.CPP
+        )
+
+        if (availableLanguages.length === 1) {
+            result[platform] = availableLanguages[0]
+            continue
         }
-    )
 
-    const selectedLangs = await p.select({
-        message: kleur.cyan('Which language(s) would you like to use?'),
-        options,
-    })
+        const selected = await p.select({
+            message: kleur.cyan(`Choose language for ${platform}:`),
+            options: availableLanguages.map(lang => ({
+                label: lang === SupportedLang.CPP ? 'C++' : capitalize(lang),
+                value: lang,
+                hint: `Use ${lang === SupportedLang.CPP ? 'C++' : capitalize(lang)} for ${platform}`,
+            })),
+        })
 
-    if (p.isCancel(selectedLangs)) return selectedLangs
-    return selectedLangs
+        if (p.isCancel(selected)) return selected
+        result[platform] = selected
+    }
+
+    return result
 }
 
-const resolveViewLanguages = (platforms: SupportedPlatform[]) => {
-    const langs = new Set<SupportedLang>()
+const resolveViewLanguages = (
+    platforms: SupportedPlatform[]
+): PlatformLangMap => {
+    const result: PlatformLangMap = {}
     if (platforms.includes(SupportedPlatform.IOS)) {
-        langs.add(SupportedLang.SWIFT)
+        result[SupportedPlatform.IOS] = SupportedLang.SWIFT
     }
     if (platforms.includes(SupportedPlatform.ANDROID)) {
-        langs.add(SupportedLang.KOTLIN)
+        result[SupportedPlatform.ANDROID] = SupportedLang.KOTLIN
     }
-    return Array.from(langs)
+    return result
 }
 
 const getUserAnswers = async (
@@ -318,7 +350,11 @@ const getUserAnswers = async (
             description: `${kleur.yellow(`react-native-${name}`)} is a react native package built with Nitro`,
             platforms,
             packageType,
-            langs: parseLangsOption(options.langs, platforms, packageType),
+            platformLangs: parsePlatformLangsOption(
+                options.langs,
+                platforms,
+                packageType
+            ),
             pm: usedPm || 'pnpm',
         }
     }
@@ -393,14 +429,14 @@ const getUserAnswers = async (
                     initialValue: Nitro.Module,
                 })
             },
-            langs: async ({ results }) => {
+            platformLangs: async ({ results }) => {
                 if (!results.platforms || !results.packageType) {
                     throw new Error('Missing required selections')
                 }
                 if (results.packageType === Nitro.View) {
                     return resolveViewLanguages(results.platforms)
                 }
-                return await selectLanguages(
+                return await selectPlatformLanguages(
                     results.platforms,
                     results.packageType
                 )
@@ -474,7 +510,7 @@ const getUserAnswers = async (
         packageName: group.packageName,
         packageType: group.packageType,
         platforms: group.platforms,
-        langs: group.langs as SupportedLang[],
+        platformLangs: group.platformLangs as PlatformLangMap,
         pm: group.pm,
         description: group.description as string,
     }

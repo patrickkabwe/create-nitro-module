@@ -103,6 +103,22 @@ jobs:
                     },
                     {
                       package_type: 'module',
+                      scenario: 'swift-cpp',
+                      platforms: 'ios,android',
+                      langs: 'swift,c++',
+                      runs_ios: true,
+                      runs_android: true,
+                    },
+                    {
+                      package_type: 'module',
+                      scenario: 'cpp-kotlin',
+                      platforms: 'ios,android',
+                      langs: 'c++,kotlin',
+                      runs_ios: true,
+                      runs_android: true,
+                    },
+                    {
+                      package_type: 'module',
                       scenario: 'swift',
                       platforms: 'ios',
                       langs: 'swift',

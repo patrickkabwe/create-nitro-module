@@ -2,8 +2,8 @@ import { readFile } from 'fs/promises'
 import path from 'path'
 import { cppCode, hppCode } from '../code-snippets/code.cpp'
 import {
-    FileGenerator,
-    GenerateModuleConfig,
+    type FileGenerator,
+    type GenerateModuleConfig,
     SupportedPlatform,
 } from '../types'
 import { createFolder, createModuleFile, toPascalCase } from '../utils'
@@ -23,31 +23,7 @@ export class CppFileGenerator implements FileGenerator {
                 config.platforms.includes(SupportedPlatform.ANDROID)
             ) {
                 await generator.generate(config)
-                // add generate objects to CMakeLists.txt
-                const cmakeListsPath = path.join(
-                    config.cwd,
-                    'android',
-                    'CMakeLists.txt'
-                )
-                let cmakeListsContent = await readFile(cmakeListsPath, {
-                    encoding: 'utf-8',
-                })
-
-                cmakeListsContent = cmakeListsContent.replace(
-                    'src/main/cpp/cpp-adapter.cpp',
-                    ''
-                )
-                cmakeListsContent = cmakeListsContent.replace(
-                    'add_library(${PACKAGE_NAME} SHARED',
-                    'add_library(${PACKAGE_NAME} SHARED \n\t' +
-                        `src/main/cpp/cpp-adapter.cpp\n\t../cpp/Hybrid${toPascalCase(config.packageName)}.cpp\n\t../cpp/Hybrid${toPascalCase(config.packageName)}.hpp`
-                )
-
-                await createModuleFile(
-                    config.cwd,
-                    'android/CMakeLists.txt',
-                    cmakeListsContent
-                )
+                await this.updateAndroidCMakeLists(config)
                 continue
             }
 
@@ -74,6 +50,8 @@ export class CppFileGenerator implements FileGenerator {
     }
 
     async generateCppCodeFiles(config: GenerateModuleConfig) {
+        await createFolder(config.cwd, 'cpp')
+
         const cppPath = path.join(
             'cpp',
             `Hybrid${toPascalCase(config.packageName)}.cpp`
@@ -92,6 +70,39 @@ export class CppFileGenerator implements FileGenerator {
             config.cwd,
             hppPath,
             hppCode(toPascalCase(config.packageName), `${config.funcName}`)
+        )
+    }
+
+    async updateAndroidCMakeLists(config: GenerateModuleConfig) {
+        const cmakeListsPath = path.join(
+            config.cwd,
+            'android',
+            'CMakeLists.txt'
+        )
+        let cmakeListsContent = await readFile(cmakeListsPath, {
+            encoding: 'utf-8',
+        })
+
+        const hybridCppPath = `../cpp/Hybrid${toPascalCase(config.packageName)}.cpp`
+
+        if (cmakeListsContent.includes(hybridCppPath)) {
+            return
+        }
+
+        cmakeListsContent = cmakeListsContent.replace(
+            'src/main/cpp/cpp-adapter.cpp',
+            ''
+        )
+        cmakeListsContent = cmakeListsContent.replace(
+            'add_library(${PACKAGE_NAME} SHARED',
+            'add_library(${PACKAGE_NAME} SHARED \n\t' +
+                `src/main/cpp/cpp-adapter.cpp\n\t${hybridCppPath}`
+        )
+
+        await createModuleFile(
+            config.cwd,
+            'android/CMakeLists.txt',
+            cmakeListsContent
         )
     }
 }

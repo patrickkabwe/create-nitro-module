@@ -6,6 +6,7 @@ import { IOS_MODULE_NAME_TAG } from '../constants'
 import {
     Nitro,
     SupportedLang,
+    SupportedPlatform,
     type FileGenerator,
     type GenerateModuleConfig,
 } from '../types'
@@ -82,7 +83,9 @@ export class IOSFileGenerator implements FileGenerator {
                 replacements: bridgeReplacements,
             })
         )
-        if (config.langs.includes(SupportedLang.SWIFT)) {
+        if (
+            config.platformLangs[SupportedPlatform.IOS] === SupportedLang.SWIFT
+        ) {
             const isHybridView = config.packageType === Nitro.View
             await createModuleFile(
                 config.cwd,

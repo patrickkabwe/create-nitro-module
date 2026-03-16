@@ -1,12 +1,14 @@
 import * as p from '@clack/prompts'
 import { detectPackageManager } from './utils'
 
+export type PlatformLangMap = Partial<Record<SupportedPlatform, SupportedLang>>
+
 export interface UserAnswers {
     packageName: string
     description: string
     platforms: SupportedPlatform[]
     packageType: Nitro
-    langs: SupportedLang[]
+    platformLangs: PlatformLangMap
     pm: PackageManager
 }
 
@@ -50,7 +52,7 @@ export enum Nitro {
 export type GenerateModuleConfig = {
     pm: PackageManager
     cwd: string
-    langs: SupportedLang[]
+    platformLangs: PlatformLangMap
     prefix?: string
     spinner: ReturnType<typeof p.spinner>
     description: string

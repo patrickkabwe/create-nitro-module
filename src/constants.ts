@@ -74,7 +74,7 @@ Begin development:
    ${kleur.cyan('Implement native code:')}
    ${kleur.white('ios/')}                     ${kleur.dim('# iOS native implementation using swift')}
    ${kleur.white('android/')}                 ${kleur.dim('# Android native implementation using kotlin')}
-   ${kleur.white('cpp/')}                     ${kleur.dim('# C++ native implementation. Shareable between iOS and Android (Will be generated if cpp was selected)')}
+   ${kleur.white('cpp/')}                     ${kleur.dim('# C++ native implementation. Shareable between iOS and Android (Will be generated if c++ was selected)')}
    
 ${
     skipExample
