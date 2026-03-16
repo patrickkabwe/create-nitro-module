@@ -74,7 +74,11 @@ export class CppFileGenerator implements FileGenerator {
     }
 
     async updateAndroidCMakeLists(config: GenerateModuleConfig) {
-        const cmakeListsPath = path.join(config.cwd, 'android', 'CMakeLists.txt')
+        const cmakeListsPath = path.join(
+            config.cwd,
+            'android',
+            'CMakeLists.txt'
+        )
         let cmakeListsContent = await readFile(cmakeListsPath, {
             encoding: 'utf-8',
         })
