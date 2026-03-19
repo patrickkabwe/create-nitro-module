@@ -8,7 +8,7 @@ export default defineConfig([
     js.configs.recommended,
     nodePlugin.configs['flat/recommended-script'],
     {
-        files: ['src/*.ts'],
+        files: ['src/**/*.ts'],
         languageOptions: {
             parser: tsParser,
             parserOptions: {

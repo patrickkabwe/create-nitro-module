@@ -712,23 +712,22 @@ export class NitroModuleFactory {
         }
 
         const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
-        const harnessWorkflowPath = path.join(
+        const workflowDirectoryPath = path.join(
             this.config.cwd,
             '.github',
-            'workflows',
-            'react-native-harness.yml'
+            'workflows'
         )
 
-        await writeFile(
-            harnessWorkflowPath,
-            harnessWorkflowCode(
-                exampleAppName,
-                this.config.pm,
-                this.config.platforms
-            ),
-            {
-                encoding: 'utf8',
-            }
+        const workflowWrites = this.config.platforms.map(platform =>
+            writeFile(
+                path.join(workflowDirectoryPath, `harness-${platform}.yml`),
+                harnessWorkflowCode(exampleAppName, this.config.pm, platform),
+                {
+                    encoding: 'utf8',
+                }
+            )
         )
+
+        await Promise.all(workflowWrites)
     }
 }
