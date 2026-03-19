@@ -17,6 +17,10 @@ program
         '-d, --module-dir <moduleDirectory>',
         'directory to create the module in'
     )
+    .option(
+        '--include-harness',
+        'include React Native Harness setup in the example app'
+    )
     .option('-e, --skip-example', 'skip example app generation')
     .option('-i, --skip-install', 'skip installing dependencies')
     .option('--ci', 'run in CI mode')

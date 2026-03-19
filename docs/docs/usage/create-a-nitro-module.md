@@ -36,6 +36,35 @@ To create a Nitro Module along with an example app, use the following command. T
   </TabItem>
 </Tabs>
 
+## With React Native Harness
+
+If you want the generated example app to include React Native Harness for native Android and iOS tests, pass the `--include-harness` flag.
+
+<Tabs groupId="cli">
+  <TabItem value="bun" label="Bun" default>
+  ```bash
+  bun create nitro-module@latest my-awesome-module --include-harness
+  ```
+  </TabItem>
+  <TabItem value="npx" label="Npx">
+  ```bash
+  npx create-nitro-module@latest my-awesome-module --include-harness
+  ```
+  </TabItem>
+  <TabItem value="yarn" label="Yarn">
+  ```bash
+  yarn create nitro-module@latest my-awesome-module --include-harness
+  ```
+  </TabItem>
+  <TabItem value="pnpm" label="Pnpm">
+  ```bash
+  pnpm create nitro-module@latest my-awesome-module --include-harness
+  ```
+  </TabItem>
+</Tabs>
+
+The generated `example` app will include Harness config, sample native test files, package scripts, and a GitHub Actions workflow for the selected platforms.
+
 ## Without example app
 
 If you prefer to create a Nitro Module without an example app, use the following command. This will generate only the module, without any additional example app.

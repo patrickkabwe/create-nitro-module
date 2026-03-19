@@ -9,6 +9,7 @@ export interface UserAnswers {
     platforms: SupportedPlatform[]
     packageType: Nitro
     platformLangs: PlatformLangMap
+    includeHarness: boolean
     pm: PackageManager
 }
 
@@ -31,6 +32,7 @@ export type PlatformLang = {
 
 export type CreateModuleOptions = {
     ci?: boolean
+    includeHarness?: boolean
     langs?: string
     moduleDir?: string
     platforms?: string
@@ -79,8 +81,10 @@ export const PLATFORM_LANGUAGE_MAP: Record<SupportedPlatform, SupportedLang[]> =
     }
 
 export type InstructionsParams = {
+    includeHarness?: boolean
     moduleName: string
     pm: string
+    platforms: SupportedPlatform[]
     skipInstall?: boolean
     skipExample?: boolean
 }
