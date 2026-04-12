@@ -186,6 +186,12 @@ export const createModule = async (
             }
         }
 
+        if (options.skipExample && options.includeHarness) {
+            throw new Error(
+                'React Native Harness requires the generated example app. Remove --skip-example or omit --include-harness.'
+            )
+        }
+
         if (
             options.packageType &&
             ![Nitro.Module, Nitro.View].includes(options.packageType)
@@ -213,6 +219,7 @@ export const createModule = async (
             spinner,
             packageType,
             finalPackageName: 'react-native-' + packageName.toLowerCase(),
+            includeHarness: answers.includeHarness,
             skipInstall: options.skipInstall,
             skipExample: options.skipExample,
         })
@@ -254,8 +261,10 @@ export const createModule = async (
 
         console.log(
             generateInstructions({
+                includeHarness: answers.includeHarness,
                 moduleName: `react-native-${packageName.toLowerCase()}`,
                 pm: answers.pm,
+                platforms: answers.platforms,
                 skipExample: options.skipExample,
                 skipInstall: options.skipInstall,
             })
@@ -350,6 +359,7 @@ const getUserAnswers = async (
             description: `${kleur.yellow(`react-native-${name}`)} is a react native package built with Nitro`,
             platforms,
             packageType,
+            includeHarness: options.includeHarness === true,
             platformLangs: parsePlatformLangsOption(
                 options.langs,
                 platforms,
@@ -479,6 +489,22 @@ const getUserAnswers = async (
                     ],
                 })
             },
+            includeHarness: async () => {
+                if (options?.skipExample) {
+                    return false
+                }
+
+                if (options?.includeHarness === true) {
+                    return true
+                }
+
+                return p.confirm({
+                    message: kleur.cyan(
+                        'Include React Native Harness for native Android and iOS tests?'
+                    ),
+                    initialValue: false,
+                })
+            },
             packageNameConfirmation: async ({ results }) => {
                 const packageName = results.packageName
                 if (!packageName) {
@@ -511,6 +537,7 @@ const getUserAnswers = async (
         packageType: group.packageType,
         platforms: group.platforms,
         platformLangs: group.platformLangs as PlatformLangMap,
+        includeHarness: group.includeHarness as boolean,
         pm: group.pm,
         description: group.description as string,
     }

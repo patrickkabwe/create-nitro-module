@@ -1,5 +1,5 @@
 import kleur from 'kleur'
-import type { InstructionsParams } from './types'
+import { SupportedPlatform, type InstructionsParams } from './types'
 
 export const SUPPORTED_PLATFORMS = ['ios', 'android']
 
@@ -47,8 +47,10 @@ export const NITRO_GRAPHIC = `
      └─┘`
 
 export const generateInstructions = ({
+    includeHarness,
     moduleName,
     pm,
+    platforms,
     skipInstall,
     skipExample,
 }: InstructionsParams) => `
@@ -84,6 +86,24 @@ ${
    ${kleur.green('cd example')}
    ${kleur.green(`${pm} run pod`)}             ${kleur.dim('# Install CocoaPods dependencies (iOS)')}
    ${kleur.green(`${pm} run ios|android`)}     ${kleur.dim('# Run your example app')}`
+}
+
+${
+    skipExample || !includeHarness
+        ? ''
+        : `\n\nRun your React Native Harness tests:
+
+   ${kleur.green('cd example')}
+   ${[
+       platforms.includes(SupportedPlatform.ANDROID)
+           ? `${kleur.green(`${pm} run test:harness:android`)}  ${kleur.dim('# Run native tests on Android')}`
+           : null,
+       platforms.includes(SupportedPlatform.IOS)
+           ? `${kleur.green(`${pm} run test:harness:ios`)}      ${kleur.dim('# Run native tests on iOS')}`
+           : null,
+   ]
+       .filter(Boolean)
+       .join('\n   ')}`
 }
 
 ${kleur.yellow('Pro Tips:')}

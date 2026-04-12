@@ -10,6 +10,10 @@ import {
     appExampleCode,
     babelConfig,
     exampleTsConfig,
+    harnessConfigCode,
+    harnessJestConfigCode,
+    harnessTestCode,
+    harnessWorkflowCode,
     metroConfig,
 } from './code-snippets/code.js'
 import {
@@ -117,6 +121,9 @@ export class NitroModuleFactory {
             await this.createExampleApp()
             await this.configureExamplePackageJson()
             await this.syncExampleAppConfigurations()
+            if (this.config.includeHarness) {
+                await this.setupReactNativeHarness()
+            }
             await this.setupWorkflows()
             await this.gitInit()
             this.config.spinner.stop(kleur.cyan(messages.generating + 'Done'))
@@ -398,6 +405,58 @@ export class NitroModuleFactory {
             'babel-plugin-module-resolver': '^5.0.2',
         }
 
+        if (this.config.includeHarness) {
+            const [
+                reactNativeHarnessVersion,
+                androidHarnessVersion,
+                appleHarnessVersion,
+            ] = await Promise.all([
+                this.getLatestVersion('react-native-harness'),
+                this.getLatestVersion('@react-native-harness/platform-android'),
+                this.getLatestVersion('@react-native-harness/platform-apple'),
+            ])
+
+            exampleAppPackageJson.scripts = {
+                ...exampleAppPackageJson.scripts,
+                ...(this.config.platforms.includes(SupportedPlatform.ANDROID)
+                    ? {
+                          'test:harness:android':
+                              'react-native-harness --config jest.harness.config.mjs --harnessRunner android',
+                      }
+                    : {}),
+                ...(this.config.platforms.includes(SupportedPlatform.IOS)
+                    ? {
+                          'test:harness:ios':
+                              'react-native-harness --config jest.harness.config.mjs --harnessRunner ios',
+                      }
+                    : {}),
+            }
+
+            exampleAppPackageJson.devDependencies = {
+                ...exampleAppPackageJson.devDependencies,
+                'react-native-harness':
+                    reactNativeHarnessVersion != null
+                        ? `^${reactNativeHarnessVersion}`
+                        : '^1.0.0',
+                ...(this.config.platforms.includes(SupportedPlatform.ANDROID)
+                    ? {
+                          '@react-native-harness/platform-android':
+                              androidHarnessVersion != null
+                                  ? `^${androidHarnessVersion}`
+                                  : '^1.0.0',
+                      }
+                    : {}),
+                ...(this.config.platforms.includes(SupportedPlatform.IOS)
+                    ? {
+                          '@react-native-harness/platform-apple':
+                              appleHarnessVersion != null
+                                  ? `^${appleHarnessVersion}`
+                                  : '^1.0.0',
+                      }
+                    : {}),
+            }
+        }
+
         packagesToRemoveFromExampleApp.forEach(pkg => {
             delete exampleAppPackageJson.devDependencies[pkg]
         })
@@ -523,6 +582,90 @@ export class NitroModuleFactory {
         }
     }
 
+    private async getExampleIOSBundleId() {
+        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
+        const projectFilePath = path.join(
+            this.config.cwd,
+            'example',
+            'ios',
+            `${exampleAppName}.xcodeproj`,
+            'project.pbxproj'
+        )
+        const projectFileContent = await readFile(projectFilePath, {
+            encoding: 'utf8',
+        })
+        const bundleIdMatch = projectFileContent.match(
+            /PRODUCT_BUNDLE_IDENTIFIER = ([^;]+);/
+        )
+
+        if (bundleIdMatch == null) {
+            throw new Error(
+                `Failed to resolve iOS bundle identifier for React Native Harness from ${projectFilePath}`
+            )
+        }
+
+        return bundleIdMatch[1].trim().replaceAll('"', '')
+    }
+
+    private async setupReactNativeHarness() {
+        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
+        const androidBundleId = this.config.platforms.includes(
+            SupportedPlatform.ANDROID
+        )
+            ? `com.${replaceHyphen(this.config.packageName)}example`
+            : null
+        const iosBundleId = this.config.platforms.includes(
+            SupportedPlatform.IOS
+        )
+            ? await this.getExampleIOSBundleId()
+            : null
+        const defaultRunner = this.config.platforms.includes(
+            SupportedPlatform.ANDROID
+        )
+            ? SupportedPlatform.ANDROID
+            : SupportedPlatform.IOS
+
+        await createFolder(this.config.cwd, path.join('example', 'harness'))
+
+        await Promise.all([
+            writeFile(
+                path.join(this.config.cwd, 'example', 'rn-harness.config.mjs'),
+                harnessConfigCode({
+                    androidBundleId,
+                    appRegistryComponentName: exampleAppName,
+                    defaultRunner,
+                    entryPoint: './index.js',
+                    iosBundleId,
+                }),
+                { encoding: 'utf8' }
+            ),
+            writeFile(
+                path.join(
+                    this.config.cwd,
+                    'example',
+                    'jest.harness.config.mjs'
+                ),
+                harnessJestConfigCode(),
+                { encoding: 'utf8' }
+            ),
+            writeFile(
+                path.join(
+                    this.config.cwd,
+                    'example',
+                    'harness',
+                    `${this.config.packageName}.harness.ts`
+                ),
+                harnessTestCode(
+                    this.config.packageName,
+                    this.config.finalPackageName,
+                    `${this.config.funcName}`,
+                    this.config.packageType
+                ),
+                { encoding: 'utf8' }
+            ),
+        ])
+    }
+
     private async installDependenciesAndRunCodegen() {
         await execAsync(`${this.config.pm} install`, { cwd: this.config.cwd })
         const packageManager =
@@ -563,5 +706,28 @@ export class NitroModuleFactory {
         await writeFile(iosBuildWorkflowPath, iosBuildWorkflowContent, {
             encoding: 'utf8',
         })
+
+        if (!this.config.includeHarness) {
+            return
+        }
+
+        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
+        const workflowDirectoryPath = path.join(
+            this.config.cwd,
+            '.github',
+            'workflows'
+        )
+
+        const workflowWrites = this.config.platforms.map(platform =>
+            writeFile(
+                path.join(workflowDirectoryPath, `harness-${platform}.yml`),
+                harnessWorkflowCode(exampleAppName, this.config.pm, platform),
+                {
+                    encoding: 'utf8',
+                }
+            )
+        )
+
+        await Promise.all(workflowWrites)
     }
 }
