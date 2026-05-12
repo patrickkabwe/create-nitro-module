@@ -99,7 +99,7 @@ if [ -d "react-native-test-module" ]; then
             -scheme TestModuleExample \
             -sdk iphonesimulator \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16' build
+            -destination 'platform=iOS Simulator,name=iPhone 17' build
 
         cd ../android
         ./gradlew assembleDebug --no-daemon

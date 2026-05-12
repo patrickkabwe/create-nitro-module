@@ -64,9 +64,9 @@ if [ "$PLATFORM" == "ios" ]; then
     SCHEME="$WORKSPACE_NAME"
   fi
   
-  # Get iPhone 16 simulator ID dynamically
-  iphone16Id=$(xcrun simctl list devices | grep "iPhone 16 (" | grep -E '\(Booted\)|\(Shutdown\)' | head -1 | grep -E -o '\([0-9A-F-]{36}\)' | tr -d '()')
-  echo "📱 Using iPhone 16 simulator with ID: $iphone16Id"
+  # Get iPhone 17 simulator ID dynamically
+  iphone16Id=$(xcrun simctl list devices | grep "iPhone 17 (" | grep -E '\(Booted\)|\(Shutdown\)' | head -1 | grep -E -o '\([0-9A-F-]{36}\)' | tr -d '()')
+  echo "📱 Using iPhone 17 simulator with ID: $iphone16Id"
 
   # Build the app with optimizations and pretty output
   export USE_CCACHE=1
@@ -114,7 +114,7 @@ if [ "$PLATFORM" == "ios" ]; then
   fi
   
   # Launch the simulator if not already booted
-  if ! xcrun simctl list devices | grep "$iphone16Id" | grep -q "Booted"; then
+  if ! xcrun simctl list devices | grep "$iphone17Id" | grep -q "Booted"; then
     echo "🚀 Booting simulator..."
     xcrun simctl boot $iphone16Id
   else

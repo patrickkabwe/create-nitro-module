@@ -186,7 +186,7 @@ const getHarnessRunnerConfig = (
 
     return `applePlatform({
       name: 'ios',
-      device: appleSimulator('iPhone 16', '18.0'),
+      device: appleSimulator('iPhone 17', '26.5'),
       bundleId: '${iosBundleId}',
     })`
 }
@@ -246,10 +246,16 @@ export default config
 `
 }
 
-export const harnessJestConfigCode = () => `export default {
-  preset: 'react-native',
-  rootDir: '.',
-  testMatch: ['<rootDir>/harness/**/*.harness.ts'],
+export const harnessJestConfigCode = () => `module.exports = {
+  projects: [
+    {
+      displayName: 'react-native-harness',
+      preset: 'react-native-harness',
+      testMatch: [
+        '<rootDir>/__tests__/**/*.(test|spec|harness).(js|jsx|ts|tsx)',
+      ],
+    },
+  ],
 }
 `
 
@@ -258,7 +264,7 @@ export const harnessTestCode = (
     finalModuleName: string,
     funcName: string,
     packageType: Nitro
-) => `/// <reference types="jest" />
+) => `import { describe, it, expect } from 'react-native-harness'
 import { ${toPascalCase(moduleName)} } from '${finalModuleName}'
 
 describe('${toPascalCase(moduleName)}', () => {
@@ -346,7 +352,7 @@ ${getPackageManagerSetupStep(packageManager)}
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: 16.4
+          xcode-version: 26.5
 
       - name: Install Pods
         working-directory: example
@@ -362,7 +368,7 @@ ${getPackageManagerSetupStep(packageManager)}
             -scheme ${exampleAppName} \
             -sdk iphonesimulator \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
             build \
             CODE_SIGNING_ALLOWED=NO
 

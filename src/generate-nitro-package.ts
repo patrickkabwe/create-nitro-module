@@ -426,7 +426,7 @@ export class NitroModuleFactory {
 
         exampleAppPackageJson.scripts = {
             ...exampleAppPackageJson.scripts,
-            ios: "react-native run-ios --simulator='iPhone 16'",
+            ios: "react-native run-ios --simulator='iPhone 17'",
             start: 'react-native start --reset-cache',
             pod: 'bundle install && bundle exec pod install --project-directory=ios',
         }
@@ -458,13 +458,13 @@ export class NitroModuleFactory {
                 ...(this.config.platforms.includes(SupportedPlatform.ANDROID)
                     ? {
                           'test:harness:android':
-                              'react-native-harness --config jest.harness.config.mjs --harnessRunner android',
+                              'react-native-harness --harnessRunner android',
                       }
                     : {}),
                 ...(this.config.platforms.includes(SupportedPlatform.IOS)
                     ? {
                           'test:harness:ios':
-                              'react-native-harness --config jest.harness.config.mjs --harnessRunner ios',
+                              'react-native-harness --harnessRunner ios',
                       }
                     : {}),
             }
@@ -662,7 +662,7 @@ export class NitroModuleFactory {
             ? SupportedPlatform.ANDROID
             : SupportedPlatform.IOS
 
-        await createFolder(this.config.cwd, path.join('example', 'harness'))
+        await createFolder(this.config.cwd, path.join('example', '__tests__'))
 
         await Promise.all([
             writeFile(
@@ -677,11 +677,7 @@ export class NitroModuleFactory {
                 { encoding: 'utf8' }
             ),
             writeFile(
-                path.join(
-                    this.config.cwd,
-                    'example',
-                    'jest.harness.config.mjs'
-                ),
+                path.join(this.config.cwd, 'example', 'jest.config.js'),
                 harnessJestConfigCode(),
                 { encoding: 'utf8' }
             ),
@@ -689,7 +685,7 @@ export class NitroModuleFactory {
                 path.join(
                     this.config.cwd,
                     'example',
-                    'harness',
+                    '__tests__',
                     `${this.config.packageName}.harness.ts`
                 ),
                 harnessTestCode(
