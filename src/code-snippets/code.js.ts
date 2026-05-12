@@ -186,7 +186,7 @@ const getHarnessRunnerConfig = (
 
     return `applePlatform({
       name: 'ios',
-      device: appleSimulator('iPhone 17', '26.5'),
+      device: appleSimulator('iPhone 16', '18.0'),
       bundleId: '${iosBundleId}',
     })`
 }
@@ -382,7 +382,7 @@ ${getPackageManagerSetupStep(packageManager)}
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: 26.5
+          xcode-version: 16.4
 
       - name: Install Pods
         working-directory: example
@@ -398,7 +398,7 @@ ${getPackageManagerSetupStep(packageManager)}
             -scheme ${exampleAppName} \
             -sdk iphonesimulator \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
             build \
             CODE_SIGNING_ALLOWED=NO
 
