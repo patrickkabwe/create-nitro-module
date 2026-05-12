@@ -170,6 +170,22 @@ const parsePlatformLangsOption = (
     return getPlatformLangMap(platforms, langs)
 }
 
+const getFinalPackageName = (packageName: string) =>
+    `react-native-${packageName.toLowerCase()}`
+
+const getTargetModulePath = (moduleBaseDir: string, packageName: string) =>
+    path.resolve(moduleBaseDir, getFinalPackageName(packageName))
+
+const getInstructionsModulePath = (modulePath: string) => {
+    const relativePath = path.relative(process.cwd(), modulePath)
+
+    if (relativePath.length === 0 || relativePath.startsWith('..')) {
+        return modulePath
+    }
+
+    return relativePath
+}
+
 export const createModule = async (
     packageName: string,
     options: CreateModuleOptions
@@ -177,12 +193,15 @@ export const createModule = async (
     let packageType = Nitro.Module
     let moduleFactory: NitroModuleFactory | null = null
     let spinnerStarted = false
+    let shouldCleanupModulePath = false
+    let targetModulePath: string | null = null
     const spinner = p.spinner()
     try {
         if (options.moduleDir) {
-            const moduleDirExists = await dirExist(options.moduleDir)
+            const moduleDirPath = path.resolve(options.moduleDir)
+            const moduleDirExists = await dirExist(moduleDirPath)
             if (!moduleDirExists) {
-                mkdirSync(options.moduleDir, { recursive: true })
+                mkdirSync(moduleDirPath, { recursive: true })
             }
         }
 
@@ -208,6 +227,12 @@ export const createModule = async (
         const answers = await getUserAnswers(packageName, usedPm, options)
         packageName = answers.packageName
         packageType = answers.packageType
+        const finalPackageName = getFinalPackageName(packageName)
+        const moduleBaseDir =
+            options.moduleDir != null
+                ? path.resolve(options.moduleDir)
+                : process.cwd()
+        targetModulePath = getTargetModulePath(moduleBaseDir, packageName)
 
         moduleFactory = new NitroModuleFactory({
             description: answers.description,
@@ -215,22 +240,24 @@ export const createModule = async (
             packageName,
             platforms: answers.platforms,
             pm: answers.pm,
-            cwd: options.moduleDir || process.cwd(),
+            cwd: moduleBaseDir,
             spinner,
             packageType,
-            finalPackageName: 'react-native-' + packageName.toLowerCase(),
+            finalPackageName,
             includeHarness: answers.includeHarness,
             skipInstall: options.skipInstall,
             skipExample: options.skipExample,
         })
 
-        const modulePath = path.join(
-            process.cwd(),
-            `react-native-${packageName.toLowerCase()}`
-        )
-        const dirExists = await dirExist(modulePath)
+        const dirExists = await dirExist(targetModulePath)
 
         if (dirExists) {
+            if (options.ci) {
+                throw new Error(
+                    `Target directory already exists: ${targetModulePath}. Remove it or choose a different module name or --module-dir.`
+                )
+            }
+
             const confirm = await p.confirm({
                 message:
                     'Looks like the directory with the same name already exists.' +
@@ -245,11 +272,14 @@ export const createModule = async (
             if (p.isCancel(confirm)) {
                 process.exit(1)
             } else if (confirm) {
-                rmSync(modulePath, { recursive: true, force: true })
+                rmSync(targetModulePath, { recursive: true, force: true })
+                shouldCleanupModulePath = true
             } else {
                 console.log(kleur.red('Cancelled'))
                 process.exit(1)
             }
+        } else {
+            shouldCleanupModulePath = true
         }
 
         spinner.start(
@@ -262,7 +292,7 @@ export const createModule = async (
         console.log(
             generateInstructions({
                 includeHarness: answers.includeHarness,
-                moduleName: `react-native-${packageName.toLowerCase()}`,
+                modulePath: getInstructionsModulePath(targetModulePath),
                 pm: answers.pm,
                 platforms: answers.platforms,
                 skipExample: options.skipExample,
@@ -276,12 +306,8 @@ export const createModule = async (
             )
         )
     } catch (error) {
-        if (packageName) {
-            const modulePath = path.join(
-                process.cwd(),
-                `react-native-${packageName.toLowerCase()}`
-            )
-            rmSync(modulePath, { recursive: true, force: true })
+        if (shouldCleanupModulePath && targetModulePath != null) {
+            rmSync(targetModulePath, { recursive: true, force: true })
         }
         if (spinnerStarted) {
             spinner.stop(

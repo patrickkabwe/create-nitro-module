@@ -53,6 +53,7 @@ import {
 const execAsync = util.promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+type NitroDependencyName = 'nitrogen' | 'react-native-nitro-modules'
 
 export class NitroModuleFactory {
     private nitroModulesVersion: string | null = null
@@ -132,6 +133,47 @@ export class NitroModuleFactory {
             this.config.spinner.start(messages.installing)
             await this.installDependenciesAndRunCodegen()
             this.config.spinner.stop(kleur.cyan(messages.installing + 'Done'))
+        }
+    }
+
+    private getTemplateDevDependencyVersion(pkg: NitroDependencyName): string {
+        const version = templatePackageJson.devDependencies[pkg]
+
+        if (typeof version !== 'string' || version.length === 0) {
+            throw new Error(
+                `Missing template devDependency version for package "${pkg}"`
+            )
+        }
+
+        return version
+    }
+
+    private async resolveNitroDependencyVersions(): Promise<{
+        nitrogenVersion: string
+        nitroModulesVersion: string
+    }> {
+        const defaultNitrogenVersion =
+            this.getTemplateDevDependencyVersion('nitrogen')
+        const defaultNitroModulesVersion = this.getTemplateDevDependencyVersion(
+            'react-native-nitro-modules'
+        )
+
+        if (this.config.skipInstall) {
+            return {
+                nitrogenVersion: defaultNitrogenVersion,
+                nitroModulesVersion: defaultNitroModulesVersion,
+            }
+        }
+
+        const [nitroModulesVersion, nitrogenVersion] = await Promise.all([
+            this.getLatestVersion('react-native-nitro-modules'),
+            this.getLatestVersion('nitrogen'),
+        ])
+
+        return {
+            nitrogenVersion: nitrogenVersion ?? defaultNitrogenVersion,
+            nitroModulesVersion:
+                nitroModulesVersion ?? defaultNitroModulesVersion,
         }
     }
 
@@ -217,24 +259,19 @@ export class NitroModuleFactory {
                 : undefined,
         }
 
-        // Resolve and pin latest Nitro tools to concrete versions
         const nitrogen = 'nitrogen'
         const nitroModules = 'react-native-nitro-modules'
-        const [nitroModulesVersion, nitrogenVersion] = await Promise.all([
-            this.getLatestVersion(nitroModules),
-            this.getLatestVersion(nitrogen),
-        ])
+        const { nitrogenVersion, nitroModulesVersion } =
+            await this.resolveNitroDependencyVersions()
         this.nitroModulesVersion = nitroModulesVersion
         newWorkspacePackageJsonFile.devDependencies = {
             ...newWorkspacePackageJsonFile.devDependencies,
             [nitroModules]:
                 nitroModulesVersion ??
-                newWorkspacePackageJsonFile.devDependencies?.[nitroModules] ??
-                templatePackageJson.devDependencies[nitroModules],
+                newWorkspacePackageJsonFile.devDependencies?.[nitroModules],
             [nitrogen]:
                 nitrogenVersion ??
-                newWorkspacePackageJsonFile.devDependencies?.[nitrogen] ??
-                templatePackageJson.devDependencies[nitrogen],
+                newWorkspacePackageJsonFile.devDependencies?.[nitrogen],
         }
 
         newWorkspacePackageJsonFile.keywords = [

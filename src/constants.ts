@@ -48,7 +48,7 @@ export const NITRO_GRAPHIC = `
 
 export const generateInstructions = ({
     includeHarness,
-    moduleName,
+    modulePath,
     pm,
     platforms,
     skipInstall,
@@ -58,7 +58,7 @@ ${kleur.cyan().bold(NITRO_GRAPHIC)}
      
 ${kleur.red().bold('Next steps:')}
 
-${kleur.green(`cd ${moduleName}`)}
+${kleur.green(`cd ${modulePath}`)}
 ${
     !skipInstall
         ? ''

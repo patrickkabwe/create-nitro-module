@@ -82,7 +82,7 @@ export const PLATFORM_LANGUAGE_MAP: Record<SupportedPlatform, SupportedLang[]> =
 
 export type InstructionsParams = {
     includeHarness?: boolean
-    moduleName: string
+    modulePath: string
     pm: string
     platforms: SupportedPlatform[]
     skipInstall?: boolean
