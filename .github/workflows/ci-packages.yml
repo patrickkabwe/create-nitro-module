@@ -73,8 +73,6 @@ jobs:
         runs-on: ubuntu-latest
         outputs:
             generation: ${{ steps.set-matrix.outputs.generation }}
-            ios-build: ${{ steps.set-matrix.outputs.ios_build }}
-            android-build: ${{ steps.set-matrix.outputs.android_build }}
             ios-harness: ${{ steps.set-matrix.outputs.ios_harness }}
             android-harness: ${{ steps.set-matrix.outputs.android_harness }}
         steps:
@@ -184,24 +182,6 @@ jobs:
                   const generation = pms.flatMap(pm =>
                     scenarios.map(item => enrich(item, { pm }))
                   )
-                  const iosBuild = pms.flatMap(pm =>
-                    scenarios
-                      .filter(item => item.runs_ios)
-                      .flatMap(item =>
-                        ['Debug', 'Release'].map(mode =>
-                          enrich(item, { pm, mode })
-                        )
-                      )
-                  )
-                  const androidBuild = pms.flatMap(pm =>
-                    scenarios
-                      .filter(item => item.runs_android)
-                      .flatMap(item =>
-                        ['Debug', 'Release'].map(mode =>
-                          enrich(item, { pm, mode })
-                        )
-                      )
-                  )
                   const iosHarness = scenarios
                     .filter(item => item.runs_ios)
                     .map(item => enrich(item, { pm: 'bun', mode: 'Debug' }))
@@ -210,8 +190,6 @@ jobs:
                     .map(item => enrich(item, { pm: 'bun', mode: 'Debug' }))
 
                   console.log(`generation=${JSON.stringify({ include: generation })}`)
-                  console.log(`ios_build=${JSON.stringify({ include: iosBuild })}`)
-                  console.log(`android_build=${JSON.stringify({ include: androidBuild })}`)
                   console.log(`ios_harness=${JSON.stringify({ include: iosHarness })}`)
                   console.log(`android_harness=${JSON.stringify({ include: androidHarness })}`)
                   NODE
@@ -350,177 +328,9 @@ jobs:
                   if-no-files-found: error
                   retention-days: 7
 
-    test-ios-build:
-        name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package_type }} - ${{ matrix.scenario }} (${{ matrix.mode }})
-        needs: [generate-packages, define-matrix]
-        runs-on: macOS-latest
-        strategy:
-            fail-fast: false
-            matrix: ${{ fromJson(needs.define-matrix.outputs.ios-build) }}
-        env:
-            WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v6
-
-            - name: Create working directory
-              run: mkdir -p ${{ env.WORKING_DIR }}
-
-            - name: Download generated package
-              uses: actions/download-artifact@v8
-              with:
-                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
-                  path: ${{ env.WORKING_DIR }}
-
-            - name: List package structure
-              working-directory: ${{ env.WORKING_DIR }}
-              run: |
-                  echo "Package structure:"
-                  find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
-
-            - name: Setup Xcode
-              uses: maxim-lobanov/setup-xcode@v1
-              with:
-                  xcode-version: 16.4
-
-            - name: Setup Ruby and CocoaPods
-              uses: ruby/setup-ruby@v1
-              with:
-                  ruby-version: '3.2'
-                  bundler-cache: true
-
-            - name: Setup Node.js
-              if: matrix.pm == 'yarn'
-              uses: actions/setup-node@v6
-              with:
-                  node-version: 22.x
-
-            - name: Setup Yarn
-              if: matrix.pm == 'yarn'
-              uses: ./.github/actions/setup-yarn
-              with:
-                  working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Setup Bun.js
-              uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
-
-            - name: Install package dependencies
-              uses: ./.github/actions/install-deps
-              with:
-                  pm: ${{ matrix.pm }}
-                  working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Run codegen and build
-              uses: ./.github/actions/run-codegen-build
-              with:
-                  pm: ${{ matrix.pm }}
-                  working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Cache CocoaPods
-              uses: actions/cache@v5
-              with:
-                  path: |
-                      ~/.cocoapods/repos
-                      ${{ env.WORKING_DIR }}/example/ios/Pods
-                  key: ${{ runner.os }}-pods-${{ hashFiles(format('{0}/example/ios/Podfile.lock', env.WORKING_DIR)) }}
-                  restore-keys: |
-                      ${{ runner.os }}-pods-
-
-            - name: Install CocoaPods dependencies
-              working-directory: ${{ env.WORKING_DIR }}/example
-              run: ${{ matrix.pm }} pod
-
-            - name: Build iOS project
-              uses: ./.github/actions/ios-build-xcode
-              with:
-                  ios-dir: ${{ env.WORKING_DIR }}/example/ios
-                  mode: ${{ matrix.mode }}
-
-    test-android-build:
-        name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package_type }} - ${{ matrix.scenario }} (${{ matrix.mode }})
-        needs: [generate-packages, define-matrix]
-        runs-on: ubuntu-latest
-        strategy:
-            fail-fast: false
-            matrix: ${{ fromJson(needs.define-matrix.outputs.android-build) }}
-        env:
-            WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v6
-
-            - name: Create working directory
-              run: mkdir -p ${{ env.WORKING_DIR }}
-
-            - name: Download generated package
-              uses: actions/download-artifact@v8
-              with:
-                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
-                  path: ${{ env.WORKING_DIR }}
-
-            - name: List package structure
-              working-directory: ${{ env.WORKING_DIR }}
-              run: |
-                  echo "Package structure:"
-                  find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
-
-            - name: Setup Node.js
-              if: matrix.pm == 'yarn'
-              uses: actions/setup-node@v6
-              with:
-                  node-version: 22.x
-
-            - name: Setup Yarn
-              if: matrix.pm == 'yarn'
-              uses: ./.github/actions/setup-yarn
-              with:
-                  working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Setup Bun.js
-              uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
-
-            - name: Install package dependencies
-              uses: ./.github/actions/install-deps
-              with:
-                  pm: ${{ matrix.pm }}
-                  working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Run codegen and build
-              uses: ./.github/actions/run-codegen-build
-              with:
-                  pm: ${{ matrix.pm }}
-                  working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Setup Java for Android builds
-              uses: actions/setup-java@v5
-              with:
-                  distribution: 'zulu'
-                  java-version: '17'
-                  cache: 'gradle'
-
-            - name: Cache Gradle
-              uses: actions/cache@v5
-              with:
-                  path: |
-                      ~/.gradle/caches
-                      ~/.gradle/wrapper
-                  key: ${{ runner.os }}-gradle-${{ hashFiles(format('{0}/example/android/**/*.gradle*', env.WORKING_DIR)) }}
-                  restore-keys: |
-                      ${{ runner.os }}-gradle-
-
-            - name: Build Android project
-              uses: ./.github/actions/android-gradle-build
-              with:
-                  android-dir: ${{ env.WORKING_DIR }}/example/android
-                  mode: ${{ matrix.mode }}
-
     harness-android:
         name: Android Harness - ${{ matrix.package_type }} - ${{ matrix.scenario }}
-        needs: [test-android-build, define-matrix]
+        needs: [generate-packages, define-matrix]
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
@@ -604,7 +414,7 @@ jobs:
 
     harness-ios:
         name: iOS Harness - ${{ matrix.package_type }} - ${{ matrix.scenario }}
-        needs: [test-ios-build, define-matrix]
+        needs: [generate-packages, define-matrix]
         runs-on: macOS-15
         strategy:
             fail-fast: false

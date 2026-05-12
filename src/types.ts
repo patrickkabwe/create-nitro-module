@@ -10,6 +10,7 @@ export interface UserAnswers {
     packageType: Nitro
     platformLangs: PlatformLangMap
     includeHarness: boolean
+    monorepo: boolean
     pm: PackageManager
 }
 
@@ -39,6 +40,7 @@ export type CreateModuleOptions = {
     skipExample?: boolean
     skipInstall?: boolean
     packageType?: Nitro
+    monorepo?: boolean
 }
 
 export type PackageManager = Exclude<
@@ -63,7 +65,8 @@ export type GenerateModuleConfig = {
     packageType: Nitro
     packageName: string
     finalPackageName: string
-} & Omit<CreateModuleOptions, 'moduleDir' | 'langs' | 'platforms'>
+    monorepo: boolean
+} & Omit<CreateModuleOptions, 'moduleDir' | 'langs' | 'platforms' | 'monorepo'>
 
 export interface FileGenerator {
     /**
@@ -82,7 +85,9 @@ export const PLATFORM_LANGUAGE_MAP: Record<SupportedPlatform, SupportedLang[]> =
 
 export type InstructionsParams = {
     includeHarness?: boolean
+    monorepo: boolean
     modulePath: string
+    packagePath: string
     pm: string
     platforms: SupportedPlatform[]
     skipInstall?: boolean

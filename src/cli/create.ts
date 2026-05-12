@@ -240,11 +240,12 @@ export const createModule = async (
             packageName,
             platforms: answers.platforms,
             pm: answers.pm,
-            cwd: moduleBaseDir,
+            cwd: targetModulePath,
             spinner,
             packageType,
             finalPackageName,
             includeHarness: answers.includeHarness,
+            monorepo: answers.monorepo,
             skipInstall: options.skipInstall,
             skipExample: options.skipExample,
         })
@@ -292,7 +293,17 @@ export const createModule = async (
         console.log(
             generateInstructions({
                 includeHarness: answers.includeHarness,
+                monorepo: answers.monorepo,
                 modulePath: getInstructionsModulePath(targetModulePath),
+                packagePath: getInstructionsModulePath(
+                    answers.monorepo
+                        ? path.join(
+                              targetModulePath,
+                              'packages',
+                              finalPackageName
+                          )
+                        : targetModulePath
+                ),
                 pm: answers.pm,
                 platforms: answers.platforms,
                 skipExample: options.skipExample,
@@ -385,6 +396,7 @@ const getUserAnswers = async (
             description: `${kleur.yellow(`react-native-${name}`)} is a react native package built with Nitro`,
             platforms,
             packageType,
+            monorepo: options.monorepo === true,
             includeHarness: options.includeHarness === true,
             platformLangs: parsePlatformLangsOption(
                 options.langs,
@@ -463,6 +475,20 @@ const getUserAnswers = async (
                         },
                     ],
                     initialValue: Nitro.Module,
+                })
+            },
+            monorepo: async () => {
+                if (options?.monorepo === true) {
+                    return true
+                }
+
+                return p.confirm({
+                    message: kleur.cyan(
+                        'Use a packages/ workspace layout for a monorepo?'
+                    ),
+                    initialValue: false,
+                    active: 'yes',
+                    inactive: 'no',
                 })
             },
             platformLangs: async ({ results }) => {
@@ -561,6 +587,7 @@ const getUserAnswers = async (
     return {
         packageName: group.packageName,
         packageType: group.packageType,
+        monorepo: group.monorepo as boolean,
         platforms: group.platforms,
         platformLangs: group.platformLangs as PlatformLangMap,
         includeHarness: group.includeHarness as boolean,

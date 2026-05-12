@@ -264,19 +264,49 @@ export const harnessTestCode = (
     finalModuleName: string,
     funcName: string,
     packageType: Nitro
-) => `import { describe, it, expect } from 'react-native-harness'
+) => {
+    if (packageType === Nitro.Module) {
+        return `import { describe, it, expect } from 'react-native-harness'
 import { ${toPascalCase(moduleName)} } from '${finalModuleName}'
 
 describe('${toPascalCase(moduleName)}', () => {
-  it('loads the native implementation', () => {
-    ${
-        packageType === Nitro.Module
-            ? `expect(${toPascalCase(moduleName)}.${funcName}(1, 2)).toBe(3)`
-            : `expect(${toPascalCase(moduleName)}).toBeDefined()`
-    }
+  it('calls the native implementation', () => {
+    expect(${toPascalCase(moduleName)}.${funcName}(1, 2)).toBe(3)
   })
 })
 `
+    }
+
+    return `import React from 'react'
+import { StyleSheet } from 'react-native'
+import { describe, it, expect, render } from 'react-native-harness'
+import { screen } from '@react-native-harness/ui'
+import { ${toPascalCase(moduleName)} } from '${finalModuleName}'
+
+describe('${toPascalCase(moduleName)}', () => {
+  it('renders the native view', async () => {
+    await render(
+      <${toPascalCase(moduleName)}
+        isRed={true}
+        style={styles.view}
+        testID="${moduleName}"
+      />
+    )
+
+    const view = await screen.findByTestId('${moduleName}')
+
+    expect(view.nativeId).toBeDefined()
+  })
+})
+
+const styles = StyleSheet.create({
+  view: {
+    width: 200,
+    height: 200,
+  },
+})
+`
+}
 
 const getPackageManagerRunCommand = (
     packageManager: PackageManager,

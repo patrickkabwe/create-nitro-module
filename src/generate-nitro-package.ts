@@ -54,9 +54,16 @@ const execAsync = util.promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 type NitroDependencyName = 'nitrogen' | 'react-native-nitro-modules'
+type PackageJson = Record<string, unknown> & {
+    name?: string
+    private?: boolean
+    scripts?: Record<string, string>
+    workspaces?: string[]
+}
 
 export class NitroModuleFactory {
     private nitroModulesVersion: string | null = null
+    private workspaceRoot: string
 
     private androidGenerator: AndroidFileGenerator
     private iosGenerator: IOSFileGenerator
@@ -74,10 +81,15 @@ export class NitroModuleFactory {
         this.config.funcName = 'sum'
         this.config.prefix = 'react-native-'
         this.config.finalPackageName = `${this.config.prefix}${this.config.packageName}`
-        this.config.cwd = path.join(
-            this.config.cwd,
-            this.config.finalPackageName
-        )
+        this.workspaceRoot = this.config.cwd
+        const packageDir = this.config.monorepo
+            ? path.join(
+                  this.config.cwd,
+                  'packages',
+                  this.config.finalPackageName
+              )
+            : this.config.cwd
+        this.config.cwd = packageDir
     }
 
     async createNitroModule() {
@@ -115,6 +127,12 @@ export class NitroModuleFactory {
         await this.copyNitroTemplateFiles()
         await this.replaceNitroJsonPlaceholders()
         await this.updatePackageJsonConfig(this.config.skipExample)
+        if (this.config.monorepo) {
+            await this.createWorkspaceRoot()
+            if (this.config.pm === 'yarn') {
+                await this.configureYarnWorkspace()
+            }
+        }
         await this.updateTemplateFiles()
 
         if (!this.config.skipExample) {
@@ -191,6 +209,70 @@ export class NitroModuleFactory {
                 return null
             }
         }
+    }
+
+    private getWorkspaceRunCommand(scriptName: string): string {
+        const packageWorkspacePath = `packages/${this.config.finalPackageName}`
+
+        if (this.config.pm === 'yarn') {
+            return `yarn --cwd ${packageWorkspacePath} ${scriptName}`
+        }
+
+        if (this.config.pm === 'pnpm') {
+            return `pnpm --dir ${packageWorkspacePath} run ${scriptName}`
+        }
+
+        if (this.config.pm === 'npm') {
+            return `npm --prefix ${packageWorkspacePath} run ${scriptName}`
+        }
+
+        return `bun --cwd ${packageWorkspacePath} run ${scriptName}`
+    }
+
+    private async createWorkspaceRoot(): Promise<void> {
+        const workspaces = this.config.skipExample
+            ? ['packages/*']
+            : ['packages/*', 'packages/*/example']
+        const rootPackageJson: PackageJson = {
+            name: `${this.config.finalPackageName}-monorepo`,
+            private: true,
+            scripts: {
+                build: this.getWorkspaceRunCommand('build'),
+                codegen: this.getWorkspaceRunCommand('codegen'),
+            },
+            workspaces,
+        }
+
+        await writeFile(
+            path.join(this.workspaceRoot, 'package.json'),
+            JSON.stringify(rootPackageJson, null, 2),
+            { encoding: 'utf8' }
+        )
+
+        if (this.config.pm !== 'pnpm') {
+            return
+        }
+
+        await writeFile(
+            path.join(this.workspaceRoot, 'pnpm-workspace.yaml'),
+            `packages:\n${workspaces.map(workspace => `  - ${workspace}`).join('\n')}\n`,
+            { encoding: 'utf8' }
+        )
+    }
+
+    private async configureYarnWorkspace(): Promise<void> {
+        const yarnCwd = this.config.monorepo
+            ? this.workspaceRoot
+            : this.config.cwd
+        await execAsync('corepack enable', { cwd: yarnCwd })
+        await execAsync('yarn set version 4.6.0', { cwd: yarnCwd })
+        await execAsync('yarn config set enableImmutableInstalls false', {
+            cwd: yarnCwd,
+        })
+        await execAsync('yarn config set nodeLinker node-modules', {
+            cwd: yarnCwd,
+        })
+        await execAsync('corepack disable', { cwd: yarnCwd })
     }
 
     private async replaceNitroJsonPlaceholders() {
@@ -280,35 +362,34 @@ export class NitroModuleFactory {
         ]
 
         if (this.config.pm === 'yarn') {
-            await execAsync('corepack enable', { cwd: this.config.cwd })
-            await execAsync('yarn set version 4.6.0', { cwd: this.config.cwd })
-            await execAsync('yarn config set enableImmutableInstalls false', {
-                cwd: this.config.cwd,
-            })
-            await execAsync('yarn config set nodeLinker node-modules', {
-                cwd: this.config.cwd,
-            })
-            await execAsync('corepack disable', { cwd: this.config.cwd })
+            if (!this.config.monorepo) {
+                await this.configureYarnWorkspace()
+            }
         } else if (this.config.pm === 'pnpm') {
             const workspaceDirs = ['example']
             const yamlContent = `packages:\n${workspaceDirs.map(d => `  - ${d}`).join('\n')}\n`
 
-            const WORKSPACE_FILENAME = 'pnpm-workspace.yaml'
-            await writeFile(
-                path.join(this.config.cwd, WORKSPACE_FILENAME),
-                yamlContent,
-                { encoding: 'utf8' }
-            )
+            if (!this.config.monorepo) {
+                const WORKSPACE_FILENAME = 'pnpm-workspace.yaml'
+                await writeFile(
+                    path.join(this.config.cwd, WORKSPACE_FILENAME),
+                    yamlContent,
+                    { encoding: 'utf8' }
+                )
+            }
             const NPMRC_FILENAME = '.npmrc'
             await writeFile(
-                path.join(this.config.cwd, NPMRC_FILENAME),
+                path.join(
+                    this.config.monorepo ? this.workspaceRoot : this.config.cwd,
+                    NPMRC_FILENAME
+                ),
                 'node-linker=hoisted',
                 { encoding: 'utf8' }
             )
             delete newWorkspacePackageJsonFile.workspaces
         }
 
-        if (skipExample) {
+        if (skipExample || this.config.monorepo) {
             delete newWorkspacePackageJsonFile.workspaces
         }
         await writeFile(
@@ -374,8 +455,23 @@ export class NitroModuleFactory {
             [__dirname, '..', 'assets', 'template'],
             filesToCopy
         )
+        if (this.config.monorepo) {
+            await rename(
+                path.join(this.config.cwd, '.github'),
+                path.join(this.workspaceRoot, '.github')
+            )
+            if (this.config.pm === 'bun') {
+                await rename(
+                    path.join(this.config.cwd, 'bunfig.toml'),
+                    path.join(this.workspaceRoot, 'bunfig.toml')
+                )
+            }
+        }
         const oldGitIgnorePath = path.join(this.config.cwd, 'gitignore')
-        const newGitIgnorePath = path.join(this.config.cwd, '.gitignore')
+        const newGitIgnorePath = path.join(
+            this.config.monorepo ? this.workspaceRoot : this.config.cwd,
+            '.gitignore'
+        )
         await rename(oldGitIgnorePath, newGitIgnorePath)
     }
 
@@ -447,10 +543,14 @@ export class NitroModuleFactory {
                 reactNativeHarnessVersion,
                 androidHarnessVersion,
                 appleHarnessVersion,
+                uiHarnessVersion,
             ] = await Promise.all([
                 this.getLatestVersion('react-native-harness'),
                 this.getLatestVersion('@react-native-harness/platform-android'),
                 this.getLatestVersion('@react-native-harness/platform-apple'),
+                this.config.packageType === Nitro.View
+                    ? this.getLatestVersion('@react-native-harness/ui')
+                    : Promise.resolve(null),
             ])
 
             exampleAppPackageJson.scripts = {
@@ -488,6 +588,14 @@ export class NitroModuleFactory {
                           '@react-native-harness/platform-apple':
                               appleHarnessVersion != null
                                   ? `^${appleHarnessVersion}`
+                                  : '^1.0.0',
+                      }
+                    : {}),
+                ...(this.config.packageType === Nitro.View
+                    ? {
+                          '@react-native-harness/ui':
+                              uiHarnessVersion != null
+                                  ? `^${uiHarnessVersion}`
                                   : '^1.0.0',
                       }
                     : {}),
@@ -686,7 +794,9 @@ export class NitroModuleFactory {
                     this.config.cwd,
                     'example',
                     '__tests__',
-                    `${this.config.packageName}.harness.ts`
+                    `${this.config.packageName}.harness.${
+                        this.config.packageType === Nitro.View ? 'tsx' : 'ts'
+                    }`
                 ),
                 harnessTestCode(
                     this.config.packageName,
@@ -700,7 +810,9 @@ export class NitroModuleFactory {
     }
 
     private async installDependenciesAndRunCodegen() {
-        await execAsync(`${this.config.pm} install`, { cwd: this.config.cwd })
+        await execAsync(`${this.config.pm} install`, {
+            cwd: this.config.monorepo ? this.workspaceRoot : this.config.cwd,
+        })
         const packageManager =
             this.config.pm === 'npm' ? 'npx --yes' : this.config.pm
         const codegenCommand = `${packageManager} nitrogen --logLevel="debug" && ${this.config.pm} run build${Object.values(this.config.platformLangs).includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
@@ -708,24 +820,37 @@ export class NitroModuleFactory {
     }
 
     private async gitInit() {
-        await execAsync('git init', { cwd: this.config.cwd })
-        await execAsync('git add .', { cwd: this.config.cwd })
+        const gitCwd = this.config.monorepo
+            ? this.workspaceRoot
+            : this.config.cwd
+        await execAsync('git init', { cwd: gitCwd })
+        await execAsync('git add .', { cwd: gitCwd })
         await execAsync('git commit -m "initial commit"', {
-            cwd: this.config.cwd,
+            cwd: gitCwd,
         })
     }
 
     private async setupWorkflows() {
+        const workflowRoot = this.config.monorepo
+            ? this.workspaceRoot
+            : this.config.cwd
         const iosBuildWorkflowPath = path.join(
-            this.config.cwd,
+            workflowRoot,
             '.github',
             'workflows',
             'ios-build.yml'
         )
+        const androidBuildWorkflowPath = path.join(
+            workflowRoot,
+            '.github',
+            'workflows',
+            'android-build.yml'
+        )
 
-        const iosBuildWorkflow = await readFile(iosBuildWorkflowPath, {
-            encoding: 'utf8',
-        })
+        const [iosBuildWorkflow, androidBuildWorkflow] = await Promise.all([
+            readFile(iosBuildWorkflowPath, { encoding: 'utf8' }),
+            readFile(androidBuildWorkflowPath, { encoding: 'utf8' }),
+        ])
 
         const iosBuildReplacements = {
             $$exampleApp$$: `${toPascalCase(this.config.packageName)}Example`,
@@ -736,9 +861,22 @@ export class NitroModuleFactory {
             replacements: iosBuildReplacements,
         })
 
-        await writeFile(iosBuildWorkflowPath, iosBuildWorkflowContent, {
-            encoding: 'utf8',
-        })
+        await Promise.all([
+            writeFile(
+                iosBuildWorkflowPath,
+                this.getWorkflowContent(iosBuildWorkflowContent),
+                {
+                    encoding: 'utf8',
+                }
+            ),
+            writeFile(
+                androidBuildWorkflowPath,
+                this.getWorkflowContent(androidBuildWorkflow),
+                {
+                    encoding: 'utf8',
+                }
+            ),
+        ])
 
         if (!this.config.includeHarness) {
             return
@@ -746,7 +884,7 @@ export class NitroModuleFactory {
 
         const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
         const workflowDirectoryPath = path.join(
-            this.config.cwd,
+            workflowRoot,
             '.github',
             'workflows'
         )
@@ -754,7 +892,13 @@ export class NitroModuleFactory {
         const workflowWrites = this.config.platforms.map(platform =>
             writeFile(
                 path.join(workflowDirectoryPath, `harness-${platform}.yml`),
-                harnessWorkflowCode(exampleAppName, this.config.pm, platform),
+                this.getWorkflowContent(
+                    harnessWorkflowCode(
+                        exampleAppName,
+                        this.config.pm,
+                        platform
+                    )
+                ),
                 {
                     encoding: 'utf8',
                 }
@@ -762,5 +906,34 @@ export class NitroModuleFactory {
         )
 
         await Promise.all(workflowWrites)
+    }
+
+    private getWorkflowContent(content: string): string {
+        if (!this.config.monorepo) {
+            return content
+        }
+
+        const packagePath = `packages/${this.config.finalPackageName}`
+        const replacements: Record<string, string> = {
+            'example/': `${packagePath}/example/`,
+            'cpp/**': `${packagePath}/cpp/**`,
+            'android/**': `${packagePath}/android/**`,
+            'ios/**': `${packagePath}/ios/**`,
+            'src/**': `${packagePath}/src/**`,
+            'nitrogen/**': `${packagePath}/nitrogen/**`,
+            "'*.podspec'": `'${packagePath}/*.podspec'`,
+            "'package.json'": `'${packagePath}/package.json'`,
+            "'react-native.config.js'": `'${packagePath}/react-native.config.js'`,
+            "'nitro.json'": `'${packagePath}/nitro.json'`,
+            'working-directory: example': `working-directory: ${packagePath}/example`,
+            'projectRoot: example': `projectRoot: ${packagePath}/example`,
+            'app: example/': `app: ${packagePath}/example/`,
+        }
+
+        return Object.entries(replacements).reduce(
+            (workflowContent, [search, value]) =>
+                workflowContent.replaceAll(search, value),
+            content
+        )
     }
 }

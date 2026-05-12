@@ -48,7 +48,9 @@ export const NITRO_GRAPHIC = `
 
 export const generateInstructions = ({
     includeHarness,
+    monorepo,
     modulePath,
+    packagePath,
     pm,
     platforms,
     skipInstall,
@@ -70,20 +72,20 @@ ${
 Begin development:
  
    ${kleur.cyan('Define your module:')}
-   ${kleur.white('src/specs/')}               ${kleur.dim('# Define your module specifications. e.g. src/specs/myModule.nitro.ts')}
+   ${kleur.white(`${monorepo ? `${packagePath}/` : ''}src/specs/`)}               ${kleur.dim('# Define your module specifications. e.g. src/specs/myModule.nitro.ts')}
    ${kleur.green(`${pm} run codegen`)}         ${kleur.dim('# Generates native interfaces from TypeScript definitions')}
    
    ${kleur.cyan('Implement native code:')}
-   ${kleur.white('ios/')}                     ${kleur.dim('# iOS native implementation using swift')}
-   ${kleur.white('android/')}                 ${kleur.dim('# Android native implementation using kotlin')}
-   ${kleur.white('cpp/')}                     ${kleur.dim('# C++ native implementation. Shareable between iOS and Android (Will be generated if c++ was selected)')}
+   ${kleur.white(`${monorepo ? `${packagePath}/` : ''}ios/`)}                     ${kleur.dim('# iOS native implementation using swift')}
+   ${kleur.white(`${monorepo ? `${packagePath}/` : ''}android/`)}                 ${kleur.dim('# Android native implementation using kotlin')}
+   ${kleur.white(`${monorepo ? `${packagePath}/` : ''}cpp/`)}                     ${kleur.dim('# C++ native implementation. Shareable between iOS and Android (Will be generated if c++ was selected)')}
    
 ${
     skipExample
         ? ''
         : `Run your example app to test the package:
 
-   ${kleur.green('cd example')}
+   ${kleur.green(`cd ${monorepo ? `${packagePath}/example` : 'example'}`)}
    ${kleur.green(`${pm} run pod`)}             ${kleur.dim('# Install CocoaPods dependencies (iOS)')}
    ${kleur.green(`${pm} run ios|android`)}     ${kleur.dim('# Run your example app')}`
 }
@@ -93,7 +95,7 @@ ${
         ? ''
         : `\n\nRun your React Native Harness tests:
 
-   ${kleur.green('cd example')}
+   ${kleur.green(`cd ${monorepo ? `${packagePath}/example` : 'example'}`)}
    ${[
        platforms.includes(SupportedPlatform.ANDROID)
            ? `${kleur.green(`${pm} run test:harness:android`)}  ${kleur.dim('# Run native tests on Android')}`
@@ -107,8 +109,8 @@ ${
 }
 
 ${kleur.yellow('Pro Tips:')}
-${kleur.dim('• iOS:')} Open ${kleur.green('example/ios/example.xcworkspace')} in Xcode for native debugging. Make sure to run ${kleur.green(`${pm} pod`)} first in the example directory
-${kleur.dim('• Android:')} Open ${kleur.green('example/android')} in Android Studio
+${kleur.dim('• iOS:')} Open ${kleur.green(`${monorepo ? `${packagePath}/` : ''}example/ios/example.xcworkspace`)} in Xcode for native debugging. Make sure to run ${kleur.green(`${pm} pod`)} first in the example directory
+${kleur.dim('• Android:')} Open ${kleur.green(`${monorepo ? `${packagePath}/` : ''}example/android`)} in Android Studio
 ${kleur.dim('• Metro:')} Clear cache with ${kleur.green(`${pm} start`)} if needed
 
 ${kleur.yellow('Need help?')} Create an issue: ${kleur.blue().underline('https://github.com/patrickkabwe/create-nitro-module/issues')}

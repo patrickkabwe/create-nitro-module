@@ -21,6 +21,10 @@ program
         '--include-harness',
         'include React Native Harness setup in the example app'
     )
+    .option(
+        '--monorepo',
+        'create a monorepo workspace with the package inside packages/'
+    )
     .option('-e, --skip-example', 'skip example app generation')
     .option('-i, --skip-install', 'skip installing dependencies')
     .option('--ci', 'run in CI mode')
