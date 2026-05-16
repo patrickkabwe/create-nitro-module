@@ -96,16 +96,7 @@ ${
         : `\n\nRun your React Native Harness tests:
 
    ${kleur.green(`cd ${monorepo ? `${packagePath}/example` : 'example'}`)}
-   ${[
-       platforms.includes(SupportedPlatform.ANDROID)
-           ? `${kleur.green(`${pm} run test:harness:android`)}  ${kleur.dim('# Run native tests on Android')}`
-           : null,
-       platforms.includes(SupportedPlatform.IOS)
-           ? `${kleur.green(`${pm} run test:harness:ios`)}      ${kleur.dim('# Run native tests on iOS')}`
-           : null,
-   ]
-       .filter(Boolean)
-       .join('\n   ')}`
+   ${kleur.green(`${pm} run test:harness`)}      ${kleur.dim(`# Run native tests with the ${platforms.includes(SupportedPlatform.ANDROID) ? SupportedPlatform.ANDROID : SupportedPlatform.IOS} runner`)}`
 }
 
 ${kleur.yellow('Pro Tips:')}

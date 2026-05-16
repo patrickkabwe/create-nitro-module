@@ -167,7 +167,7 @@ const getHarnessRunnerConfig = (
     platform: SupportedPlatform,
     androidBundleId: string | null,
     iosBundleId: string | null
-) => {
+): string => {
     if (platform === SupportedPlatform.ANDROID) {
         if (androidBundleId == null) {
             throw new Error('Android bundle id is required for Harness config')
@@ -197,7 +197,7 @@ export const harnessConfigCode = ({
     defaultRunner,
     entryPoint,
     iosBundleId,
-}: HarnessConfigParams) => {
+}: HarnessConfigParams): string => {
     const imports = [
         ...(androidBundleId == null
             ? []
@@ -240,6 +240,7 @@ const config = {
     ${runners}
   ],
   defaultRunner: '${defaultRunner}',
+  bridgeTimeout: 300000,
 }
 
 export default config
@@ -359,11 +360,12 @@ ${getPackageManagerSetupStep(packageManager)}
         run: ./gradlew assembleDebug --no-daemon --build-cache
 
       - name: Run React Native Harness
-        uses: callstackincubator/react-native-harness/actions/android@v1.0.0
+        uses: callstackincubator/react-native-harness@v1.0.0
         with:
           app: example/android/app/build/outputs/apk/debug/app-debug.apk
           runner: android
-          projectRoot: example`
+          projectRoot: example
+          packageManager: ${packageManager}`
     }
 
     return `  test:
@@ -403,11 +405,12 @@ ${getPackageManagerSetupStep(packageManager)}
             CODE_SIGNING_ALLOWED=NO
 
       - name: Run React Native Harness
-        uses: callstackincubator/react-native-harness/actions/ios@v1.0.0
+        uses: callstackincubator/react-native-harness@v1.0.0
         with:
           app: example/ios/build/Build/Products/Debug-iphonesimulator/${exampleAppName}.app
           runner: ios
-          projectRoot: example`
+          projectRoot: example
+          packageManager: ${packageManager}`
 }
 
 export const harnessWorkflowCode = (

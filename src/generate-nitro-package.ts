@@ -555,18 +555,7 @@ export class NitroModuleFactory {
 
             exampleAppPackageJson.scripts = {
                 ...exampleAppPackageJson.scripts,
-                ...(this.config.platforms.includes(SupportedPlatform.ANDROID)
-                    ? {
-                          'test:harness:android':
-                              'react-native-harness --harnessRunner android',
-                      }
-                    : {}),
-                ...(this.config.platforms.includes(SupportedPlatform.IOS)
-                    ? {
-                          'test:harness:ios':
-                              'react-native-harness --harnessRunner ios',
-                      }
-                    : {}),
+                'test:harness': 'react-native-harness',
             }
 
             exampleAppPackageJson.devDependencies = {
