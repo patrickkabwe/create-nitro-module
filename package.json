@@ -12,9 +12,7 @@
         "release": "bun run build && bun semantic-release",
         "lint": "eslint --fix ",
         "format": "prettier --write ",
-        "commitlint": "commitlint --edit",
-        "ios:e2e": "bash scripts/e2e-maestro.sh ios",
-        "android:e2e": "bash scripts/e2e-maestro.sh android"
+        "commitlint": "commitlint --edit"
     },
     "files": [
         "lib",

@@ -1,5 +1,0 @@
-appId: ${APP_ID}
----
-- launchApp
-- assertVisible:
-      id: ${MODULE_ID}
