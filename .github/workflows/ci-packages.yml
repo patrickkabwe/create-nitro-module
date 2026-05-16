@@ -304,6 +304,23 @@ jobs:
                     exit 1
                   fi
 
+            - name: Verify generated harness scripts
+              shell: bash
+              run: |
+                  cd "${{ matrix.package_dir }}"
+
+                  if [ "${{ matrix.runs_android }}" = "true" ] && ! grep -q '"test:harness:android"' example/package.json; then
+                    echo "Missing Android Harness script in example/package.json"
+                    cat example/package.json
+                    exit 1
+                  fi
+
+                  if [ "${{ matrix.runs_ios }}" = "true" ] && ! grep -q '"test:harness:ios"' example/package.json; then
+                    echo "Missing iOS Harness script in example/package.json"
+                    cat example/package.json
+                    exit 1
+                  fi
+
             - name: Test package.json content
               shell: bash
               run: |
