@@ -39,7 +39,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Repo
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
 
             - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
@@ -226,7 +226,7 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - name: Configure Git
               run: |
@@ -360,7 +360,7 @@ jobs:
             WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
 
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -448,7 +448,7 @@ jobs:
             WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
 
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -528,7 +528,7 @@ jobs:
             WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
 
             - name: Enable KVM (Android emulator)
               if: runner.os == 'Linux'
@@ -614,7 +614,7 @@ jobs:
             WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
 
             - name: Setup Xcode
               uses: maxim-lobanov/setup-xcode@v1
