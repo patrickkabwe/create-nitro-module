@@ -47,7 +47,7 @@ jobs:
                   bun-version: latest
 
             - name: Cache bun dependencies
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
                   key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
@@ -245,7 +245,7 @@ jobs:
                   bun-version: latest
 
             - name: Cache dependencies (bun)
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
                   key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
@@ -418,7 +418,7 @@ jobs:
                   working-directory: ${{ env.WORKING_DIR }}
 
             - name: Cache CocoaPods
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: |
                       ~/.cocoapods/repos
@@ -502,7 +502,7 @@ jobs:
                   cache: 'gradle'
 
             - name: Cache Gradle
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: |
                       ~/.gradle/caches
@@ -556,7 +556,7 @@ jobs:
                   bun-version: latest
 
             - name: Cache Bun dependencies
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
                   key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
@@ -640,7 +640,7 @@ jobs:
                   bun-version: latest
 
             - name: Cache Bun dependencies
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
                   key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
@@ -660,7 +660,7 @@ jobs:
                   working-directory: ${{ env.WORKING_DIR }}
 
             - name: Cache Pods
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ${{ env.WORKING_DIR }}/example/ios/Pods
                   key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
@@ -678,7 +678,7 @@ jobs:
                   ccache --zero-stats
 
             - name: Cache ccache
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ~/Library/Caches/ccache
                   key: ${{ runner.os }}-ccache-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ github.sha }}
