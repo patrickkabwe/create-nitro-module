@@ -597,6 +597,7 @@ export class NitroModuleFactory {
             encoding: 'utf8',
         })
         const exampleAppPackageJson = JSON.parse(examplePackageJsonStr)
+        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
 
         exampleAppPackageJson.name = `${this.config.finalPackageName}-example`
 
@@ -642,13 +643,37 @@ export class NitroModuleFactory {
                 ...(this.config.platforms.includes(SupportedPlatform.ANDROID)
                     ? {
                           'test:harness:android':
-                              'react-native-harness --harnessRunner android',
+                              [
+                                  'if [ -z "${HARNESS_APP_PATH:-}" ]; then',
+                                  '  set -euo pipefail',
+                                  '  (cd android && ./gradlew assembleDebug --no-daemon --build-cache)',
+                                  '  HARNESS_APP_PATH="$(find android/app/build/outputs/apk/debug -maxdepth 1 -type f -name "*.apk" | head -1)"',
+                                  '  if [ -z "${HARNESS_APP_PATH}" ]; then',
+                                  '    echo "Unable to locate the built Android app bundle."',
+                                  '    exit 1',
+                                  '  fi',
+                                  '  export HARNESS_APP_PATH',
+                                  'fi',
+                                  'react-native-harness --harnessRunner android',
+                              ].join('\n'),
                       }
                     : {}),
                 ...(this.config.platforms.includes(SupportedPlatform.IOS)
                     ? {
                           'test:harness:ios':
-                              'react-native-harness --harnessRunner ios',
+                              [
+                                  'if [ -z "${HARNESS_APP_PATH:-}" ]; then',
+                                  '  set -euo pipefail',
+                                  `  xcodebuild CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ -derivedDataPath build -UseModernBuildSystem=YES -workspace ${exampleAppName}.xcworkspace -scheme ${exampleAppName} -sdk iphonesimulator -configuration Debug build CODE_SIGNING_ALLOWED=NO`,
+                                  '  HARNESS_APP_PATH="$(find ios/build/Build/Products/Debug-iphonesimulator -maxdepth 1 -type d -name "*.app" | head -1)"',
+                                  '  if [ -z "${HARNESS_APP_PATH}" ]; then',
+                                  '    echo "Unable to locate the built iOS app bundle."',
+                                  '    exit 1',
+                                  '  fi',
+                                  '  export HARNESS_APP_PATH',
+                                  'fi',
+                                  'react-native-harness --harnessRunner ios',
+                              ].join('\n'),
                       }
                     : {}),
             }

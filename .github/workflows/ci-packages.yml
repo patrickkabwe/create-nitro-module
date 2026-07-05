@@ -623,7 +623,7 @@ jobs:
                   script: |
                       adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
                       cd "${{ env.WORKING_DIR }}/example"
-                      ${{ matrix.pm }} run test:harness:android
+                      HARNESS_APP_PATH="${{ env.WORKING_DIR }}/example/android/app/build/outputs/apk/debug/app-debug.apk" ${{ matrix.pm }} run test:harness:android
 
     harness-ios:
         name: iOS Harness - ${{ matrix.package_type }} - ${{ matrix.scenario }}
@@ -697,4 +697,12 @@ jobs:
 
             - name: Run iOS Harness Tests
               working-directory: ${{ env.WORKING_DIR }}/example
-              run: ${{ matrix.pm }} run test:harness:ios
+              shell: bash
+              run: |
+                  APP_PATH="$(find ios/build/Build/Products/Debug-iphonesimulator -maxdepth 1 -type d -name '*.app' | head -1)"
+                  if [ -z "$APP_PATH" ]; then
+                    echo "No built iOS app bundle found in ios/build/Build/Products/Debug-iphonesimulator"
+                    exit 1
+                  fi
+
+                  HARNESS_APP_PATH="$APP_PATH" ${{ matrix.pm }} run test:harness:ios
