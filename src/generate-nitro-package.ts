@@ -602,7 +602,7 @@ export class NitroModuleFactory {
 
         exampleAppPackageJson.scripts = {
             ...exampleAppPackageJson.scripts,
-            ios: "react-native run-ios --simulator='iPhone 16'",
+            ios: 'react-native run-ios',
             start: 'react-native start --reset-cache',
             pod: 'bundle install && bundle exec pod install --project-directory=ios',
         }

@@ -42,14 +42,13 @@ runs:
               do
                 echo "xcodebuild attempt $attempt of $max_retries"
                 
-                if xcodebuild \
+              if xcodebuild \
                   CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
                   -derivedDataPath build -UseModernBuildSystem=YES \
                   -workspace "${WORKSPACE_NAME}.xcworkspace" \
                   -scheme "${SCHEME_NAME}" \
                   -sdk iphonesimulator \
                   -configuration "${{ inputs.mode }}" \
-                  -destination 'platform=iOS Simulator,name=iPhone 16' \
                   build \
                   CODE_SIGNING_ALLOWED=NO | xcpretty; then
                   echo "xcodebuild succeeded on attempt $attempt"

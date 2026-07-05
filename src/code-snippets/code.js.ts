@@ -192,6 +192,83 @@ type HarnessConfigParams = {
     iosBundleId: string | null
 }
 
+const getIosHarnessDeviceResolverCode = () => `const resolveIosDevice = async () => {
+  const targets = await getAppleRunTargets()
+  const simulatorTargets = targets.filter(target => target.platform === 'ios' && target.type === 'emulator')
+  const preferredName = process.env.HARNESS_IOS_SIMULATOR_NAME
+  const preferredVersion = process.env.HARNESS_IOS_SIMULATOR_VERSION
+
+  if (preferredName != null || preferredVersion != null) {
+    const preferredTarget = simulatorTargets.find(target => {
+      if (preferredName != null && target.device.name !== preferredName) {
+        return false
+      }
+
+      if (preferredVersion != null && target.device.systemVersion !== preferredVersion) {
+        return false
+      }
+
+      return true
+    })
+
+    if (preferredTarget == null) {
+      throw new Error(
+        \`No iOS simulator matched HARNESS_IOS_SIMULATOR_NAME=\${preferredName ?? 'unset'} and HARNESS_IOS_SIMULATOR_VERSION=\${preferredVersion ?? 'unset'}. Available simulators: \${simulatorTargets.map(target => \`\${target.device.name} (\${target.device.systemVersion})\`).join(', ') || 'none'}\`
+      )
+    }
+
+    return appleSimulator(
+      preferredTarget.device.name,
+      preferredTarget.device.systemVersion
+    )
+  }
+
+  const defaultTarget = simulatorTargets[0]
+  if (defaultTarget == null) {
+    throw new Error(
+      \`No available iOS simulators were found for React Native Harness. Available run targets: \${targets.map(target => \`\${target.name} (\${target.description})\`).join(', ') || 'none'}\`
+    )
+  }
+
+  return appleSimulator(
+    defaultTarget.device.name,
+    defaultTarget.device.systemVersion
+  )
+}
+
+const iosDevice = await resolveIosDevice()
+`
+
+const getAndroidHarnessDeviceResolverCode = () => `const resolveAndroidDevice = async () => {
+  const targets = await getAndroidRunTargets()
+  const emulatorTargets = targets.filter(target => target.platform === 'android' && target.type === 'emulator')
+  const preferredName = process.env.HARNESS_ANDROID_EMULATOR_NAME
+
+  if (preferredName != null) {
+    const preferredTarget = emulatorTargets.find(target => target.device.name === preferredName)
+
+    if (preferredTarget == null) {
+      throw new Error(
+        \`No Android emulator matched HARNESS_ANDROID_EMULATOR_NAME=\${preferredName}. Available emulators: \${emulatorTargets.map(target => target.device.name).join(', ') || 'none'}\`
+      )
+    }
+
+    return androidEmulator(preferredTarget.device.name)
+  }
+
+  const defaultTarget = emulatorTargets[0]
+  if (defaultTarget == null) {
+    throw new Error(
+      \`No available Android emulators were found for React Native Harness. Available run targets: \${targets.map(target => \`\${target.name} (\${target.description})\`).join(', ') || 'none'}\`
+    )
+  }
+
+  return androidEmulator(defaultTarget.device.name)
+}
+
+const androidDevice = await resolveAndroidDevice()
+`
+
 const getHarnessRunnerConfig = (
     platform: SupportedPlatform,
     androidBundleId: string | null,
@@ -204,7 +281,7 @@ const getHarnessRunnerConfig = (
 
         return `androidPlatform({
       name: 'android',
-      device: androidEmulator('Pixel_8_API_35'),
+      device: androidDevice,
       bundleId: '${androidBundleId}',
     })`
     }
@@ -215,7 +292,7 @@ const getHarnessRunnerConfig = (
 
     return `applePlatform({
       name: 'ios',
-      device: appleSimulator('iPhone 16', '18.0'),
+      device: iosDevice,
       bundleId: '${iosBundleId}',
     })`
 }
@@ -231,13 +308,17 @@ export const harnessConfigCode = ({
         ...(androidBundleId == null
             ? []
             : [
-                  "import { androidEmulator, androidPlatform } from '@react-native-harness/platform-android'",
+                  "import { androidEmulator, androidPlatform, getRunTargets as getAndroidRunTargets } from '@react-native-harness/platform-android'",
               ]),
         ...(iosBundleId == null
             ? []
             : [
-                  "import { applePlatform, appleSimulator } from '@react-native-harness/platform-apple'",
+                  "import { applePlatform, appleSimulator, getRunTargets as getAppleRunTargets } from '@react-native-harness/platform-apple'",
               ]),
+    ].join('\n')
+    const deviceResolvers = [
+        ...(iosBundleId == null ? [] : [getIosHarnessDeviceResolverCode()]),
+        ...(androidBundleId == null ? [] : [getAndroidHarnessDeviceResolverCode()]),
     ].join('\n')
     const runners = [
         ...(androidBundleId == null
@@ -261,6 +342,8 @@ export const harnessConfigCode = ({
     ].join(',\n    ')
 
     return `${imports}
+
+${deviceResolvers}
 
 const config = {
   entryPoint: '${entryPoint}',
@@ -444,7 +527,6 @@ ${getHarnessCodegenBuildStep(packageManager, monorepo)}
             -scheme ${exampleAppName} \
             -sdk iphonesimulator \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
             build \
             CODE_SIGNING_ALLOWED=NO
 
