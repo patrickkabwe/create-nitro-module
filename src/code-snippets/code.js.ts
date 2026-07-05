@@ -192,7 +192,8 @@ type HarnessConfigParams = {
     iosBundleId: string | null
 }
 
-const getIosHarnessDeviceResolverCode = () => `const resolveIosDevice = async () => {
+const getIosHarnessDeviceResolverCode =
+    () => `const resolveIosDevice = async () => {
   const targets = await getAppleRunTargets()
   const simulatorTargets = targets.filter(target => target.platform === 'ios' && target.type === 'emulator')
   const preferredName = process.env.HARNESS_IOS_SIMULATOR_NAME
@@ -239,7 +240,8 @@ const getIosHarnessDeviceResolverCode = () => `const resolveIosDevice = async ()
 const iosDevice = await resolveIosDevice()
 `
 
-const getAndroidHarnessDeviceResolverCode = () => `const resolveAndroidDevice = async () => {
+const getAndroidHarnessDeviceResolverCode =
+    () => `const resolveAndroidDevice = async () => {
   const targets = await getAndroidRunTargets()
   const emulatorTargets = targets.filter(target => target.platform === 'android' && target.type === 'emulator')
   const preferredName = process.env.HARNESS_ANDROID_EMULATOR_NAME
@@ -318,7 +320,9 @@ export const harnessConfigCode = ({
     ].join('\n')
     const deviceResolvers = [
         ...(iosBundleId == null ? [] : [getIosHarnessDeviceResolverCode()]),
-        ...(androidBundleId == null ? [] : [getAndroidHarnessDeviceResolverCode()]),
+        ...(androidBundleId == null
+            ? []
+            : [getAndroidHarnessDeviceResolverCode()]),
     ].join('\n')
     const runners = [
         ...(androidBundleId == null
