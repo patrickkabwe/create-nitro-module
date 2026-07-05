@@ -948,13 +948,12 @@ export class NitroModuleFactory {
             readFile(androidBuildWorkflowPath, { encoding: 'utf8' }),
         ])
 
-        const iosBuildReplacements = {
-            $$exampleApp$$: `${toPascalCase(this.config.packageName)}Example`,
-        }
-
+        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
         const iosBuildWorkflowContent = await replacePlaceholder({
             data: iosBuildWorkflow,
-            replacements: iosBuildReplacements,
+            replacements: {
+                $$exampleApp$$: exampleAppName,
+            },
         })
 
         await Promise.all([
@@ -978,7 +977,6 @@ export class NitroModuleFactory {
             return
         }
 
-        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
         const workflowDirectoryPath = path.join(
             workflowRoot,
             '.github',

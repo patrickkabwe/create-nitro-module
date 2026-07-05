@@ -7,6 +7,8 @@
     "scripts": {
         "dev": "bun typecheck && bun src/cli/index.ts",
         "build": "rm -rf lib && bun typecheck && tsup src",
+        "test:e2e": "bun test e2e",
+        "test:e2e:build": "bun run build && bun run test:e2e",
         "typecheck": "tsc --noEmit",
         "prerelease": "rm -rf ./lib/assets",
         "release": "bun run build && bun semantic-release",
