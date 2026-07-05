@@ -547,17 +547,16 @@ jobs:
             fail-fast: false
             matrix: ${{ fromJson(needs.define-matrix.outputs.android-harness) }}
         env:
+            AVD_DISK_SIZE: 1G
+            AVD_HEAP_SIZE: 1G
+            AVD_NAME: Pixel_7_API_36
+            DEVICE_API_LEVEL: '36'
+            DEVICE_ARCH: x86_64
+            DEVICE_PROFILE: pixel_7
             WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v7
-
-            - name: Enable KVM (Android emulator)
-              if: runner.os == 'Linux'
-              run: |
-                  echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-                  sudo udevadm control --reload-rules
-                  sudo udevadm trigger --name-match=kvm
 
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -600,28 +599,22 @@ jobs:
                   java-version: '17'
                   cache: 'gradle'
 
-            - name: Setup Android SDK
-              uses: android-actions/setup-android@v4
-
             - name: Build Android app
-              uses: ./.github/actions/android-gradle-build
-              with:
-                  android-dir: ${{ env.WORKING_DIR }}/example/android
-                  mode: ${{ matrix.mode }}
+              working-directory: ${{ env.WORKING_DIR }}/example/android
+              run: ./gradlew :app:assembleDebug --no-daemon --build-cache -PreactNativeArchitectures=${{ env.DEVICE_ARCH }}
 
-            - name: Run Android Emulator and Harness Tests
-              uses: reactivecircus/android-emulator-runner@v2
+            - name: Run React Native Harness
+              uses: callstackincubator/react-native-harness@v1.2.0
               with:
-                  api-level: 35
-                  target: google_apis
-                  arch: x86_64
-                  profile: Galaxy Nexus
-                  emulator-options: -no-snapshot -memory 4096 -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-                  disable-animations: true
-                  script: |
-                      adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
-                      cd "${{ env.WORKING_DIR }}/example"
-                      HARNESS_APP_PATH="${{ env.WORKING_DIR }}/example/android/app/build/outputs/apk/debug/app-debug.apk" ${{ matrix.pm }} run test:harness:android
+                  app: android/app/build/outputs/apk/debug/app-debug.apk
+                  runner: android
+                  projectRoot: ${{ env.WORKING_DIR }}/example
+                  packageManager: ${{ matrix.pm }}
+
+            - name: Stop Gradle
+              if: always()
+              working-directory: ${{ env.WORKING_DIR }}/example/android
+              run: ./gradlew --stop
 
     harness-ios:
         name: iOS Harness - ${{ matrix.package_type }} - ${{ matrix.scenario }}

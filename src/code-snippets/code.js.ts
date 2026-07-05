@@ -365,6 +365,13 @@ const getHarnessJobCode = (
         return `  test:
     name: Test Android Harness
     runs-on: ubuntu-latest
+    env:
+      AVD_DISK_SIZE: 1G
+      AVD_HEAP_SIZE: 1G
+      AVD_NAME: Pixel_7_API_36
+      DEVICE_API_LEVEL: '36'
+      DEVICE_ARCH: x86_64
+      DEVICE_PROFILE: pixel_7
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -384,15 +391,20 @@ ${getHarnessCodegenBuildStep(packageManager, monorepo)}
 
       - name: Build Android app
         working-directory: example/android
-        run: ./gradlew assembleDebug --no-daemon --build-cache
+        run: ./gradlew :app:assembleDebug --no-daemon --build-cache -PreactNativeArchitectures=\${{ env.DEVICE_ARCH }}
 
       - name: Run React Native Harness
-        uses: callstackincubator/react-native-harness@v1.0.0
+        uses: callstackincubator/react-native-harness@v1.2.0
         with:
-          app: example/android/app/build/outputs/apk/debug/app-debug.apk
+          app: android/app/build/outputs/apk/debug/app-debug.apk
           runner: android
           projectRoot: example
-          packageManager: ${packageManager}`
+          packageManager: ${packageManager}
+
+      - name: Stop Gradle
+        if: always()
+        working-directory: example/android
+        run: ./gradlew --stop`
     }
 
     return `  test:
