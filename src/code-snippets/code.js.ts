@@ -105,9 +105,9 @@ export const ${toPascalCase(moduleName)} = getHostComponent<${toPascalCase(modul
 export type ${toPascalCase(moduleName)}Ref = HybridRef<${toPascalCase(moduleName)}Props, ${toPascalCase(moduleName)}Methods>
 `
 
-export const metroConfig = `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+export const metroConfig = (packageRelativePath = '..') => `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const path = require('path');
-const root = path.resolve(__dirname, '..');
+const root = path.resolve(__dirname, '${packageRelativePath}');
 
 /**
  * Metro configuration
@@ -121,8 +121,8 @@ const config = {
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);`
 
-export const babelConfig = `const path = require('path');
-const pak = require('../package.json');
+export const babelConfig = (packageRelativePath = '..') => `const path = require('path');
+const pak = require('${packageRelativePath}/package.json');
 
 module.exports = api => {
   api.cache(true);
@@ -134,7 +134,7 @@ module.exports = api => {
         {
           extensions: ['.js', '.ts', '.json', '.jsx', '.tsx'],
           alias: {
-            [pak.name]: path.join(__dirname, '../', pak.source),
+            [pak.name]: path.join(__dirname, '${packageRelativePath}', pak.source),
           },
         },
       ],
@@ -142,7 +142,30 @@ module.exports = api => {
   };
 };`
 
-export const exampleTsConfig = (finalModuleName: string) => `{
+export const exampleReactNativeConfig = (packageRelativePath = '..') => `const path = require('path')
+const pkg = require('${packageRelativePath}/package.json')
+
+/**
+ * @type {import('@react-native-community/cli-types').Config}
+ */
+module.exports = {
+    project: {
+        ios: {
+            automaticPodsInstallation: true,
+        },
+    },
+    dependencies: {
+        [pkg.name]: {
+            root: path.join(__dirname, '${packageRelativePath}'),
+        },
+    },
+}
+`
+
+export const exampleTsConfig = (
+    finalModuleName: string,
+    packageRelativePath = '..'
+) => `{
   "extends": "@react-native/typescript-config",
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["**/node_modules", "**/Pods"],
@@ -150,7 +173,7 @@ export const exampleTsConfig = (finalModuleName: string) => `{
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "${finalModuleName}": ["../src"]
+      "${finalModuleName}": ["${packageRelativePath}/src"]
     }
   }
 }`
@@ -329,10 +352,25 @@ const getPackageManagerSetupStep = (packageManager: PackageManager) => {
 `
 }
 
+const getHarnessCodegenBuildStep = (
+    packageManager: PackageManager,
+    monorepo: boolean
+) => {
+    if (!monorepo) {
+        return ''
+    }
+
+    return `
+      - name: Run codegen and build
+        run: ${getPackageManagerRunCommand(packageManager, 'codegen')} && ${getPackageManagerRunCommand(packageManager, 'build')}
+`
+}
+
 const getHarnessJobCode = (
     exampleAppName: string,
     packageManager: PackageManager,
-    platform: SupportedPlatform
+    platform: SupportedPlatform,
+    monorepo = false
 ) => {
     if (platform === SupportedPlatform.ANDROID) {
         return `  test:
@@ -347,7 +385,7 @@ ${getPackageManagerSetupStep(packageManager)}
 
       - name: Install dependencies
         run: ${packageManager} install
-
+${getHarnessCodegenBuildStep(packageManager, monorepo)}
       - name: Setup JDK 17
         uses: actions/setup-java@v5
         with:
@@ -380,7 +418,7 @@ ${getPackageManagerSetupStep(packageManager)}
 
       - name: Install dependencies
         run: ${packageManager} install
-
+${getHarnessCodegenBuildStep(packageManager, monorepo)}
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -416,7 +454,8 @@ ${getPackageManagerSetupStep(packageManager)}
 export const harnessWorkflowCode = (
     exampleAppName: string,
     packageManager: PackageManager,
-    platform: SupportedPlatform
+    platform: SupportedPlatform,
+    monorepo = false
 ) => `name: Run React Native Harness ${platform === SupportedPlatform.ANDROID ? 'Android' : 'iOS'}
 
 permissions:
@@ -466,7 +505,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-${getHarnessJobCode(exampleAppName, packageManager, platform)}
+${getHarnessJobCode(exampleAppName, packageManager, platform, monorepo)}
 `
 
 export const postScript = (moduleName: string, isHybridView: boolean) => `/**

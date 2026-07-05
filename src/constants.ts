@@ -33,6 +33,29 @@ export const packagesToRemoveFromExampleApp = [
 
 export const foldersToRemoveFromExampleApp = ['__tests__']
 
+const getHarnessInstructions = (
+    monorepo: boolean,
+    pm: string,
+    platforms: SupportedPlatform[]
+) => {
+    if (monorepo) {
+        const commands = [
+            ...(platforms.includes(SupportedPlatform.ANDROID)
+                ? [`${pm} run test:harness:android`]
+                : []),
+            ...(platforms.includes(SupportedPlatform.IOS)
+                ? [`${pm} run test:harness:ios`]
+                : []),
+        ]
+
+        return commands
+            .map(command => `   ${kleur.green(command)}`)
+            .join('\n')
+    }
+
+    return `   ${kleur.green('cd example')}\n   ${kleur.green(`${pm} run test:harness`)}`
+}
+
 export const NITRO_GRAPHIC = `   
    ┌─────┐
    │ ⏲️  |
@@ -85,7 +108,7 @@ ${
         ? ''
         : `Run your example app to test the package:
 
-   ${kleur.green(`cd ${monorepo ? `${packagePath}/example` : 'example'}`)}
+   ${kleur.green('cd example')}
    ${kleur.green(`${pm} run pod`)}             ${kleur.dim('# Install CocoaPods dependencies (iOS)')}
    ${kleur.green(`${pm} run ios|android`)}     ${kleur.dim('# Run your example app')}`
 }
@@ -95,13 +118,12 @@ ${
         ? ''
         : `\n\nRun your React Native Harness tests:
 
-   ${kleur.green(`cd ${monorepo ? `${packagePath}/example` : 'example'}`)}
-   ${kleur.green(`${pm} run test:harness`)}      ${kleur.dim(`# Run native tests with the ${platforms.includes(SupportedPlatform.ANDROID) ? SupportedPlatform.ANDROID : SupportedPlatform.IOS} runner`)}`
+${getHarnessInstructions(monorepo, pm, platforms)}`
 }
 
 ${kleur.yellow('Pro Tips:')}
-${kleur.dim('• iOS:')} Open ${kleur.green(`${monorepo ? `${packagePath}/` : ''}example/ios/example.xcworkspace`)} in Xcode for native debugging. Make sure to run ${kleur.green(`${pm} pod`)} first in the example directory
-${kleur.dim('• Android:')} Open ${kleur.green(`${monorepo ? `${packagePath}/` : ''}example/android`)} in Android Studio
+${kleur.dim('• iOS:')} Open ${kleur.green('example/ios/example.xcworkspace')} in Xcode for native debugging. Make sure to run ${kleur.green(`${pm} pod`)} first in the example directory
+${kleur.dim('• Android:')} Open ${kleur.green('example/android')} in Android Studio
 ${kleur.dim('• Metro:')} Clear cache with ${kleur.green(`${pm} start`)} if needed
 
 ${kleur.yellow('Need help?')} Create an issue: ${kleur.blue().underline('https://github.com/patrickkabwe/create-nitro-module/issues')}

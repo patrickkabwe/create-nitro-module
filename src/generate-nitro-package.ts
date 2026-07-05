@@ -9,6 +9,7 @@ import { androidSettingsGradleCode } from './code-snippets/code.kotlin'
 import {
     appExampleCode,
     babelConfig,
+    exampleReactNativeConfig,
     exampleTsConfig,
     harnessConfigCode,
     harnessJestConfigCode,
@@ -92,6 +93,18 @@ export class NitroModuleFactory {
         this.config.cwd = packageDir
     }
 
+    private get exampleDir(): string {
+        return this.config.monorepo
+            ? path.join(this.workspaceRoot, 'example')
+            : path.join(this.config.cwd, 'example')
+    }
+
+    private get packageRelativeFromExample(): string {
+        return this.config.monorepo
+            ? path.posix.join('..', 'packages', this.config.finalPackageName)
+            : '..'
+    }
+
     async createNitroModule() {
         await createFolder(this.config.cwd)
 
@@ -134,6 +147,9 @@ export class NitroModuleFactory {
             }
         }
         await this.updateTemplateFiles()
+        if (this.config.monorepo) {
+            await this.configureMonorepoReleaseConfig()
+        }
 
         if (!this.config.skipExample) {
             this.config.spinner.message(messages.generating)
@@ -226,19 +242,62 @@ export class NitroModuleFactory {
             return `npm --prefix ${packageWorkspacePath} run ${scriptName}`
         }
 
-        return `bun --cwd ${packageWorkspacePath} run ${scriptName}`
+        return `bun run --cwd ${packageWorkspacePath} ${scriptName}`
+    }
+
+    private getExampleRunCommand(scriptName: string): string {
+        if (this.config.pm === 'yarn') {
+            return `yarn --cwd example ${scriptName}`
+        }
+
+        if (this.config.pm === 'pnpm') {
+            return `pnpm --dir example run ${scriptName}`
+        }
+
+        if (this.config.pm === 'npm') {
+            return `npm --prefix example run ${scriptName}`
+        }
+
+        return `bun run --cwd example ${scriptName}`
     }
 
     private async createWorkspaceRoot(): Promise<void> {
         const workspaces = this.config.skipExample
             ? ['packages/*']
-            : ['packages/*', 'packages/*/example']
+            : ['packages/*', 'example']
         const rootPackageJson: PackageJson = {
-            name: `${this.config.finalPackageName}-monorepo`,
+            name: this.config.finalPackageName,
             private: true,
             scripts: {
                 build: this.getWorkspaceRunCommand('build'),
                 codegen: this.getWorkspaceRunCommand('codegen'),
+                release: this.getWorkspaceRunCommand('release'),
+                ...(this.config.includeHarness && !this.config.skipExample
+                    ? {
+                          'test:harness':
+                              this.getExampleRunCommand('test:harness'),
+                          ...(this.config.platforms.includes(
+                              SupportedPlatform.ANDROID
+                          )
+                              ? {
+                                    'test:harness:android':
+                                        this.getExampleRunCommand(
+                                            'test:harness:android'
+                                        ),
+                                }
+                              : {}),
+                          ...(this.config.platforms.includes(
+                              SupportedPlatform.IOS
+                          )
+                              ? {
+                                    'test:harness:ios':
+                                        this.getExampleRunCommand(
+                                            'test:harness:ios'
+                                        ),
+                                }
+                              : {}),
+                      }
+                    : {}),
             },
             workspaces,
         }
@@ -302,11 +361,12 @@ export class NitroModuleFactory {
     }
 
     private getPostCodegenScript() {
-        let script = `${this.config.pm} --cwd example pod`
+        const examplePath = this.config.monorepo ? '../example' : 'example'
+        let script = `${this.config.pm} --cwd ${examplePath} pod`
         if (this.config.pm === 'npm') {
-            script = `${this.config.pm} --prefix example run pod`
+            script = `${this.config.pm} --prefix ${examplePath} run pod`
         } else if (this.config.pm === 'pnpm') {
-            script = `pnpm --filter ./example pod`
+            script = `pnpm --dir ${examplePath} run pod`
         }
         return script
     }
@@ -432,6 +492,25 @@ export class NitroModuleFactory {
         })
     }
 
+    private async configureMonorepoReleaseConfig(): Promise<void> {
+        const releaseConfigPath = path.join(this.config.cwd, 'release.config.cjs')
+        const releaseConfig = await readFile(releaseConfigPath, {
+            encoding: 'utf8',
+        })
+        const gitAssets = this.config.skipExample
+            ? "['package.json', 'CHANGELOG.md']"
+            : "['package.json', 'CHANGELOG.md', '../example/package.json']"
+
+        await writeFile(
+            releaseConfigPath,
+            releaseConfig.replace(
+                /assets:\s*\[[^\]]+\]/,
+                `assets: ${gitAssets}`
+            ),
+            { encoding: 'utf8' }
+        )
+    }
+
     private async copyNitroTemplateFiles() {
         const filesToCopy = [
             '.watchmanconfig',
@@ -491,10 +570,12 @@ export class NitroModuleFactory {
             --package-name com.${replaceHyphen(this.config.packageName)}example \
             --directory example --skip-install --skip-git-init --version ${reactNativeVersion}`
 
-        await execAsync(args, { cwd: this.config.cwd })
+        await execAsync(args, {
+            cwd: this.config.monorepo ? this.workspaceRoot : this.config.cwd,
+        })
 
         // Setup App.tsx
-        const appPath = path.join(this.config.cwd, 'example', 'App.tsx')
+        const appPath = path.join(this.exampleDir, 'App.tsx')
         await writeFile(
             appPath,
             appExampleCode(
@@ -508,11 +589,7 @@ export class NitroModuleFactory {
     }
 
     private async configureExamplePackageJson() {
-        const packageJsonPath = path.join(
-            this.config.cwd,
-            'example',
-            'package.json'
-        )
+        const packageJsonPath = path.join(this.exampleDir, 'package.json')
         const examplePackageJsonStr = await readFile(packageJsonPath, {
             encoding: 'utf8',
         })
@@ -530,6 +607,9 @@ export class NitroModuleFactory {
         const nitroKey = `react-native-nitro-modules`
         exampleAppPackageJson.dependencies = {
             ...exampleAppPackageJson.dependencies,
+            ...(this.config.monorepo
+                ? { [this.config.finalPackageName]: '*' }
+                : {}),
             [nitroKey]: this.nitroModulesVersion ?? '*',
         }
 
@@ -556,6 +636,18 @@ export class NitroModuleFactory {
             exampleAppPackageJson.scripts = {
                 ...exampleAppPackageJson.scripts,
                 'test:harness': 'react-native-harness',
+                ...(this.config.platforms.includes(SupportedPlatform.ANDROID)
+                    ? {
+                          'test:harness:android':
+                              'react-native-harness --harnessRunner android',
+                      }
+                    : {}),
+                ...(this.config.platforms.includes(SupportedPlatform.IOS)
+                    ? {
+                          'test:harness:ios':
+                              'react-native-harness --harnessRunner ios',
+                      }
+                    : {}),
             }
 
             exampleAppPackageJson.devDependencies = {
@@ -603,50 +695,25 @@ export class NitroModuleFactory {
     }
 
     private async syncExampleAppConfigurations() {
+        const packageRelativePath = this.packageRelativeFromExample
         const reactNativeConfigPath = path.join(
-            this.config.cwd,
-            'example',
+            this.exampleDir,
             'react-native.config.js'
         )
 
-        const replacements = {
-            [JS_PACKAGE_NAME_TAG]: this.config.finalPackageName,
-        }
-
-        const reactNativeConfig = await replacePlaceholder({
-            filePath: path.join(
-                __dirname,
-                '..',
-                'assets',
-                'react-native.config.js'
-            ),
-            replacements,
-        })
+        const reactNativeConfig = exampleReactNativeConfig(packageRelativePath)
 
         // Setup metro.config.js
-        const metroConfigPath = path.join(
-            this.config.cwd,
-            'example',
-            'metro.config.js'
-        )
+        const metroConfigPath = path.join(this.exampleDir, 'metro.config.js')
 
         // Setup babel.config.js
-        const babelConfigPath = path.join(
-            this.config.cwd,
-            'example',
-            'babel.config.js'
-        )
+        const babelConfigPath = path.join(this.exampleDir, 'babel.config.js')
 
         // Setup tsconfig.json
-        const tsConfigPath = path.join(
-            this.config.cwd,
-            'example',
-            'tsconfig.json'
-        )
+        const tsConfigPath = path.join(this.exampleDir, 'tsconfig.json')
 
         const androidSettingsGradlePath = path.join(
-            this.config.cwd,
-            'example',
+            this.exampleDir,
             'android',
             'settings.gradle'
         )
@@ -658,8 +725,7 @@ export class NitroModuleFactory {
         )
 
         const androidBuildGradlePath = path.join(
-            this.config.cwd,
-            'example',
+            this.exampleDir,
             'android',
             'app',
             'build.gradle'
@@ -669,7 +735,7 @@ export class NitroModuleFactory {
             encoding: 'utf8',
         })
 
-        const gradleReplacements = {
+        const gradleReplacements: Record<string, string> = {
             '// reactNativeDir = file("../../node_modules/react-native")':
                 'reactNativeDir = file("../../../node_modules/react-native")',
             '// codegenDir = file("../../node_modules/@react-native/codegen")':
@@ -687,11 +753,14 @@ export class NitroModuleFactory {
 
         const filesToWrite = [
             { saveTo: reactNativeConfigPath, data: reactNativeConfig },
-            { saveTo: metroConfigPath, data: metroConfig },
-            { saveTo: babelConfigPath, data: babelConfig },
+            { saveTo: metroConfigPath, data: metroConfig(packageRelativePath) },
+            { saveTo: babelConfigPath, data: babelConfig(packageRelativePath) },
             {
                 saveTo: tsConfigPath,
-                data: exampleTsConfig(this.config.finalPackageName),
+                data: exampleTsConfig(
+                    this.config.finalPackageName,
+                    packageRelativePath
+                ),
             },
             {
                 saveTo: androidSettingsGradlePath,
@@ -709,7 +778,7 @@ export class NitroModuleFactory {
         )
 
         for (const folder of foldersToRemoveFromExampleApp) {
-            await rm(path.join(this.config.cwd, 'example', folder), {
+            await rm(path.join(this.exampleDir, folder), {
                 recursive: true,
                 force: true,
             })
@@ -719,8 +788,7 @@ export class NitroModuleFactory {
     private async getExampleIOSBundleId() {
         const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
         const projectFilePath = path.join(
-            this.config.cwd,
-            'example',
+            this.exampleDir,
             'ios',
             `${exampleAppName}.xcodeproj`,
             'project.pbxproj'
@@ -759,11 +827,11 @@ export class NitroModuleFactory {
             ? SupportedPlatform.ANDROID
             : SupportedPlatform.IOS
 
-        await createFolder(this.config.cwd, path.join('example', '__tests__'))
+        await createFolder(this.exampleDir, '__tests__')
 
         await Promise.all([
             writeFile(
-                path.join(this.config.cwd, 'example', 'rn-harness.config.mjs'),
+                path.join(this.exampleDir, 'rn-harness.config.mjs'),
                 harnessConfigCode({
                     androidBundleId,
                     appRegistryComponentName: exampleAppName,
@@ -774,14 +842,13 @@ export class NitroModuleFactory {
                 { encoding: 'utf8' }
             ),
             writeFile(
-                path.join(this.config.cwd, 'example', 'jest.config.js'),
+                path.join(this.exampleDir, 'jest.config.js'),
                 harnessJestConfigCode(),
                 { encoding: 'utf8' }
             ),
             writeFile(
                 path.join(
-                    this.config.cwd,
-                    'example',
+                    this.exampleDir,
                     '__tests__',
                     `${this.config.packageName}.harness.${
                         this.config.packageType === Nitro.View ? 'tsx' : 'ts'
@@ -885,7 +952,8 @@ export class NitroModuleFactory {
                     harnessWorkflowCode(
                         exampleAppName,
                         this.config.pm,
-                        platform
+                        platform,
+                        this.config.monorepo
                     )
                 ),
                 {
@@ -903,26 +971,36 @@ export class NitroModuleFactory {
         }
 
         const packagePath = `packages/${this.config.finalPackageName}`
-        const replacements: Record<string, string> = {
-            'example/': `${packagePath}/example/`,
+        const packagePathReplacements: Record<string, string> = {
             'cpp/**': `${packagePath}/cpp/**`,
             'android/**': `${packagePath}/android/**`,
             'ios/**': `${packagePath}/ios/**`,
             'src/**': `${packagePath}/src/**`,
             'nitrogen/**': `${packagePath}/nitrogen/**`,
-            "'*.podspec'": `'${packagePath}/*.podspec'`,
-            "'package.json'": `'${packagePath}/package.json'`,
-            "'react-native.config.js'": `'${packagePath}/react-native.config.js'`,
-            "'nitro.json'": `'${packagePath}/nitro.json'`,
-            'working-directory: example': `working-directory: ${packagePath}/example`,
-            'projectRoot: example': `projectRoot: ${packagePath}/example`,
-            'app: example/': `app: ${packagePath}/example/`,
+            'nitrogen/generated/shared/**': `${packagePath}/nitrogen/generated/shared/**`,
+            'nitrogen/generated/android/**': `${packagePath}/nitrogen/generated/android/**`,
+            'nitrogen/generated/ios/**': `${packagePath}/nitrogen/generated/ios/**`,
+            '*.podspec': `${packagePath}/*.podspec`,
+            'package.json': `${packagePath}/package.json`,
+            'react-native.config.js': `${packagePath}/react-native.config.js`,
+            'nitro.json': `${packagePath}/nitro.json`,
         }
 
-        return Object.entries(replacements).reduce(
-            (workflowContent, [search, value]) =>
-                workflowContent.replaceAll(search, value),
-            content
-        )
+        return content
+            .split('\n')
+            .map(line => {
+                const pathMatch = line.match(/^\s*-\s+'([^']+)'\s*$/)
+                if (pathMatch == null) {
+                    return line
+                }
+
+                const replacement = packagePathReplacements[pathMatch[1]]
+                if (replacement == null) {
+                    return line
+                }
+
+                return line.replace(pathMatch[1], replacement)
+            })
+            .join('\n')
     }
 }

@@ -1,5 +1,5 @@
-import * as p from '@clack/prompts'
-import { detectPackageManager } from './utils'
+import type * as p from '@clack/prompts'
+import type { detectPackageManager } from './utils'
 
 export type PlatformLangMap = Partial<Record<SupportedPlatform, SupportedLang>>
 
