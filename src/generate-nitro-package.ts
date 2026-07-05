@@ -645,6 +645,7 @@ export class NitroModuleFactory {
                           'test:harness:android': [
                               'if [ -z "${HARNESS_APP_PATH:-}" ]; then',
                               '  set -euo pipefail',
+                              '  chmod +x android/gradlew',
                               '  (cd android && ./gradlew assembleDebug --no-daemon --build-cache)',
                               '  HARNESS_APP_PATH="$(find android/app/build/outputs/apk/debug -maxdepth 1 -type f -name "*.apk" | head -1)"',
                               '  if [ -z "${HARNESS_APP_PATH}" ]; then',

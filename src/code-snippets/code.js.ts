@@ -391,7 +391,9 @@ ${getHarnessCodegenBuildStep(packageManager, monorepo)}
 
       - name: Build Android app
         working-directory: example/android
-        run: ./gradlew :app:assembleDebug --no-daemon --build-cache -PreactNativeArchitectures=\${{ env.DEVICE_ARCH }}
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:assembleDebug --no-daemon --build-cache -PreactNativeArchitectures=\${{ env.DEVICE_ARCH }}
 
       - name: Run React Native Harness
         uses: callstackincubator/react-native-harness@v1.2.0
@@ -404,7 +406,9 @@ ${getHarnessCodegenBuildStep(packageManager, monorepo)}
       - name: Stop Gradle
         if: always()
         working-directory: example/android
-        run: ./gradlew --stop`
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --stop`
     }
 
     return `  test:

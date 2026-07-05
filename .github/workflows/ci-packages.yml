@@ -601,7 +601,9 @@ jobs:
 
             - name: Build Android app
               working-directory: ${{ env.WORKING_DIR }}/example/android
-              run: ./gradlew :app:assembleDebug --no-daemon --build-cache -PreactNativeArchitectures=${{ env.DEVICE_ARCH }}
+              run: |
+                  chmod +x ./gradlew
+                  ./gradlew :app:assembleDebug --no-daemon --build-cache -PreactNativeArchitectures=${{ env.DEVICE_ARCH }}
 
             - name: Run React Native Harness
               uses: callstackincubator/react-native-harness@v1.2.0
@@ -614,7 +616,9 @@ jobs:
             - name: Stop Gradle
               if: always()
               working-directory: ${{ env.WORKING_DIR }}/example/android
-              run: ./gradlew --stop
+              run: |
+                  chmod +x ./gradlew
+                  ./gradlew --stop
 
     harness-ios:
         name: iOS Harness - ${{ matrix.package_type }} - ${{ matrix.scenario }}
