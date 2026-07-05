@@ -105,7 +105,9 @@ export const ${toPascalCase(moduleName)} = getHostComponent<${toPascalCase(modul
 export type ${toPascalCase(moduleName)}Ref = HybridRef<${toPascalCase(moduleName)}Props, ${toPascalCase(moduleName)}Methods>
 `
 
-export const metroConfig = (packageRelativePath = '..') => `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+export const metroConfig = (
+    packageRelativePath = '..'
+) => `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const path = require('path');
 const root = path.resolve(__dirname, '${packageRelativePath}');
 
@@ -121,7 +123,9 @@ const config = {
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);`
 
-export const babelConfig = (packageRelativePath = '..') => `const path = require('path');
+export const babelConfig = (
+    packageRelativePath = '..'
+) => `const path = require('path');
 const pak = require('${packageRelativePath}/package.json');
 
 module.exports = api => {
@@ -142,7 +146,9 @@ module.exports = api => {
   };
 };`
 
-export const exampleReactNativeConfig = (packageRelativePath = '..') => `const path = require('path')
+export const exampleReactNativeConfig = (
+    packageRelativePath = '..'
+) => `const path = require('path')
 const pkg = require('${packageRelativePath}/package.json')
 
 /**

@@ -493,7 +493,10 @@ export class NitroModuleFactory {
     }
 
     private async configureMonorepoReleaseConfig(): Promise<void> {
-        const releaseConfigPath = path.join(this.config.cwd, 'release.config.cjs')
+        const releaseConfigPath = path.join(
+            this.config.cwd,
+            'release.config.cjs'
+        )
         const releaseConfig = await readFile(releaseConfigPath, {
             encoding: 'utf8',
         })

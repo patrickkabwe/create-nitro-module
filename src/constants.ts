@@ -48,9 +48,7 @@ const getHarnessInstructions = (
                 : []),
         ]
 
-        return commands
-            .map(command => `   ${kleur.green(command)}`)
-            .join('\n')
+        return commands.map(command => `   ${kleur.green(command)}`).join('\n')
     }
 
     return `   ${kleur.green('cd example')}\n   ${kleur.green(`${pm} run test:harness`)}`
