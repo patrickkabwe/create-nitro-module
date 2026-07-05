@@ -397,7 +397,7 @@ ${getHarnessCodegenBuildStep(packageManager, monorepo)}
 
     return `  test:
     name: Test iOS Harness
-    runs-on: macOS-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -408,10 +408,8 @@ ${getPackageManagerSetupStep(packageManager)}
       - name: Install dependencies
         run: ${packageManager} install
 ${getHarnessCodegenBuildStep(packageManager, monorepo)}
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: 16.4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.5.app/Contents/Developer
 
       - name: Install Pods
         working-directory: example
