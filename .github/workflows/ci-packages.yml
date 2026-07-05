@@ -699,10 +699,17 @@ jobs:
               working-directory: ${{ env.WORKING_DIR }}/example
               shell: bash
               run: |
+                  IOS_SIMULATOR="$(xcrun simctl list devices available --json | node -e 'const fs = require("node:fs"); const input = fs.readFileSync(0, "utf8"); const data = JSON.parse(input); const candidates = Object.entries(data.devices).flatMap(([runtime, devices]) => { const version = runtime.match(/iOS-(\d+(?:-\d+)*)$/)?.[1]?.replaceAll("-", "."); if (version == null) return []; return devices.filter(device => device.isAvailable === true && device.name.startsWith("iPhone")).map(device => ({ name: device.name, version })); }); candidates.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }) || b.name.localeCompare(a.name, undefined, { numeric: true })); const selected = candidates[0]; if (selected == null) process.exit(1); console.log(`${selected.name}|${selected.version}`);' || true)"
+                  if [ -z "$IOS_SIMULATOR" ]; then
+                    echo "Unable to resolve an available iOS simulator."
+                    xcrun simctl list devices available
+                    exit 1
+                  fi
+
                   APP_PATH="$(find ios/build/Build/Products/Debug-iphonesimulator -maxdepth 1 -type d -name '*.app' | head -1)"
                   if [ -z "$APP_PATH" ]; then
                     echo "No built iOS app bundle found in ios/build/Build/Products/Debug-iphonesimulator"
                     exit 1
                   fi
 
-                  HARNESS_APP_PATH="$APP_PATH" ${{ matrix.pm }} run test:harness:ios
+                  DEVICE_MODEL="${IOS_SIMULATOR%%|*}" IOS_VERSION="${IOS_SIMULATOR#*|}" HARNESS_APP_PATH="$APP_PATH" ${{ matrix.pm }} run test:harness:ios
