@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from 'bun:test'
 import { execFile } from 'node:child_process'
-import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { promisify } from 'node:util'
@@ -26,6 +26,18 @@ const createProject = async (
 ): Promise<GeneratedProject> => {
     const rootDir = await mkdtemp(path.join(os.tmpdir(), 'nitro-cli-e2e-'))
     generatedRoots.push(rootDir)
+    const gitConfigPath = path.join(rootDir, 'gitconfig')
+
+    await writeFile(
+        gitConfigPath,
+        [
+            '[user]',
+            '    name = Nitro CLI E2E',
+            '    email = e2e@example.com',
+            '',
+        ].join('\n'),
+        { encoding: 'utf8' }
+    )
 
     const args = [
         'lib/cli/index.js',
@@ -50,6 +62,8 @@ const createProject = async (
         env: {
             ...process.env,
             CI: 'true',
+            GIT_CONFIG_GLOBAL: gitConfigPath,
+            GIT_CONFIG_NOSYSTEM: '1',
         },
         maxBuffer: 1024 * 1024 * 20,
     })
