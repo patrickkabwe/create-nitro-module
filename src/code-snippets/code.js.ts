@@ -1,4 +1,5 @@
 import { toPascalCase } from '../utils'
+import { Nitro, type PackageManager, SupportedPlatform } from '../types'
 
 export const appExampleCode = (
     moduleName: string,
@@ -104,9 +105,11 @@ export const ${toPascalCase(moduleName)} = getHostComponent<${toPascalCase(modul
 export type ${toPascalCase(moduleName)}Ref = HybridRef<${toPascalCase(moduleName)}Props, ${toPascalCase(moduleName)}Methods>
 `
 
-export const metroConfig = `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+export const metroConfig = (
+    packageRelativePath = '..'
+) => `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const path = require('path');
-const root = path.resolve(__dirname, '..');
+const root = path.resolve(__dirname, '${packageRelativePath}');
 
 /**
  * Metro configuration
@@ -120,8 +123,10 @@ const config = {
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);`
 
-export const babelConfig = `const path = require('path');
-const pak = require('../package.json');
+export const babelConfig = (
+    packageRelativePath = '..'
+) => `const path = require('path');
+const pak = require('${packageRelativePath}/package.json');
 
 module.exports = api => {
   api.cache(true);
@@ -133,7 +138,7 @@ module.exports = api => {
         {
           extensions: ['.js', '.ts', '.json', '.jsx', '.tsx'],
           alias: {
-            [pak.name]: path.join(__dirname, '../', pak.source),
+            [pak.name]: path.join(__dirname, '${packageRelativePath}', pak.source),
           },
         },
       ],
@@ -141,7 +146,32 @@ module.exports = api => {
   };
 };`
 
-export const exampleTsConfig = (finalModuleName: string) => `{
+export const exampleReactNativeConfig = (
+    packageRelativePath = '..'
+) => `const path = require('path')
+const pkg = require('${packageRelativePath}/package.json')
+
+/**
+ * @type {import('@react-native-community/cli-types').Config}
+ */
+module.exports = {
+    project: {
+        ios: {
+            automaticPodsInstallation: true,
+        },
+    },
+    dependencies: {
+        [pkg.name]: {
+            root: path.join(__dirname, '${packageRelativePath}'),
+        },
+    },
+}
+`
+
+export const exampleTsConfig = (
+    finalModuleName: string,
+    packageRelativePath = '..'
+) => `{
   "extends": "@react-native/typescript-config",
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["**/node_modules", "**/Pods"],
@@ -149,10 +179,336 @@ export const exampleTsConfig = (finalModuleName: string) => `{
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "${finalModuleName}": ["../src"]
+      "${finalModuleName}": ["${packageRelativePath}/src"]
     }
   }
 }`
+
+type HarnessConfigParams = {
+    androidBundleId: string | null
+    appRegistryComponentName: string
+    defaultRunner: SupportedPlatform
+    entryPoint: string
+    iosBundleId: string | null
+}
+
+export const harnessConfigCode = ({
+    androidBundleId,
+    appRegistryComponentName,
+    defaultRunner,
+    entryPoint,
+    iosBundleId,
+}: HarnessConfigParams): string => {
+    const imports = [
+        ...(androidBundleId == null
+            ? []
+            : [
+                  "import { androidEmulator, androidPlatform } from '@react-native-harness/platform-android'",
+              ]),
+        ...(iosBundleId == null
+            ? []
+            : [
+                  "import { applePlatform, appleSimulator } from '@react-native-harness/platform-apple'",
+              ]),
+    ].join('\n')
+    const runners = [
+        ...(androidBundleId == null
+            ? []
+            : [
+                  `androidPlatform({
+      name: 'android',
+      device: androidEmulator(process.env.AVD_NAME ?? 'Pixel_7_API_36', {
+        apiLevel: Number(process.env.DEVICE_API_LEVEL ?? '36'),
+        profile: process.env.DEVICE_PROFILE ?? 'pixel_7',
+        diskSize: process.env.AVD_DISK_SIZE ?? '1G',
+        heapSize: process.env.AVD_HEAP_SIZE ?? '1G',
+        snapshot: {
+          enabled: process.env.CI === 'true',
+        },
+      }),
+      bundleId: '${androidBundleId}',
+    })`,
+              ]),
+        ...(iosBundleId == null
+            ? []
+            : [
+                  `applePlatform({
+      name: 'ios',
+      device: appleSimulator(
+        process.env.DEVICE_MODEL ?? 'iPhone 17 Pro',
+        process.env.IOS_VERSION ?? '26.5'
+      ),
+      bundleId: '${iosBundleId}',
+    })`,
+              ]),
+    ].join(',\n    ')
+
+    return `${imports}
+
+const config = {
+  entryPoint: '${entryPoint}',
+  appRegistryComponentName: '${appRegistryComponentName}',
+  runners: [
+    ${runners}
+  ],
+  defaultRunner: '${defaultRunner}',
+  bridgeTimeout: 300000,
+}
+
+export default config
+`
+}
+
+export const harnessJestConfigCode = () => `module.exports = {
+  projects: [
+    {
+      displayName: 'react-native-harness',
+      preset: 'react-native-harness',
+      testMatch: [
+        '<rootDir>/__tests__/**/*.(test|spec|harness).(js|jsx|ts|tsx)',
+      ],
+    },
+  ],
+}
+`
+
+export const harnessTestCode = (
+    moduleName: string,
+    finalModuleName: string,
+    funcName: string,
+    packageType: Nitro
+) => {
+    if (packageType === Nitro.Module) {
+        return `import { describe, it, expect } from 'react-native-harness'
+import { ${toPascalCase(moduleName)} } from '${finalModuleName}'
+
+describe('${toPascalCase(moduleName)}', () => {
+  it('calls the native implementation', () => {
+    expect(${toPascalCase(moduleName)}.${funcName}(1, 2)).toBe(3)
+  })
+})
+`
+    }
+
+    return `import React from 'react'
+import { StyleSheet } from 'react-native'
+import { describe, it, expect, render } from 'react-native-harness'
+import { screen } from '@react-native-harness/ui'
+import { ${toPascalCase(moduleName)} } from '${finalModuleName}'
+
+describe('${toPascalCase(moduleName)}', () => {
+  it('renders the native view', async () => {
+    await render(
+      <${toPascalCase(moduleName)}
+        isRed={true}
+        style={styles.view}
+        testID="${moduleName}"
+      />
+    )
+
+    const view = await screen.findByTestId('${moduleName}')
+
+    expect(view.nativeId).toBeDefined()
+  })
+})
+
+const styles = StyleSheet.create({
+  view: {
+    width: 200,
+    height: 200,
+  },
+})
+`
+}
+
+const getPackageManagerRunCommand = (
+    packageManager: PackageManager,
+    scriptName: string
+) => {
+    if (packageManager === 'yarn') {
+        return `yarn ${scriptName}`
+    }
+
+    return `${packageManager} run ${scriptName}`
+}
+
+const getPackageManagerSetupStep = (packageManager: PackageManager) => {
+    if (packageManager !== 'bun') {
+        return ''
+    }
+
+    return `      - uses: oven-sh/setup-bun@v2
+`
+}
+
+const getHarnessCodegenBuildStep = (
+    packageManager: PackageManager,
+    monorepo: boolean
+) => {
+    if (!monorepo) {
+        return ''
+    }
+
+    return `
+      - name: Run codegen and build
+        run: ${getPackageManagerRunCommand(packageManager, 'codegen')} && ${getPackageManagerRunCommand(packageManager, 'build')}
+`
+}
+
+const getHarnessJobCode = (
+    exampleAppName: string,
+    packageManager: PackageManager,
+    platform: SupportedPlatform,
+    monorepo = false
+) => {
+    if (platform === SupportedPlatform.ANDROID) {
+        return `  test:
+    name: Test Android Harness
+    runs-on: ubuntu-latest
+    env:
+      AVD_DISK_SIZE: 1G
+      AVD_HEAP_SIZE: 1G
+      AVD_NAME: Pixel_7_API_36
+      DEVICE_API_LEVEL: '36'
+      DEVICE_ARCH: x86_64
+      DEVICE_PROFILE: pixel_7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+${getPackageManagerSetupStep(packageManager)}
+
+      - name: Install dependencies
+        run: ${packageManager} install
+${getHarnessCodegenBuildStep(packageManager, monorepo)}
+      - name: Setup JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Build Android app
+        working-directory: example/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:assembleDebug --no-daemon --build-cache -PreactNativeArchitectures=\${{ env.DEVICE_ARCH }}
+
+      - name: Run React Native Harness
+        uses: callstackincubator/react-native-harness@v1.2.0
+        with:
+          app: android/app/build/outputs/apk/debug/app-debug.apk
+          runner: android
+          projectRoot: example
+          packageManager: ${packageManager}
+
+      - name: Stop Gradle
+        if: always()
+        working-directory: example/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --stop`
+    }
+
+    return `  test:
+    name: Test iOS Harness
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+${getPackageManagerSetupStep(packageManager)}
+
+      - name: Install dependencies
+        run: ${packageManager} install
+${getHarnessCodegenBuildStep(packageManager, monorepo)}
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.5.app/Contents/Developer
+
+      - name: Install Pods
+        working-directory: example
+        run: ${getPackageManagerRunCommand(packageManager, 'pod')}
+
+      - name: Build iOS app
+        working-directory: example/ios
+        run: |
+          set -o pipefail && xcodebuild \
+            CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
+            -derivedDataPath build -UseModernBuildSystem=YES \
+            -workspace ${exampleAppName}.xcworkspace \
+            -scheme ${exampleAppName} \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            build \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run React Native Harness
+        uses: callstackincubator/react-native-harness@v1.0.0
+        with:
+          app: example/ios/build/Build/Products/Debug-iphonesimulator/${exampleAppName}.app
+          runner: ios
+          projectRoot: example
+          packageManager: ${packageManager}`
+}
+
+export const harnessWorkflowCode = (
+    exampleAppName: string,
+    packageManager: PackageManager,
+    platform: SupportedPlatform,
+    monorepo = false
+) => `name: Run React Native Harness ${platform === SupportedPlatform.ANDROID ? 'Android' : 'iOS'}
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/harness-${platform}.yml'
+      - 'example/**'
+      - 'android/**'
+      - 'ios/**'
+      - 'cpp/**'
+      - 'src/**'
+      - 'nitrogen/**'
+      - '*.podspec'
+      - 'package.json'
+      - 'bun.lock'
+      - 'pnpm-lock.yaml'
+      - 'package-lock.json'
+      - 'yarn.lock'
+      - 'react-native.config.js'
+      - 'nitro.json'
+  pull_request:
+    paths:
+      - '.github/workflows/harness-${platform}.yml'
+      - 'example/**'
+      - 'android/**'
+      - 'ios/**'
+      - 'cpp/**'
+      - 'src/**'
+      - 'nitrogen/**'
+      - '*.podspec'
+      - 'package.json'
+      - 'bun.lock'
+      - 'pnpm-lock.yaml'
+      - 'package-lock.json'
+      - 'yarn.lock'
+      - 'react-native.config.js'
+      - 'nitro.json'
+  workflow_dispatch:
+
+concurrency:
+  group: \${{ github.workflow }}-\${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+${getHarnessJobCode(exampleAppName, packageManager, platform, monorepo)}
+`
 
 export const postScript = (moduleName: string, isHybridView: boolean) => `/**
 * @file This script is auto-generated by create-nitro-module and should not be edited.
@@ -212,7 +568,7 @@ const androidWorkaround = async () => {
  )
 
  if (res.some((r) => r.status === 'rejected')) {
-   throw new Error(\`Error updating view manager files: \$\{res\}\`)
+   throw new Error('Error updating view manager files: ' + JSON.stringify(res))
  }
 `
          : ''

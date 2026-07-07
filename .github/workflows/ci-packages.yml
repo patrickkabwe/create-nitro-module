@@ -39,7 +39,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Repo
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
 
             - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
@@ -47,7 +47,7 @@ jobs:
                   bun-version: latest
 
             - name: Cache bun dependencies
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
                   key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
@@ -68,15 +68,16 @@ jobs:
                   node lib/cli/index.js --help
                   node lib/cli/index.js create --help
 
+            - name: Run E2E tests
+              run: bun run test:e2e
+
     define-matrix:
         name: Define Package Matrices
         runs-on: ubuntu-latest
         outputs:
             generation: ${{ steps.set-matrix.outputs.generation }}
-            ios-build: ${{ steps.set-matrix.outputs.ios_build }}
-            android-build: ${{ steps.set-matrix.outputs.android_build }}
-            ios-e2e: ${{ steps.set-matrix.outputs.ios_e2e }}
-            android-e2e: ${{ steps.set-matrix.outputs.android_e2e }}
+            ios-harness: ${{ steps.set-matrix.outputs.ios_harness }}
+            android-harness: ${{ steps.set-matrix.outputs.android_harness }}
         steps:
             - name: Build workflow matrices
               id: set-matrix
@@ -184,36 +185,16 @@ jobs:
                   const generation = pms.flatMap(pm =>
                     scenarios.map(item => enrich(item, { pm }))
                   )
-                  const iosBuild = pms.flatMap(pm =>
-                    scenarios
-                      .filter(item => item.runs_ios)
-                      .flatMap(item =>
-                        ['Debug', 'Release'].map(mode =>
-                          enrich(item, { pm, mode })
-                        )
-                      )
-                  )
-                  const androidBuild = pms.flatMap(pm =>
-                    scenarios
-                      .filter(item => item.runs_android)
-                      .flatMap(item =>
-                        ['Debug', 'Release'].map(mode =>
-                          enrich(item, { pm, mode })
-                        )
-                      )
-                  )
-                  const iosE2E = scenarios
+                  const iosHarness = scenarios
                     .filter(item => item.runs_ios)
-                    .map(item => enrich(item, { pm: 'bun', mode: 'Release' }))
-                  const androidE2E = scenarios
+                    .map(item => enrich(item, { pm: 'bun', mode: 'Debug' }))
+                  const androidHarness = scenarios
                     .filter(item => item.runs_android)
-                    .map(item => enrich(item, { pm: 'bun', mode: 'Release' }))
+                    .map(item => enrich(item, { pm: 'bun', mode: 'Debug' }))
 
                   console.log(`generation=${JSON.stringify({ include: generation })}`)
-                  console.log(`ios_build=${JSON.stringify({ include: iosBuild })}`)
-                  console.log(`android_build=${JSON.stringify({ include: androidBuild })}`)
-                  console.log(`ios_e2e=${JSON.stringify({ include: iosE2E })}`)
-                  console.log(`android_e2e=${JSON.stringify({ include: androidE2E })}`)
+                  console.log(`ios_harness=${JSON.stringify({ include: iosHarness })}`)
+                  console.log(`android_harness=${JSON.stringify({ include: androidHarness })}`)
                   NODE
 
     generate-packages:
@@ -226,7 +207,7 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - name: Configure Git
               run: |
@@ -245,7 +226,7 @@ jobs:
                   bun-version: latest
 
             - name: Cache dependencies (bun)
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
                   key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
@@ -264,6 +245,7 @@ jobs:
               run: |
                   ${{ matrix.pm }} create nitro-module test-${{ matrix.package_type }}-${{ matrix.scenario }} \
                     --skip-install \
+                    --include-harness \
                     --ci \
                     --package-type ${{ matrix.package_type }} \
                     --platforms ${{ matrix.platforms }} \
@@ -325,6 +307,23 @@ jobs:
                     exit 1
                   fi
 
+            - name: Verify generated harness scripts
+              shell: bash
+              run: |
+                  cd "${{ matrix.package_dir }}"
+
+                  if [ "${{ matrix.runs_android }}" = "true" ] && ! grep -q '"test:harness:android"' example/package.json; then
+                    echo "Missing Android Harness script in example/package.json"
+                    cat example/package.json
+                    exit 1
+                  fi
+
+                  if [ "${{ matrix.runs_ios }}" = "true" ] && ! grep -q '"test:harness:ios"' example/package.json; then
+                    echo "Missing iOS Harness script in example/package.json"
+                    cat example/package.json
+                    exit 1
+                  fi
+
             - name: Test package.json content
               shell: bash
               run: |
@@ -349,106 +348,24 @@ jobs:
                   if-no-files-found: error
                   retention-days: 7
 
-    test-ios-build:
-        name: Test iOS Build - ${{ matrix.pm }} - ${{ matrix.package_type }} - ${{ matrix.scenario }} (${{ matrix.mode }})
-        needs: [generate-packages, define-matrix]
-        runs-on: macOS-latest
-        strategy:
-            fail-fast: false
-            matrix: ${{ fromJson(needs.define-matrix.outputs.ios-build) }}
-        env:
-            WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v6
-
-            - name: Create working directory
-              run: mkdir -p ${{ env.WORKING_DIR }}
-
-            - name: Download generated package
-              uses: actions/download-artifact@v8
-              with:
-                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
-                  path: ${{ env.WORKING_DIR }}
-
-            - name: List package structure
-              working-directory: ${{ env.WORKING_DIR }}
-              run: |
-                  echo "Package structure:"
-                  find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
-
-            - name: Setup Xcode
-              uses: maxim-lobanov/setup-xcode@v1
-              with:
-                  xcode-version: 16.4
-
-            - name: Setup Ruby and CocoaPods
-              uses: ruby/setup-ruby@v1
-              with:
-                  ruby-version: '3.2'
-                  bundler-cache: true
-
-            - name: Setup Node.js
-              if: matrix.pm == 'yarn'
-              uses: actions/setup-node@v6
-              with:
-                  node-version: 22.x
-
-            - name: Setup Yarn
-              if: matrix.pm == 'yarn'
-              uses: ./.github/actions/setup-yarn
-              with:
-                  working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Setup Bun.js
-              uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
-
-            - name: Install package dependencies
-              uses: ./.github/actions/install-deps
-              with:
-                  pm: ${{ matrix.pm }}
-                  working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Run codegen and build
-              uses: ./.github/actions/run-codegen-build
-              with:
-                  pm: ${{ matrix.pm }}
-                  working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Cache CocoaPods
-              uses: actions/cache@v5
-              with:
-                  path: |
-                      ~/.cocoapods/repos
-                      ${{ env.WORKING_DIR }}/example/ios/Pods
-                  key: ${{ runner.os }}-pods-${{ hashFiles(format('{0}/example/ios/Podfile.lock', env.WORKING_DIR)) }}
-                  restore-keys: |
-                      ${{ runner.os }}-pods-
-
-            - name: Install CocoaPods dependencies
-              working-directory: ${{ env.WORKING_DIR }}/example
-              run: ${{ matrix.pm }} pod
-
-            - name: Build iOS project
-              uses: ./.github/actions/ios-build-xcode
-              with:
-                  ios-dir: ${{ env.WORKING_DIR }}/example/ios
-                  mode: ${{ matrix.mode }}
-
-    test-android-build:
-        name: Test Android Build - ${{ matrix.pm }} - ${{ matrix.package_type }} - ${{ matrix.scenario }} (${{ matrix.mode }})
+    harness-android:
+        name: Android Harness - ${{ matrix.package_type }} - ${{ matrix.scenario }}
         needs: [generate-packages, define-matrix]
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
-            matrix: ${{ fromJson(needs.define-matrix.outputs.android-build) }}
+            matrix: ${{ fromJson(needs.define-matrix.outputs.android-harness) }}
         env:
+            AVD_DISK_SIZE: 1G
+            AVD_HEAP_SIZE: 1G
+            AVD_NAME: Pixel_7_API_36
+            DEVICE_API_LEVEL: '36'
+            DEVICE_ARCH: x86_64
+            DEVICE_PROFILE: pixel_7
             WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
 
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -458,97 +375,6 @@ jobs:
               with:
                   name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
-
-            - name: List package structure
-              working-directory: ${{ env.WORKING_DIR }}
-              run: |
-                  echo "Package structure:"
-                  find . -type f -name "*.json" -o -name "*.js" -o -name "*.ts" | head -20
-
-            - name: Setup Node.js
-              if: matrix.pm == 'yarn'
-              uses: actions/setup-node@v6
-              with:
-                  node-version: 22.x
-
-            - name: Setup Yarn
-              if: matrix.pm == 'yarn'
-              uses: ./.github/actions/setup-yarn
-              with:
-                  working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Setup Bun.js
-              uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
-
-            - name: Install package dependencies
-              uses: ./.github/actions/install-deps
-              with:
-                  pm: ${{ matrix.pm }}
-                  working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Run codegen and build
-              uses: ./.github/actions/run-codegen-build
-              with:
-                  pm: ${{ matrix.pm }}
-                  working-directory: ${{ env.WORKING_DIR }}
-
-            - name: Setup Java for Android builds
-              uses: actions/setup-java@v5
-              with:
-                  distribution: 'zulu'
-                  java-version: '17'
-                  cache: 'gradle'
-
-            - name: Cache Gradle
-              uses: actions/cache@v5
-              with:
-                  path: |
-                      ~/.gradle/caches
-                      ~/.gradle/wrapper
-                  key: ${{ runner.os }}-gradle-${{ hashFiles(format('{0}/example/android/**/*.gradle*', env.WORKING_DIR)) }}
-                  restore-keys: |
-                      ${{ runner.os }}-gradle-
-
-            - name: Build Android project
-              uses: ./.github/actions/android-gradle-build
-              with:
-                  android-dir: ${{ env.WORKING_DIR }}/example/android
-                  mode: ${{ matrix.mode }}
-
-    e2e-android:
-        name: Android E2E - ${{ matrix.package_type }} - ${{ matrix.scenario }}
-        needs: [test-android-build, define-matrix]
-        runs-on: ubuntu-latest
-        strategy:
-            fail-fast: false
-            matrix: ${{ fromJson(needs.define-matrix.outputs.android-e2e) }}
-        env:
-            WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v6
-
-            - name: Enable KVM (Android emulator)
-              if: runner.os == 'Linux'
-              run: |
-                  echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-                  sudo udevadm control --reload-rules
-                  sudo udevadm trigger --name-match=kvm
-
-            - name: Create working directory
-              run: mkdir -p ${{ env.WORKING_DIR }}
-
-            - name: Download generated package
-              uses: actions/download-artifact@v8
-              with:
-                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
-                  path: ${{ env.WORKING_DIR }}
-
-            - name: List package structure
-              working-directory: ${{ env.WORKING_DIR }}
-              run: find . -type f | head -30
 
             - name: Setup Bun
               uses: oven-sh/setup-bun@v2
@@ -556,7 +382,7 @@ jobs:
                   bun-version: latest
 
             - name: Cache Bun dependencies
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
                   key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
@@ -582,57 +408,51 @@ jobs:
                   java-version: '17'
                   cache: 'gradle'
 
-            - name: Setup Android SDK
-              uses: android-actions/setup-android@v4
+            - name: Build Android app
+              working-directory: ${{ env.WORKING_DIR }}/example/android
+              run: |
+                  chmod +x ./gradlew
+                  ./gradlew :app:assembleDebug --no-daemon --build-cache -PreactNativeArchitectures=${{ env.DEVICE_ARCH }}
 
-            - name: Install Maestro CLI
-              uses: ./.github/actions/setup-maestro
-
-            - name: Run Android Emulator and E2E Tests
-              uses: reactivecircus/android-emulator-runner@v2
+            - name: Run React Native Harness
+              uses: callstackincubator/react-native-harness@v1.2.0
               with:
-                  api-level: 35
-                  target: google_apis
-                  arch: x86_64
-                  profile: Galaxy Nexus
-                  emulator-options: -no-snapshot -memory 4096 -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-                  disable-animations: true
-                  script: |
-                      adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
-                      ${{ matrix.pm }} android:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package_type }}
+                  app: android/app/build/outputs/apk/debug/app-debug.apk
+                  runner: android
+                  projectRoot: ${{ env.WORKING_DIR }}/example
+                  packageManager: ${{ matrix.pm }}
 
-    e2e-ios:
-        name: iOS E2E - ${{ matrix.package_type }} - ${{ matrix.scenario }}
-        needs: [test-ios-build, define-matrix]
-        runs-on: macOS-15
+            - name: Stop Gradle
+              if: always()
+              working-directory: ${{ env.WORKING_DIR }}/example/android
+              run: |
+                  chmod +x ./gradlew
+                  ./gradlew --stop
+
+    harness-ios:
+        name: iOS Harness - ${{ matrix.package_type }} - ${{ matrix.scenario }}
+        needs: [generate-packages, define-matrix]
+        runs-on: macos-26
         strategy:
             fail-fast: false
-            matrix: ${{ fromJson(needs.define-matrix.outputs.ios-e2e) }}
+            matrix: ${{ fromJson(needs.define-matrix.outputs.ios-harness) }}
         env:
-            MAESTRO_DRIVER_STARTUP_TIMEOUT: 300_000
-            MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: true
             WORKING_DIR: ${{ github.workspace }}/${{ matrix.package_dir }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
 
-            - name: Setup Xcode
-              uses: maxim-lobanov/setup-xcode@v1
-              with:
-                  xcode-version: 16.4
+            - name: Select Xcode
+              run: sudo xcode-select -s /Applications/Xcode_26.5.app/Contents/Developer
 
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
 
-            - name: Download generated module
+            - name: Download generated package
               uses: actions/download-artifact@v8
               with:
                   name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
                   path: ${{ env.WORKING_DIR }}
-
-            - name: List package structure
-              working-directory: ${{ env.WORKING_DIR }}
-              run: find . -type f | head -30
 
             - name: Setup Bun
               uses: oven-sh/setup-bun@v2
@@ -640,14 +460,14 @@ jobs:
                   bun-version: latest
 
             - name: Cache Bun dependencies
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
                   key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
-            - name: Install Dependencies
+            - name: Install dependencies
               uses: ./.github/actions/install-deps
               with:
                   pm: ${{ matrix.pm }}
@@ -660,7 +480,7 @@ jobs:
                   working-directory: ${{ env.WORKING_DIR }}
 
             - name: Cache Pods
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ${{ env.WORKING_DIR }}/example/ios/Pods
                   key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
@@ -671,44 +491,27 @@ jobs:
               working-directory: ${{ env.WORKING_DIR }}/example/ios
               run: pod install
 
-            - name: Setup ccache
-              run: |
-                  brew install ccache
-                  ccache --version
-                  ccache --zero-stats
-
-            - name: Cache ccache
-              uses: actions/cache@v5
+            - name: Build iOS app
+              uses: ./.github/actions/ios-build-xcode
               with:
-                  path: ~/Library/Caches/ccache
-                  key: ${{ runner.os }}-ccache-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ github.sha }}
-                  restore-keys: |
-                      ${{ runner.os }}-ccache-${{ matrix.package_type }}-${{ matrix.scenario }}-
-                      ${{ runner.os }}-ccache-
+                  ios-dir: ${{ env.WORKING_DIR }}/example/ios
+                  mode: ${{ matrix.mode }}
 
-            - name: Configure ccache
+            - name: Run iOS Harness Tests
+              working-directory: ${{ env.WORKING_DIR }}/example
+              shell: bash
               run: |
-                  ccache --set-config=max_size=2G
-                  ccache --set-config=compression=true
-                  ccache --set-config=compression_level=6
+                  IOS_SIMULATOR="$(xcrun simctl list devices available --json | IOS_VERSION=26.5 node -e 'const fs = require("node:fs"); const input = fs.readFileSync(0, "utf8"); const data = JSON.parse(input); const desiredVersion = process.env.IOS_VERSION; const candidates = Object.entries(data.devices).flatMap(([runtime, devices]) => { const version = runtime.match(/iOS-(\d+(?:-\d+)*)$/)?.[1]?.replaceAll("-", "."); if (version == null || (desiredVersion != null && version !== desiredVersion)) return []; return devices.filter(device => device.isAvailable === true && device.name.startsWith("iPhone")).map(device => ({ name: device.name, version })); }); candidates.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }) || b.name.localeCompare(a.name, undefined, { numeric: true })); const selected = candidates[0]; if (selected == null) process.exit(1); console.log(`${selected.name}|${selected.version}`);' || true)"
+                  if [ -z "$IOS_SIMULATOR" ]; then
+                    echo "Unable to resolve an available iOS simulator."
+                    xcrun simctl list devices available
+                    exit 1
+                  fi
 
-            - name: Install Maestro CLI
-              uses: ./.github/actions/setup-maestro
+                  APP_PATH="$(find ios/build/Build/Products/Debug-iphonesimulator -maxdepth 1 -type d -name '*.app' | head -1)"
+                  if [ -z "$APP_PATH" ]; then
+                    echo "No built iOS app bundle found in ios/build/Build/Products/Debug-iphonesimulator"
+                    exit 1
+                  fi
 
-            - name: Run tests
-              env:
-                  USE_CCACHE: 1
-                  CCACHE_DIR: ~/Library/Caches/ccache
-              run: ${{ matrix.pm }} ios:e2e ${{ env.WORKING_DIR }}/example ${{ matrix.package_type }}
-
-            - name: Print ccache statistics
-              if: always()
-              run: ccache --show-stats
-
-            - name: Upload test artifacts
-              if: always()
-              uses: actions/upload-artifact@v7
-              with:
-                  name: maestro-artifacts-ios-${{ matrix.package_type }}-${{ matrix.scenario }}
-                  path: e2e-artifacts
-                  include-hidden-files: true
+                  DEVICE_MODEL="${IOS_SIMULATOR%%|*}" IOS_VERSION="${IOS_SIMULATOR#*|}" HARNESS_APP_PATH="$APP_PATH" ${{ matrix.pm }} run test:harness:ios

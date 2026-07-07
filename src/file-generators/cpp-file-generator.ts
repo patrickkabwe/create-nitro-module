@@ -14,7 +14,6 @@ export class CppFileGenerator implements FileGenerator {
     constructor(private fileGenerators: FileGenerator[]) {}
 
     async generate(config: GenerateModuleConfig): Promise<void> {
-        await createFolder(config.cwd, 'cpp')
         await this.generateCppCodeFiles(config)
 
         for (const generator of this.fileGenerators) {

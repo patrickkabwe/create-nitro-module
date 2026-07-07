@@ -5,6 +5,7 @@
         "outDir": "lib",
         "moduleResolution": "bundler",
         "strict": true,
+        "types": ["node"],
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "skipLibCheck": false

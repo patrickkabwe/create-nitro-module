@@ -9,7 +9,12 @@ import { androidSettingsGradleCode } from './code-snippets/code.kotlin'
 import {
     appExampleCode,
     babelConfig,
+    exampleReactNativeConfig,
     exampleTsConfig,
+    harnessConfigCode,
+    harnessJestConfigCode,
+    harnessTestCode,
+    harnessWorkflowCode,
     metroConfig,
 } from './code-snippets/code.js'
 import {
@@ -49,9 +54,17 @@ import {
 const execAsync = util.promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+type NitroDependencyName = 'nitrogen' | 'react-native-nitro-modules'
+type PackageJson = Record<string, unknown> & {
+    name?: string
+    private?: boolean
+    scripts?: Record<string, string>
+    workspaces?: string[]
+}
 
 export class NitroModuleFactory {
     private nitroModulesVersion: string | null = null
+    private workspaceRoot: string
 
     private androidGenerator: AndroidFileGenerator
     private iosGenerator: IOSFileGenerator
@@ -69,10 +82,27 @@ export class NitroModuleFactory {
         this.config.funcName = 'sum'
         this.config.prefix = 'react-native-'
         this.config.finalPackageName = `${this.config.prefix}${this.config.packageName}`
-        this.config.cwd = path.join(
-            this.config.cwd,
-            this.config.finalPackageName
-        )
+        this.workspaceRoot = this.config.cwd
+        const packageDir = this.config.monorepo
+            ? path.join(
+                  this.config.cwd,
+                  'packages',
+                  this.config.finalPackageName
+              )
+            : this.config.cwd
+        this.config.cwd = packageDir
+    }
+
+    private get exampleDir(): string {
+        return this.config.monorepo
+            ? path.join(this.workspaceRoot, 'example')
+            : path.join(this.config.cwd, 'example')
+    }
+
+    private get packageRelativeFromExample(): string {
+        return this.config.monorepo
+            ? path.posix.join('..', 'packages', this.config.finalPackageName)
+            : '..'
     }
 
     async createNitroModule() {
@@ -110,13 +140,25 @@ export class NitroModuleFactory {
         await this.copyNitroTemplateFiles()
         await this.replaceNitroJsonPlaceholders()
         await this.updatePackageJsonConfig(this.config.skipExample)
+        if (this.config.monorepo) {
+            await this.createWorkspaceRoot()
+            if (this.config.pm === 'yarn') {
+                await this.configureYarnWorkspace()
+            }
+        }
         await this.updateTemplateFiles()
+        if (this.config.monorepo) {
+            await this.configureMonorepoReleaseConfig()
+        }
 
         if (!this.config.skipExample) {
             this.config.spinner.message(messages.generating)
             await this.createExampleApp()
             await this.configureExamplePackageJson()
             await this.syncExampleAppConfigurations()
+            if (this.config.includeHarness) {
+                await this.setupReactNativeHarness()
+            }
             await this.setupWorkflows()
             await this.gitInit()
             this.config.spinner.stop(kleur.cyan(messages.generating + 'Done'))
@@ -125,6 +167,47 @@ export class NitroModuleFactory {
             this.config.spinner.start(messages.installing)
             await this.installDependenciesAndRunCodegen()
             this.config.spinner.stop(kleur.cyan(messages.installing + 'Done'))
+        }
+    }
+
+    private getTemplateDevDependencyVersion(pkg: NitroDependencyName): string {
+        const version = templatePackageJson.devDependencies[pkg]
+
+        if (typeof version !== 'string' || version.length === 0) {
+            throw new Error(
+                `Missing template devDependency version for package "${pkg}"`
+            )
+        }
+
+        return version
+    }
+
+    private async resolveNitroDependencyVersions(): Promise<{
+        nitrogenVersion: string
+        nitroModulesVersion: string
+    }> {
+        const defaultNitrogenVersion =
+            this.getTemplateDevDependencyVersion('nitrogen')
+        const defaultNitroModulesVersion = this.getTemplateDevDependencyVersion(
+            'react-native-nitro-modules'
+        )
+
+        if (this.config.skipInstall) {
+            return {
+                nitrogenVersion: defaultNitrogenVersion,
+                nitroModulesVersion: defaultNitroModulesVersion,
+            }
+        }
+
+        const [nitroModulesVersion, nitrogenVersion] = await Promise.all([
+            this.getLatestVersion('react-native-nitro-modules'),
+            this.getLatestVersion('nitrogen'),
+        ])
+
+        return {
+            nitrogenVersion: nitrogenVersion ?? defaultNitrogenVersion,
+            nitroModulesVersion:
+                nitroModulesVersion ?? defaultNitroModulesVersion,
         }
     }
 
@@ -142,6 +225,113 @@ export class NitroModuleFactory {
                 return null
             }
         }
+    }
+
+    private getWorkspaceRunCommand(scriptName: string): string {
+        const packageWorkspacePath = `packages/${this.config.finalPackageName}`
+
+        if (this.config.pm === 'yarn') {
+            return `yarn --cwd ${packageWorkspacePath} ${scriptName}`
+        }
+
+        if (this.config.pm === 'pnpm') {
+            return `pnpm --dir ${packageWorkspacePath} run ${scriptName}`
+        }
+
+        if (this.config.pm === 'npm') {
+            return `npm --prefix ${packageWorkspacePath} run ${scriptName}`
+        }
+
+        return `bun run --cwd ${packageWorkspacePath} ${scriptName}`
+    }
+
+    private getExampleRunCommand(scriptName: string): string {
+        if (this.config.pm === 'yarn') {
+            return `yarn --cwd example ${scriptName}`
+        }
+
+        if (this.config.pm === 'pnpm') {
+            return `pnpm --dir example run ${scriptName}`
+        }
+
+        if (this.config.pm === 'npm') {
+            return `npm --prefix example run ${scriptName}`
+        }
+
+        return `bun run --cwd example ${scriptName}`
+    }
+
+    private async createWorkspaceRoot(): Promise<void> {
+        const workspaces = this.config.skipExample
+            ? ['packages/*']
+            : ['packages/*', 'example']
+        const rootPackageJson: PackageJson = {
+            name: this.config.finalPackageName,
+            private: true,
+            scripts: {
+                build: this.getWorkspaceRunCommand('build'),
+                codegen: this.getWorkspaceRunCommand('codegen'),
+                release: this.getWorkspaceRunCommand('release'),
+                ...(this.config.includeHarness && !this.config.skipExample
+                    ? {
+                          'test:harness':
+                              this.getExampleRunCommand('test:harness'),
+                          ...(this.config.platforms.includes(
+                              SupportedPlatform.ANDROID
+                          )
+                              ? {
+                                    'test:harness:android':
+                                        this.getExampleRunCommand(
+                                            'test:harness:android'
+                                        ),
+                                }
+                              : {}),
+                          ...(this.config.platforms.includes(
+                              SupportedPlatform.IOS
+                          )
+                              ? {
+                                    'test:harness:ios':
+                                        this.getExampleRunCommand(
+                                            'test:harness:ios'
+                                        ),
+                                }
+                              : {}),
+                      }
+                    : {}),
+            },
+            workspaces,
+        }
+
+        await writeFile(
+            path.join(this.workspaceRoot, 'package.json'),
+            JSON.stringify(rootPackageJson, null, 2),
+            { encoding: 'utf8' }
+        )
+
+        if (this.config.pm !== 'pnpm') {
+            return
+        }
+
+        await writeFile(
+            path.join(this.workspaceRoot, 'pnpm-workspace.yaml'),
+            `packages:\n${workspaces.map(workspace => `  - ${workspace}`).join('\n')}\n`,
+            { encoding: 'utf8' }
+        )
+    }
+
+    private async configureYarnWorkspace(): Promise<void> {
+        const yarnCwd = this.config.monorepo
+            ? this.workspaceRoot
+            : this.config.cwd
+        await execAsync('corepack enable', { cwd: yarnCwd })
+        await execAsync('yarn set version 4.6.0', { cwd: yarnCwd })
+        await execAsync('yarn config set enableImmutableInstalls false', {
+            cwd: yarnCwd,
+        })
+        await execAsync('yarn config set nodeLinker node-modules', {
+            cwd: yarnCwd,
+        })
+        await execAsync('corepack disable', { cwd: yarnCwd })
     }
 
     private async replaceNitroJsonPlaceholders() {
@@ -171,11 +361,12 @@ export class NitroModuleFactory {
     }
 
     private getPostCodegenScript() {
-        let script = `${this.config.pm} --cwd example pod`
+        const examplePath = this.config.monorepo ? '../example' : 'example'
+        let script = `${this.config.pm} --cwd ${examplePath} pod`
         if (this.config.pm === 'npm') {
-            script = `${this.config.pm} --prefix example run pod`
+            script = `${this.config.pm} --prefix ${examplePath} run pod`
         } else if (this.config.pm === 'pnpm') {
-            script = `pnpm --filter ./example pod`
+            script = `pnpm --dir ${examplePath} run pod`
         }
         return script
     }
@@ -210,24 +401,19 @@ export class NitroModuleFactory {
                 : undefined,
         }
 
-        // Resolve and pin latest Nitro tools to concrete versions
         const nitrogen = 'nitrogen'
         const nitroModules = 'react-native-nitro-modules'
-        const [nitroModulesVersion, nitrogenVersion] = await Promise.all([
-            this.getLatestVersion(nitroModules),
-            this.getLatestVersion(nitrogen),
-        ])
+        const { nitrogenVersion, nitroModulesVersion } =
+            await this.resolveNitroDependencyVersions()
         this.nitroModulesVersion = nitroModulesVersion
         newWorkspacePackageJsonFile.devDependencies = {
             ...newWorkspacePackageJsonFile.devDependencies,
             [nitroModules]:
                 nitroModulesVersion ??
-                newWorkspacePackageJsonFile.devDependencies?.[nitroModules] ??
-                templatePackageJson.devDependencies[nitroModules],
+                newWorkspacePackageJsonFile.devDependencies?.[nitroModules],
             [nitrogen]:
                 nitrogenVersion ??
-                newWorkspacePackageJsonFile.devDependencies?.[nitrogen] ??
-                templatePackageJson.devDependencies[nitrogen],
+                newWorkspacePackageJsonFile.devDependencies?.[nitrogen],
         }
 
         newWorkspacePackageJsonFile.keywords = [
@@ -236,35 +422,34 @@ export class NitroModuleFactory {
         ]
 
         if (this.config.pm === 'yarn') {
-            await execAsync('corepack enable', { cwd: this.config.cwd })
-            await execAsync('yarn set version 4.6.0', { cwd: this.config.cwd })
-            await execAsync('yarn config set enableImmutableInstalls false', {
-                cwd: this.config.cwd,
-            })
-            await execAsync('yarn config set nodeLinker node-modules', {
-                cwd: this.config.cwd,
-            })
-            await execAsync('corepack disable', { cwd: this.config.cwd })
+            if (!this.config.monorepo) {
+                await this.configureYarnWorkspace()
+            }
         } else if (this.config.pm === 'pnpm') {
             const workspaceDirs = ['example']
             const yamlContent = `packages:\n${workspaceDirs.map(d => `  - ${d}`).join('\n')}\n`
 
-            const WORKSPACE_FILENAME = 'pnpm-workspace.yaml'
-            await writeFile(
-                path.join(this.config.cwd, WORKSPACE_FILENAME),
-                yamlContent,
-                { encoding: 'utf8' }
-            )
+            if (!this.config.monorepo) {
+                const WORKSPACE_FILENAME = 'pnpm-workspace.yaml'
+                await writeFile(
+                    path.join(this.config.cwd, WORKSPACE_FILENAME),
+                    yamlContent,
+                    { encoding: 'utf8' }
+                )
+            }
             const NPMRC_FILENAME = '.npmrc'
             await writeFile(
-                path.join(this.config.cwd, NPMRC_FILENAME),
+                path.join(
+                    this.config.monorepo ? this.workspaceRoot : this.config.cwd,
+                    NPMRC_FILENAME
+                ),
                 'node-linker=hoisted',
                 { encoding: 'utf8' }
             )
             delete newWorkspacePackageJsonFile.workspaces
         }
 
-        if (skipExample) {
+        if (skipExample || this.config.monorepo) {
             delete newWorkspacePackageJsonFile.workspaces
         }
         await writeFile(
@@ -307,6 +492,28 @@ export class NitroModuleFactory {
         })
     }
 
+    private async configureMonorepoReleaseConfig(): Promise<void> {
+        const releaseConfigPath = path.join(
+            this.config.cwd,
+            'release.config.cjs'
+        )
+        const releaseConfig = await readFile(releaseConfigPath, {
+            encoding: 'utf8',
+        })
+        const gitAssets = this.config.skipExample
+            ? "['package.json', 'CHANGELOG.md']"
+            : "['package.json', 'CHANGELOG.md', '../example/package.json']"
+
+        await writeFile(
+            releaseConfigPath,
+            releaseConfig.replace(
+                /assets:\s*\[[^\]]+\]/,
+                `assets: ${gitAssets}`
+            ),
+            { encoding: 'utf8' }
+        )
+    }
+
     private async copyNitroTemplateFiles() {
         const filesToCopy = [
             '.watchmanconfig',
@@ -330,8 +537,23 @@ export class NitroModuleFactory {
             [__dirname, '..', 'assets', 'template'],
             filesToCopy
         )
+        if (this.config.monorepo) {
+            await rename(
+                path.join(this.config.cwd, '.github'),
+                path.join(this.workspaceRoot, '.github')
+            )
+            if (this.config.pm === 'bun') {
+                await rename(
+                    path.join(this.config.cwd, 'bunfig.toml'),
+                    path.join(this.workspaceRoot, 'bunfig.toml')
+                )
+            }
+        }
         const oldGitIgnorePath = path.join(this.config.cwd, 'gitignore')
-        const newGitIgnorePath = path.join(this.config.cwd, '.gitignore')
+        const newGitIgnorePath = path.join(
+            this.config.monorepo ? this.workspaceRoot : this.config.cwd,
+            '.gitignore'
+        )
         await rename(oldGitIgnorePath, newGitIgnorePath)
     }
 
@@ -351,10 +573,12 @@ export class NitroModuleFactory {
             --package-name com.${replaceHyphen(this.config.packageName)}example \
             --directory example --skip-install --skip-git-init --version ${reactNativeVersion}`
 
-        await execAsync(args, { cwd: this.config.cwd })
+        await execAsync(args, {
+            cwd: this.config.monorepo ? this.workspaceRoot : this.config.cwd,
+        })
 
         // Setup App.tsx
-        const appPath = path.join(this.config.cwd, 'example', 'App.tsx')
+        const appPath = path.join(this.exampleDir, 'App.tsx')
         await writeFile(
             appPath,
             appExampleCode(
@@ -368,21 +592,18 @@ export class NitroModuleFactory {
     }
 
     private async configureExamplePackageJson() {
-        const packageJsonPath = path.join(
-            this.config.cwd,
-            'example',
-            'package.json'
-        )
+        const packageJsonPath = path.join(this.exampleDir, 'package.json')
         const examplePackageJsonStr = await readFile(packageJsonPath, {
             encoding: 'utf8',
         })
         const exampleAppPackageJson = JSON.parse(examplePackageJsonStr)
+        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
 
         exampleAppPackageJson.name = `${this.config.finalPackageName}-example`
 
         exampleAppPackageJson.scripts = {
             ...exampleAppPackageJson.scripts,
-            ios: "react-native run-ios --simulator='iPhone 16'",
+            ios: 'react-native run-ios',
             start: 'react-native start --reset-cache',
             pod: 'bundle install && bundle exec pod install --project-directory=ios',
         }
@@ -390,12 +611,116 @@ export class NitroModuleFactory {
         const nitroKey = `react-native-nitro-modules`
         exampleAppPackageJson.dependencies = {
             ...exampleAppPackageJson.dependencies,
+            ...(this.config.monorepo
+                ? { [this.config.finalPackageName]: '*' }
+                : {}),
             [nitroKey]: this.nitroModulesVersion ?? '*',
         }
 
         exampleAppPackageJson.devDependencies = {
             ...exampleAppPackageJson.devDependencies,
             'babel-plugin-module-resolver': '^5.0.2',
+        }
+
+        if (this.config.includeHarness) {
+            const [
+                reactNativeHarnessVersion,
+                androidHarnessVersion,
+                appleHarnessVersion,
+                uiHarnessVersion,
+            ] = await Promise.all([
+                this.getLatestVersion('react-native-harness'),
+                this.getLatestVersion('@react-native-harness/platform-android'),
+                this.getLatestVersion('@react-native-harness/platform-apple'),
+                this.config.packageType === Nitro.View
+                    ? this.getLatestVersion('@react-native-harness/ui')
+                    : Promise.resolve(null),
+            ])
+
+            exampleAppPackageJson.scripts = {
+                ...exampleAppPackageJson.scripts,
+                'test:harness': 'react-native-harness',
+                ...(this.config.platforms.includes(SupportedPlatform.ANDROID)
+                    ? {
+                          'test:harness:android': [
+                              'if [ -z "${HARNESS_APP_PATH:-}" ]; then',
+                              '  set -euo pipefail',
+                              '  chmod +x android/gradlew',
+                              '  (cd android && ./gradlew assembleDebug --no-daemon --build-cache)',
+                              '  HARNESS_APP_PATH="$(find android/app/build/outputs/apk/debug -maxdepth 1 -type f -name "*.apk" | head -1)"',
+                              '  if [ -z "${HARNESS_APP_PATH}" ]; then',
+                              '    echo "Unable to locate the built Android app bundle."',
+                              '    exit 1',
+                              '  fi',
+                              '  export HARNESS_APP_PATH',
+                              'fi',
+                              'react-native-harness --harnessRunner android',
+                          ].join('\n'),
+                      }
+                    : {}),
+                ...(this.config.platforms.includes(SupportedPlatform.IOS)
+                    ? {
+                          'test:harness:ios': [
+                              'set -euo pipefail',
+                              'if [ -z "${DEVICE_MODEL:-}" ] || [ -z "${IOS_VERSION:-}" ]; then',
+                              '  IOS_VERSION="${IOS_VERSION:-26.5}"',
+                              '  export IOS_VERSION',
+                              '  IOS_SIMULATOR="$(xcrun simctl list devices available --json | node -e \'const fs = require("node:fs"); const input = fs.readFileSync(0, "utf8"); const data = JSON.parse(input); const desiredVersion = process.env.IOS_VERSION; const candidates = Object.entries(data.devices).flatMap(([runtime, devices]) => { const version = runtime.match(/iOS-(\\d+(?:-\\d+)*)$/)?.[1]?.replaceAll("-", "."); if (version == null || (desiredVersion != null && version !== desiredVersion)) return []; return devices.filter(device => device.isAvailable === true && device.name.startsWith("iPhone")).map(device => ({ name: device.name, version })); }); candidates.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }) || b.name.localeCompare(a.name, undefined, { numeric: true })); const selected = candidates[0]; if (selected == null) process.exit(1); console.log(`${selected.name}|${selected.version}`);\' || true)"',
+                              '  if [ -z "${IOS_SIMULATOR}" ]; then',
+                              '    echo "Unable to resolve an available iOS simulator."',
+                              '    xcrun simctl list devices available',
+                              '    exit 1',
+                              '  fi',
+                              '  DEVICE_MODEL="${IOS_SIMULATOR%%|*}"',
+                              '  IOS_VERSION="${IOS_SIMULATOR#*|}"',
+                              '  export DEVICE_MODEL IOS_VERSION',
+                              'fi',
+                              'if [ -z "${HARNESS_APP_PATH:-}" ]; then',
+                              `  xcodebuild CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ -derivedDataPath build -UseModernBuildSystem=YES -workspace ${exampleAppName}.xcworkspace -scheme ${exampleAppName} -sdk iphonesimulator -configuration Debug build CODE_SIGNING_ALLOWED=NO`,
+                              '  HARNESS_APP_PATH="$(find ios/build/Build/Products/Debug-iphonesimulator -maxdepth 1 -type d -name "*.app" | head -1)"',
+                              '  if [ -z "${HARNESS_APP_PATH}" ]; then',
+                              '    echo "Unable to locate the built iOS app bundle."',
+                              '    exit 1',
+                              '  fi',
+                              '  export HARNESS_APP_PATH',
+                              'fi',
+                              'react-native-harness --harnessRunner ios',
+                          ].join('\n'),
+                      }
+                    : {}),
+            }
+
+            exampleAppPackageJson.devDependencies = {
+                ...exampleAppPackageJson.devDependencies,
+                'react-native-harness':
+                    reactNativeHarnessVersion != null
+                        ? `^${reactNativeHarnessVersion}`
+                        : '^1.0.0',
+                ...(this.config.platforms.includes(SupportedPlatform.ANDROID)
+                    ? {
+                          '@react-native-harness/platform-android':
+                              androidHarnessVersion != null
+                                  ? `^${androidHarnessVersion}`
+                                  : '^1.0.0',
+                      }
+                    : {}),
+                ...(this.config.platforms.includes(SupportedPlatform.IOS)
+                    ? {
+                          '@react-native-harness/platform-apple':
+                              appleHarnessVersion != null
+                                  ? `^${appleHarnessVersion}`
+                                  : '^1.0.0',
+                      }
+                    : {}),
+                ...(this.config.packageType === Nitro.View
+                    ? {
+                          '@react-native-harness/ui':
+                              uiHarnessVersion != null
+                                  ? `^${uiHarnessVersion}`
+                                  : '^1.0.0',
+                      }
+                    : {}),
+            }
         }
 
         packagesToRemoveFromExampleApp.forEach(pkg => {
@@ -410,50 +735,25 @@ export class NitroModuleFactory {
     }
 
     private async syncExampleAppConfigurations() {
+        const packageRelativePath = this.packageRelativeFromExample
         const reactNativeConfigPath = path.join(
-            this.config.cwd,
-            'example',
+            this.exampleDir,
             'react-native.config.js'
         )
 
-        const replacements = {
-            [JS_PACKAGE_NAME_TAG]: this.config.finalPackageName,
-        }
-
-        const reactNativeConfig = await replacePlaceholder({
-            filePath: path.join(
-                __dirname,
-                '..',
-                'assets',
-                'react-native.config.js'
-            ),
-            replacements,
-        })
+        const reactNativeConfig = exampleReactNativeConfig(packageRelativePath)
 
         // Setup metro.config.js
-        const metroConfigPath = path.join(
-            this.config.cwd,
-            'example',
-            'metro.config.js'
-        )
+        const metroConfigPath = path.join(this.exampleDir, 'metro.config.js')
 
         // Setup babel.config.js
-        const babelConfigPath = path.join(
-            this.config.cwd,
-            'example',
-            'babel.config.js'
-        )
+        const babelConfigPath = path.join(this.exampleDir, 'babel.config.js')
 
         // Setup tsconfig.json
-        const tsConfigPath = path.join(
-            this.config.cwd,
-            'example',
-            'tsconfig.json'
-        )
+        const tsConfigPath = path.join(this.exampleDir, 'tsconfig.json')
 
         const androidSettingsGradlePath = path.join(
-            this.config.cwd,
-            'example',
+            this.exampleDir,
             'android',
             'settings.gradle'
         )
@@ -465,8 +765,7 @@ export class NitroModuleFactory {
         )
 
         const androidBuildGradlePath = path.join(
-            this.config.cwd,
-            'example',
+            this.exampleDir,
             'android',
             'app',
             'build.gradle'
@@ -476,7 +775,7 @@ export class NitroModuleFactory {
             encoding: 'utf8',
         })
 
-        const gradleReplacements = {
+        const gradleReplacements: Record<string, string> = {
             '// reactNativeDir = file("../../node_modules/react-native")':
                 'reactNativeDir = file("../../../node_modules/react-native")',
             '// codegenDir = file("../../node_modules/@react-native/codegen")':
@@ -494,11 +793,14 @@ export class NitroModuleFactory {
 
         const filesToWrite = [
             { saveTo: reactNativeConfigPath, data: reactNativeConfig },
-            { saveTo: metroConfigPath, data: metroConfig },
-            { saveTo: babelConfigPath, data: babelConfig },
+            { saveTo: metroConfigPath, data: metroConfig(packageRelativePath) },
+            { saveTo: babelConfigPath, data: babelConfig(packageRelativePath) },
             {
                 saveTo: tsConfigPath,
-                data: exampleTsConfig(this.config.finalPackageName),
+                data: exampleTsConfig(
+                    this.config.finalPackageName,
+                    packageRelativePath
+                ),
             },
             {
                 saveTo: androidSettingsGradlePath,
@@ -516,15 +818,97 @@ export class NitroModuleFactory {
         )
 
         for (const folder of foldersToRemoveFromExampleApp) {
-            await rm(path.join(this.config.cwd, 'example', folder), {
+            await rm(path.join(this.exampleDir, folder), {
                 recursive: true,
                 force: true,
             })
         }
     }
 
+    private async getExampleIOSBundleId() {
+        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
+        const projectFilePath = path.join(
+            this.exampleDir,
+            'ios',
+            `${exampleAppName}.xcodeproj`,
+            'project.pbxproj'
+        )
+        const projectFileContent = await readFile(projectFilePath, {
+            encoding: 'utf8',
+        })
+        const bundleIdMatch = projectFileContent.match(
+            /PRODUCT_BUNDLE_IDENTIFIER = ([^;]+);/
+        )
+
+        if (bundleIdMatch == null) {
+            throw new Error(
+                `Failed to resolve iOS bundle identifier for React Native Harness from ${projectFilePath}`
+            )
+        }
+
+        return bundleIdMatch[1].trim().replaceAll('"', '')
+    }
+
+    private async setupReactNativeHarness() {
+        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
+        const androidBundleId = this.config.platforms.includes(
+            SupportedPlatform.ANDROID
+        )
+            ? `com.${replaceHyphen(this.config.packageName)}example`
+            : null
+        const iosBundleId = this.config.platforms.includes(
+            SupportedPlatform.IOS
+        )
+            ? await this.getExampleIOSBundleId()
+            : null
+        const defaultRunner = this.config.platforms.includes(
+            SupportedPlatform.ANDROID
+        )
+            ? SupportedPlatform.ANDROID
+            : SupportedPlatform.IOS
+
+        await createFolder(this.exampleDir, '__tests__')
+
+        await Promise.all([
+            writeFile(
+                path.join(this.exampleDir, 'rn-harness.config.mjs'),
+                harnessConfigCode({
+                    androidBundleId,
+                    appRegistryComponentName: exampleAppName,
+                    defaultRunner,
+                    entryPoint: './index.js',
+                    iosBundleId,
+                }),
+                { encoding: 'utf8' }
+            ),
+            writeFile(
+                path.join(this.exampleDir, 'jest.config.js'),
+                harnessJestConfigCode(),
+                { encoding: 'utf8' }
+            ),
+            writeFile(
+                path.join(
+                    this.exampleDir,
+                    '__tests__',
+                    `${this.config.packageName}.harness.${
+                        this.config.packageType === Nitro.View ? 'tsx' : 'ts'
+                    }`
+                ),
+                harnessTestCode(
+                    this.config.packageName,
+                    this.config.finalPackageName,
+                    `${this.config.funcName}`,
+                    this.config.packageType
+                ),
+                { encoding: 'utf8' }
+            ),
+        ])
+    }
+
     private async installDependenciesAndRunCodegen() {
-        await execAsync(`${this.config.pm} install`, { cwd: this.config.cwd })
+        await execAsync(`${this.config.pm} install`, {
+            cwd: this.config.monorepo ? this.workspaceRoot : this.config.cwd,
+        })
         const packageManager =
             this.config.pm === 'npm' ? 'npx --yes' : this.config.pm
         const codegenCommand = `${packageManager} nitrogen --logLevel="debug" && ${this.config.pm} run build${Object.values(this.config.platformLangs).includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
@@ -532,36 +916,129 @@ export class NitroModuleFactory {
     }
 
     private async gitInit() {
-        await execAsync('git init', { cwd: this.config.cwd })
-        await execAsync('git add .', { cwd: this.config.cwd })
+        const gitCwd = this.config.monorepo
+            ? this.workspaceRoot
+            : this.config.cwd
+        await execAsync('git init', { cwd: gitCwd })
+        await execAsync('git add .', { cwd: gitCwd })
         await execAsync('git commit -m "initial commit"', {
-            cwd: this.config.cwd,
+            cwd: gitCwd,
         })
     }
 
     private async setupWorkflows() {
+        const workflowRoot = this.config.monorepo
+            ? this.workspaceRoot
+            : this.config.cwd
         const iosBuildWorkflowPath = path.join(
-            this.config.cwd,
+            workflowRoot,
             '.github',
             'workflows',
             'ios-build.yml'
         )
+        const androidBuildWorkflowPath = path.join(
+            workflowRoot,
+            '.github',
+            'workflows',
+            'android-build.yml'
+        )
 
-        const iosBuildWorkflow = await readFile(iosBuildWorkflowPath, {
-            encoding: 'utf8',
-        })
+        const [iosBuildWorkflow, androidBuildWorkflow] = await Promise.all([
+            readFile(iosBuildWorkflowPath, { encoding: 'utf8' }),
+            readFile(androidBuildWorkflowPath, { encoding: 'utf8' }),
+        ])
 
-        const iosBuildReplacements = {
-            $$exampleApp$$: `${toPascalCase(this.config.packageName)}Example`,
-        }
-
+        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
         const iosBuildWorkflowContent = await replacePlaceholder({
             data: iosBuildWorkflow,
-            replacements: iosBuildReplacements,
+            replacements: {
+                $$exampleApp$$: exampleAppName,
+            },
         })
 
-        await writeFile(iosBuildWorkflowPath, iosBuildWorkflowContent, {
-            encoding: 'utf8',
-        })
+        await Promise.all([
+            writeFile(
+                iosBuildWorkflowPath,
+                this.getWorkflowContent(iosBuildWorkflowContent),
+                {
+                    encoding: 'utf8',
+                }
+            ),
+            writeFile(
+                androidBuildWorkflowPath,
+                this.getWorkflowContent(androidBuildWorkflow),
+                {
+                    encoding: 'utf8',
+                }
+            ),
+        ])
+
+        if (!this.config.includeHarness) {
+            return
+        }
+
+        const workflowDirectoryPath = path.join(
+            workflowRoot,
+            '.github',
+            'workflows'
+        )
+
+        const workflowWrites = this.config.platforms.map(platform =>
+            writeFile(
+                path.join(workflowDirectoryPath, `harness-${platform}.yml`),
+                this.getWorkflowContent(
+                    harnessWorkflowCode(
+                        exampleAppName,
+                        this.config.pm,
+                        platform,
+                        this.config.monorepo
+                    )
+                ),
+                {
+                    encoding: 'utf8',
+                }
+            )
+        )
+
+        await Promise.all(workflowWrites)
+    }
+
+    private getWorkflowContent(content: string): string {
+        if (!this.config.monorepo) {
+            return content
+        }
+
+        const packagePath = `packages/${this.config.finalPackageName}`
+        const packagePathReplacements: Record<string, string> = {
+            'cpp/**': `${packagePath}/cpp/**`,
+            'android/**': `${packagePath}/android/**`,
+            'ios/**': `${packagePath}/ios/**`,
+            'src/**': `${packagePath}/src/**`,
+            'nitrogen/**': `${packagePath}/nitrogen/**`,
+            'nitrogen/generated/shared/**': `${packagePath}/nitrogen/generated/shared/**`,
+            'nitrogen/generated/android/**': `${packagePath}/nitrogen/generated/android/**`,
+            'nitrogen/generated/ios/**': `${packagePath}/nitrogen/generated/ios/**`,
+            '*.podspec': `${packagePath}/*.podspec`,
+            'package.json': `${packagePath}/package.json`,
+            'react-native.config.js': `${packagePath}/react-native.config.js`,
+            'nitro.json': `${packagePath}/nitro.json`,
+        }
+
+        return content
+            .split('\n')
+            .map(line => {
+                const pathMatch = line.match(/^\s*-\s+'([^']+)'\s*$/)
+                if (pathMatch == null) {
+                    return line
+                }
+
+                const replacement = packagePathReplacements[pathMatch[1]]
+                if (replacement == null) {
+                    return line
+                }
+
+                return line.replace(pathMatch[1], replacement)
+            })
+            .join('\n')
     }
 }

@@ -7,14 +7,14 @@
     "scripts": {
         "dev": "bun typecheck && bun src/cli/index.ts",
         "build": "rm -rf lib && bun typecheck && tsup src",
+        "test:e2e": "bun test e2e",
+        "test:e2e:build": "bun run build && bun run test:e2e",
         "typecheck": "tsc --noEmit",
         "prerelease": "rm -rf ./lib/assets",
         "release": "bun run build && bun semantic-release",
         "lint": "eslint --fix ",
         "format": "prettier --write ",
-        "commitlint": "commitlint --edit",
-        "ios:e2e": "bash scripts/e2e-maestro.sh ios",
-        "android:e2e": "bash scripts/e2e-maestro.sh android"
+        "commitlint": "commitlint --edit"
     },
     "files": [
         "lib",
@@ -55,7 +55,7 @@
         "access": "public"
     },
     "dependencies": {
-        "@clack/prompts": "^0.11.0",
+        "@clack/prompts": "^1.7.0",
         "commander": "^14.0.0",
         "kleur": "^4.1.5",
         "tsup": "^8.3.5"
@@ -84,6 +84,6 @@
         "typescript": "^6.0.3"
     },
     "engines": {
-        "node": ">=22.14.0"
+        "node": ">=24.3.0"
     }
 }

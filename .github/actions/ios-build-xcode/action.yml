@@ -18,7 +18,7 @@ runs:
               set -euo pipefail
               gem install xcpretty
               cd "${{ inputs.ios-dir }}"
-              
+
               set -o pipefail
 
               WORKSPACE_NAME="$(find . -maxdepth 1 -name '*.xcworkspace' ! -name 'Pods.xcworkspace' -exec basename {} .xcworkspace \; | head -1)"
@@ -34,22 +34,21 @@ runs:
               fi
 
               echo "Building workspace ${WORKSPACE_NAME}.xcworkspace with scheme ${SCHEME_NAME}"
-              
+
               max_retries=3
               attempt=1
-              
+
               while [ "$attempt" -le "$max_retries" ]
               do
                 echo "xcodebuild attempt $attempt of $max_retries"
                 
-                if xcodebuild \
+              if xcodebuild \
                   CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
                   -derivedDataPath build -UseModernBuildSystem=YES \
                   -workspace "${WORKSPACE_NAME}.xcworkspace" \
                   -scheme "${SCHEME_NAME}" \
                   -sdk iphonesimulator \
                   -configuration "${{ inputs.mode }}" \
-                  -destination 'platform=iOS Simulator,name=iPhone 16' \
                   build \
                   CODE_SIGNING_ALLOWED=NO | xcpretty; then
                   echo "xcodebuild succeeded on attempt $attempt"

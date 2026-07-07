@@ -25,6 +25,7 @@ Options:
   --platforms <platforms>             comma-separated platforms to target
   --langs <langs>                     comma-separated languages to generate
   -d, --module-dir <moduleDirectory>  directory to create the module in
+  --include-harness                   include React Native Harness setup in the example app
   -e, --skip-example                  skip example app generation
   -i, --skip-install                  skip installing dependencies
   --ci                               run in CI mode
