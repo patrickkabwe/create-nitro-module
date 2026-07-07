@@ -301,9 +301,7 @@ export const createModule = async (
             generateInstructions({
                 includeHarness: answers.includeHarness,
                 monorepo: answers.monorepo,
-                modulePath: getInstructionsModulePath(
-                    resolvedTargetModulePath
-                ),
+                modulePath: getInstructionsModulePath(resolvedTargetModulePath),
                 packagePath: getInstructionsModulePath(
                     answers.monorepo
                         ? path.join(
