@@ -1,5 +1,67 @@
 ## [3.7.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.6.0...v3.7.0) (2026-07-07)
 
+### ✨ Features
+
+* add optional react-native-harness scaffolding ([08ca7d9](https://github.com/patrickkabwe/create-nitro-module/commit/08ca7d9c8391ae9e7cc90f393c33ae83b2007c94))
+* mono repo ([c71b337](https://github.com/patrickkabwe/create-nitro-module/commit/c71b337231a1e6d0001aed625c11e9d2147ab877))
+
+### 🐛 Bug Fixes
+
+* align android harness workflow with repo layout ([3f58ecf](https://github.com/patrickkabwe/create-nitro-module/commit/3f58ecff212991f27d0e44ccc2fbcf791745fe4f))
+* align ios harness xcode setup with nitro ([d2548ae](https://github.com/patrickkabwe/create-nitro-module/commit/d2548ae8fa2501b9bb9a8a846e85d135e3e00b4c))
+* align ios harness xcode setup with nitro ([f4d258d](https://github.com/patrickkabwe/create-nitro-module/commit/f4d258d7de71e1e1f65c187f256eef6b4d63a89e))
+* discover harness targets dynamically ([c9ac1f2](https://github.com/patrickkabwe/create-nitro-module/commit/c9ac1f2ee258e28cf7b118fc7fb9939c13408c72))
+* ensure android harness gradlew is executable ([b40e28d](https://github.com/patrickkabwe/create-nitro-module/commit/b40e28d0f1faabd1ea3428e828fb4f85c2ab6b32))
+* generate harness jest config as default jest config ([d1064f0](https://github.com/patrickkabwe/create-nitro-module/commit/d1064f0b194fca748adfe68eb18c5beeeccf9269))
+* make harness config platform-specific ([d639b68](https://github.com/patrickkabwe/create-nitro-module/commit/d639b68a367885269d6f6b6ea683f14505e4c298))
+* pass build artifacts to harness runners ([95e2680](https://github.com/patrickkabwe/create-nitro-module/commit/95e2680f910247738d801c413910dbab0374c47c))
+* pass build artifacts to harness runners ([7417a26](https://github.com/patrickkabwe/create-nitro-module/commit/7417a26820bc81fe2cc0c7c89cd969339e919d54))
+* use harness for generated package tests ([6fffa2c](https://github.com/patrickkabwe/create-nitro-module/commit/6fffa2caa38397b50dcabb96c0f5b2ed473f9f46))
+* use harness for generated package tests ([4439871](https://github.com/patrickkabwe/create-nitro-module/commit/4439871173b334882b765a7e9f77b5c6fa38d340))
+* use harness for package runtime tests ([f9e21a8](https://github.com/patrickkabwe/create-nitro-module/commit/f9e21a85f92dc23be61c28ff470fe292afb4e6e1))
+
+### 🔄 Code Refactors
+
+* rename moduleName to modulePath ([9ec8597](https://github.com/patrickkabwe/create-nitro-module/commit/9ec8597d75bc9ff680ed2bfa19380f87f129b518))
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump @commitlint/cli from 20.4.3 to 20.5.0 ([796d0e9](https://github.com/patrickkabwe/create-nitro-module/commit/796d0e98352043aee8e6474d0540d6f85c5e2089))
+* **deps-dev:** bump @commitlint/config-conventional ([b0fa8c6](https://github.com/patrickkabwe/create-nitro-module/commit/b0fa8c66538da2a70cde0ba136d2129922fe5a0d))
+* **deps-dev:** bump @types/node from 25.3.5 to 25.5.0 ([eb3ccb0](https://github.com/patrickkabwe/create-nitro-module/commit/eb3ccb0d9aa36ea2f8168381dbfd520919310d38))
+* **deps-dev:** bump @types/node from 25.5.0 to 25.5.2 ([ec91a9d](https://github.com/patrickkabwe/create-nitro-module/commit/ec91a9d96437b804f197bf5b8089db0ac8540857))
+* **deps-dev:** bump @types/node from 25.5.2 to 25.6.0 ([1507e2d](https://github.com/patrickkabwe/create-nitro-module/commit/1507e2dfc1dc33b4832a1d00c751dddedb4847ef))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([f736501](https://github.com/patrickkabwe/create-nitro-module/commit/f7365013e03e36cfe6c6b9c1ff44521ac0ebe944))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([7895771](https://github.com/patrickkabwe/create-nitro-module/commit/789577167ff9387e5b3ac1e39e1b09129aad1439))
+* **deps-dev:** bump @typescript-eslint/eslint-plugin ([3539b88](https://github.com/patrickkabwe/create-nitro-module/commit/3539b8867358f1ff073bd89cf6d29c3c623e31fb))
+* **deps-dev:** bump @typescript-eslint/parser from 8.56.1 to 8.57.1 ([9c29a59](https://github.com/patrickkabwe/create-nitro-module/commit/9c29a59a3890d4875adcf843f6967a78d33fc77f))
+* **deps-dev:** bump @typescript-eslint/parser from 8.57.1 to 8.58.1 ([e097712](https://github.com/patrickkabwe/create-nitro-module/commit/e0977122e0a02ae5a1c010c04cae9940b52d4b62))
+* **deps-dev:** bump conventional-changelog-conventionalcommits ([2e83b29](https://github.com/patrickkabwe/create-nitro-module/commit/2e83b29fcd8b53c9210016255312094a258d63d0))
+* **deps-dev:** bump conventional-changelog-conventionalcommits ([c359edc](https://github.com/patrickkabwe/create-nitro-module/commit/c359edcedfd80fbbdeb9d9c79ed9933a41ed708f))
+* **deps-dev:** bump conventional-changelog-conventionalcommits ([dba38c9](https://github.com/patrickkabwe/create-nitro-module/commit/dba38c9efaf039b5ddc02c19d4e3a5ab504c1821))
+* **deps-dev:** bump conventional-changelog-conventionalcommits ([19eb805](https://github.com/patrickkabwe/create-nitro-module/commit/19eb80565ece43a8f5775b0678bc48d56b271ee6))
+* **deps-dev:** bump eslint-plugin-n from 17.23.2 to 17.24.0 ([aa6601f](https://github.com/patrickkabwe/create-nitro-module/commit/aa6601f7d00be0ff67acc1fbcf1e1fdc5d5427fd))
+* **deps-dev:** bump lefthook from 2.1.2 to 2.1.4 ([992fd63](https://github.com/patrickkabwe/create-nitro-module/commit/992fd63bca4bf1f2f6898cb150f0c123983cc6bf))
+* **deps-dev:** bump lefthook from 2.1.4 to 2.1.6 ([9e90cf9](https://github.com/patrickkabwe/create-nitro-module/commit/9e90cf9b3af41f4237ab9f1f438fa77884b8c3f4))
+* **deps-dev:** bump prettier from 3.8.0 to 3.8.1 ([e8e9bb5](https://github.com/patrickkabwe/create-nitro-module/commit/e8e9bb5e2928966ebb8ff6f797095de600c67a9b))
+* **deps-dev:** bump react-native ([522d19a](https://github.com/patrickkabwe/create-nitro-module/commit/522d19a856048f2ae7564cf1bc7fb8ad1d53d1b1))
+* **deps-dev:** bump react-native ([8648a52](https://github.com/patrickkabwe/create-nitro-module/commit/8648a520a1e937655f67b52df03432727f7a1d68))
+* **deps-dev:** bump react-native ([3678c98](https://github.com/patrickkabwe/create-nitro-module/commit/3678c987b6781bf11d2c9b59b1978291c8adcc9e))
+* **deps-dev:** bump typescript from 5.9.3 to 6.0.3 ([1543d83](https://github.com/patrickkabwe/create-nitro-module/commit/1543d833c07b585b7afd647f16cc9c710a32790b))
+* **deps-dev:** bump typescript from 5.9.3 to 6.0.3 in /assets/template ([cb925a3](https://github.com/patrickkabwe/create-nitro-module/commit/cb925a373935129240b45637e495867149cb71c9))
+* **deps:** bump actions/cache from 5 to 6 ([5a0395a](https://github.com/patrickkabwe/create-nitro-module/commit/5a0395a673305197d8686222e88fc875e9a11d66))
+* **deps:** bump actions/checkout from 6 to 7 ([cea5db4](https://github.com/patrickkabwe/create-nitro-module/commit/cea5db4cfb58c10ec3d6508395261a52de9e8a53))
+* **deps:** bump actions/deploy-pages from 4 to 5 ([9397be3](https://github.com/patrickkabwe/create-nitro-module/commit/9397be3485da099f481f55e19af9fc42dcb14b4f))
+* **deps:** bump actions/upload-pages-artifact from 4 to 5 ([2aa81e9](https://github.com/patrickkabwe/create-nitro-module/commit/2aa81e95f2796956de2c09fd3476cb9adc8399e9))
+* **deps:** bump android-actions/setup-android from 3 to 4 ([f4763eb](https://github.com/patrickkabwe/create-nitro-module/commit/f4763eb64454aadbeba3fececb7778e197d3b7bc))
+* formatting ([5add5cd](https://github.com/patrickkabwe/create-nitro-module/commit/5add5cd8074834972258bf646512aa8fbbefe178))
+* formatting ([cd1f67f](https://github.com/patrickkabwe/create-nitro-module/commit/cd1f67f2b4e1fad1518bd566b4ff6a69808c7a79))
+* update clack prompts to v1 ([e65a7f2](https://github.com/patrickkabwe/create-nitro-module/commit/e65a7f2276c1c1c09036fca9bc0d37dc339f13e6))
+* update dependencies ([b3113aa](https://github.com/patrickkabwe/create-nitro-module/commit/b3113aa1c977f19a90b05efa24c2f28a450d0d03))
+* update eslint dependencie ([c102554](https://github.com/patrickkabwe/create-nitro-module/commit/c102554b1c41999b82234189aa9d8f72f8dec048))
+* update typescript and fix typechec ([72bd754](https://github.com/patrickkabwe/create-nitro-module/commit/72bd75478a8c6381bbbf44d79db113a6a82a6c3d))
+* update typescript and fix typecheck ([f83115d](https://github.com/patrickkabwe/create-nitro-module/commit/f83115d386637ba3c5554422abc1c8d7d9ed21a1))
+
 ## [3.6.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.5.4...v3.6.0) (2026-03-16)
 
 ### ✨ Features
