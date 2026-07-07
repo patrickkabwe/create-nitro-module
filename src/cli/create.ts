@@ -191,7 +191,6 @@ export const createModule = async (
     options: CreateModuleOptions
 ) => {
     let packageType = Nitro.Module
-    let moduleFactory: NitroModuleFactory | null = null
     let spinnerStarted = false
     let shouldCleanupModulePath = false
     let targetModulePath: string | null = null
@@ -238,7 +237,7 @@ export const createModule = async (
         )
         targetModulePath = resolvedTargetModulePath
 
-        moduleFactory = new NitroModuleFactory({
+        const moduleFactory = new NitroModuleFactory({
             description: answers.description,
             platformLangs: answers.platformLangs,
             packageName,
