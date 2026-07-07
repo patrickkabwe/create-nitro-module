@@ -275,6 +275,7 @@ export const createModule = async (
                 inactive: 'no',
             })
             if (p.isCancel(confirm)) {
+                p.cancel('Cancelled')
                 process.exit(1)
             } else if (confirm) {
                 rmSync(resolvedTargetModulePath, {
@@ -283,7 +284,7 @@ export const createModule = async (
                 })
                 shouldCleanupModulePath = true
             } else {
-                console.log(kleur.red('Cancelled'))
+                p.cancel('Cancelled')
                 process.exit(1)
             }
         } else {
@@ -425,7 +426,10 @@ const getUserAnswers = async (
                     defaultValue: name,
                     initialValue: name,
                     validate(value) {
-                        const packageName = value?.trim()
+                        if (value === undefined) {
+                            return validatePackageName('')
+                        }
+                        const packageName = value.trim()
                         return validatePackageName(packageName)
                     },
                 })
@@ -518,6 +522,7 @@ const getUserAnswers = async (
                         ),
                     })
                     if (p.isCancel(confirm)) {
+                        p.cancel('Cancelled')
                         process.exit(0)
                     } else if (confirm) {
                         return usedPm
@@ -575,9 +580,7 @@ const getUserAnswers = async (
                     ),
                 })
                 if (!packageNameConfirmation) {
-                    console.log(
-                        kleur.red('Package name confirmation cancelled')
-                    )
+                    p.cancel('Package name confirmation cancelled')
                     process.exit(1)
                 }
                 return packageNameConfirmation
@@ -585,7 +588,7 @@ const getUserAnswers = async (
         },
         {
             onCancel() {
-                console.log(kleur.red('Cancelled'))
+                p.cancel('Cancelled')
                 process.exit(1)
             },
         }
