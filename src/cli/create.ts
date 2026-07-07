@@ -232,7 +232,11 @@ export const createModule = async (
             options.moduleDir != null
                 ? path.resolve(options.moduleDir)
                 : process.cwd()
-        targetModulePath = getTargetModulePath(moduleBaseDir, packageName)
+        const resolvedTargetModulePath = getTargetModulePath(
+            moduleBaseDir,
+            packageName
+        )
+        targetModulePath = resolvedTargetModulePath
 
         moduleFactory = new NitroModuleFactory({
             description: answers.description,
@@ -240,7 +244,7 @@ export const createModule = async (
             packageName,
             platforms: answers.platforms,
             pm: answers.pm,
-            cwd: targetModulePath,
+            cwd: resolvedTargetModulePath,
             spinner,
             packageType,
             finalPackageName,
@@ -250,12 +254,12 @@ export const createModule = async (
             skipExample: options.skipExample,
         })
 
-        const dirExists = await dirExist(targetModulePath)
+        const dirExists = await dirExist(resolvedTargetModulePath)
 
         if (dirExists) {
             if (options.ci) {
                 throw new Error(
-                    `Target directory already exists: ${targetModulePath}. Remove it or choose a different module name or --module-dir.`
+                    `Target directory already exists: ${resolvedTargetModulePath}. Remove it or choose a different module name or --module-dir.`
                 )
             }
 
@@ -273,7 +277,10 @@ export const createModule = async (
             if (p.isCancel(confirm)) {
                 process.exit(1)
             } else if (confirm) {
-                rmSync(targetModulePath, { recursive: true, force: true })
+                rmSync(resolvedTargetModulePath, {
+                    recursive: true,
+                    force: true,
+                })
                 shouldCleanupModulePath = true
             } else {
                 console.log(kleur.red('Cancelled'))
@@ -294,15 +301,15 @@ export const createModule = async (
             generateInstructions({
                 includeHarness: answers.includeHarness,
                 monorepo: answers.monorepo,
-                modulePath: getInstructionsModulePath(targetModulePath),
+                modulePath: getInstructionsModulePath(resolvedTargetModulePath),
                 packagePath: getInstructionsModulePath(
                     answers.monorepo
                         ? path.join(
-                              targetModulePath,
+                              resolvedTargetModulePath,
                               'packages',
                               finalPackageName
                           )
-                        : targetModulePath
+                        : resolvedTargetModulePath
                 ),
                 pm: answers.pm,
                 platforms: answers.platforms,
