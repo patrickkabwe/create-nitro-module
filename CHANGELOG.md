@@ -1,3 +1,5 @@
+## [3.7.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.6.0...v3.7.0) (2026-07-07)
+
 ## [3.6.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.5.4...v3.6.0) (2026-03-16)
 
 ### ✨ Features
