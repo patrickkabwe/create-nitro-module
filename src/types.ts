@@ -1,5 +1,5 @@
-import * as p from '@clack/prompts'
-import { detectPackageManager } from './utils'
+import type * as p from '@clack/prompts'
+import type { detectPackageManager } from './utils'
 
 export type PlatformLangMap = Partial<Record<SupportedPlatform, SupportedLang>>
 
@@ -9,6 +9,8 @@ export interface UserAnswers {
     platforms: SupportedPlatform[]
     packageType: Nitro
     platformLangs: PlatformLangMap
+    includeHarness: boolean
+    monorepo: boolean
     pm: PackageManager
 }
 
@@ -31,12 +33,14 @@ export type PlatformLang = {
 
 export type CreateModuleOptions = {
     ci?: boolean
+    includeHarness?: boolean
     langs?: string
     moduleDir?: string
     platforms?: string
     skipExample?: boolean
     skipInstall?: boolean
     packageType?: Nitro
+    monorepo?: boolean
 }
 
 export type PackageManager = Exclude<
@@ -61,7 +65,8 @@ export type GenerateModuleConfig = {
     packageType: Nitro
     packageName: string
     finalPackageName: string
-} & Omit<CreateModuleOptions, 'moduleDir' | 'langs' | 'platforms'>
+    monorepo: boolean
+} & Omit<CreateModuleOptions, 'moduleDir' | 'langs' | 'platforms' | 'monorepo'>
 
 export interface FileGenerator {
     /**
@@ -79,8 +84,12 @@ export const PLATFORM_LANGUAGE_MAP: Record<SupportedPlatform, SupportedLang[]> =
     }
 
 export type InstructionsParams = {
-    moduleName: string
+    includeHarness?: boolean
+    monorepo: boolean
+    modulePath: string
+    packagePath: string
     pm: string
+    platforms: SupportedPlatform[]
     skipInstall?: boolean
     skipExample?: boolean
 }

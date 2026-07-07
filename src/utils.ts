@@ -24,8 +24,6 @@ type AutolinkingConfig = {
     [key: string]: AutolinkingEntry
 }
 
-export const LANGS = ['c++', 'swift', 'kotlin'] as const
-
 export const validatePackageName = (input: string): string => {
     if (input.length === 0) {
         return 'Package name is required'
@@ -114,10 +112,6 @@ export const generateAutolinking = (
     }
 
     return { [moduleName]: entry }
-}
-
-export const validateTemplate = (answer: string[]) => {
-    return answer.length > 0 || 'You must choose at least one template'
 }
 
 export const dirExist = async (dir: string) => {

@@ -1,5 +1,5 @@
 import kleur from 'kleur'
-import type { InstructionsParams } from './types'
+import { SupportedPlatform, type InstructionsParams } from './types'
 
 export const SUPPORTED_PLATFORMS = ['ios', 'android']
 
@@ -33,6 +33,27 @@ export const packagesToRemoveFromExampleApp = [
 
 export const foldersToRemoveFromExampleApp = ['__tests__']
 
+const getHarnessInstructions = (
+    monorepo: boolean,
+    pm: string,
+    platforms: SupportedPlatform[]
+) => {
+    if (monorepo) {
+        const commands = [
+            ...(platforms.includes(SupportedPlatform.ANDROID)
+                ? [`${pm} run test:harness:android`]
+                : []),
+            ...(platforms.includes(SupportedPlatform.IOS)
+                ? [`${pm} run test:harness:ios`]
+                : []),
+        ]
+
+        return commands.map(command => `   ${kleur.green(command)}`).join('\n')
+    }
+
+    return `   ${kleur.green('cd example')}\n   ${kleur.green(`${pm} run test:harness`)}`
+}
+
 export const NITRO_GRAPHIC = `   
    ┌─────┐
    │ ⏲️  |
@@ -47,8 +68,12 @@ export const NITRO_GRAPHIC = `
      └─┘`
 
 export const generateInstructions = ({
-    moduleName,
+    includeHarness,
+    monorepo,
+    modulePath,
+    packagePath,
     pm,
+    platforms,
     skipInstall,
     skipExample,
 }: InstructionsParams) => `
@@ -56,7 +81,7 @@ ${kleur.cyan().bold(NITRO_GRAPHIC)}
      
 ${kleur.red().bold('Next steps:')}
 
-${kleur.green(`cd ${moduleName}`)}
+${kleur.green(`cd ${modulePath}`)}
 ${
     !skipInstall
         ? ''
@@ -68,13 +93,13 @@ ${
 Begin development:
  
    ${kleur.cyan('Define your module:')}
-   ${kleur.white('src/specs/')}               ${kleur.dim('# Define your module specifications. e.g. src/specs/myModule.nitro.ts')}
+   ${kleur.white(`${monorepo ? `${packagePath}/` : ''}src/specs/`)}               ${kleur.dim('# Define your module specifications. e.g. src/specs/myModule.nitro.ts')}
    ${kleur.green(`${pm} run codegen`)}         ${kleur.dim('# Generates native interfaces from TypeScript definitions')}
    
    ${kleur.cyan('Implement native code:')}
-   ${kleur.white('ios/')}                     ${kleur.dim('# iOS native implementation using swift')}
-   ${kleur.white('android/')}                 ${kleur.dim('# Android native implementation using kotlin')}
-   ${kleur.white('cpp/')}                     ${kleur.dim('# C++ native implementation. Shareable between iOS and Android (Will be generated if c++ was selected)')}
+   ${kleur.white(`${monorepo ? `${packagePath}/` : ''}ios/`)}                     ${kleur.dim('# iOS native implementation using swift')}
+   ${kleur.white(`${monorepo ? `${packagePath}/` : ''}android/`)}                 ${kleur.dim('# Android native implementation using kotlin')}
+   ${kleur.white(`${monorepo ? `${packagePath}/` : ''}cpp/`)}                     ${kleur.dim('# C++ native implementation. Shareable between iOS and Android (Will be generated if c++ was selected)')}
    
 ${
     skipExample
@@ -84,6 +109,14 @@ ${
    ${kleur.green('cd example')}
    ${kleur.green(`${pm} run pod`)}             ${kleur.dim('# Install CocoaPods dependencies (iOS)')}
    ${kleur.green(`${pm} run ios|android`)}     ${kleur.dim('# Run your example app')}`
+}
+
+${
+    skipExample || !includeHarness
+        ? ''
+        : `\n\nRun your React Native Harness tests:
+
+${getHarnessInstructions(monorepo, pm, platforms)}`
 }
 
 ${kleur.yellow('Pro Tips:')}

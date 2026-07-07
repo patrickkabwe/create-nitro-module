@@ -53,6 +53,9 @@ sleep 1
 send \x20
 send \r
 
+# Module type (Default to Nitro Module)
+expect "📦 Select module type:" {send \r}
+
 # Language selection
 expect "💻 Select programming languages:"
 sleep 1
@@ -66,9 +69,8 @@ send \r
 # Package manager
 expect "📦 Select package manager:" {send \r}
 
-                  
-# Module type (Default to Nitro Module)
-expect "📦 Select module type:" {send \r}
+# React Native Harness (Default to no)
+expect "Include React Native Harness for native Android and iOS tests?" {send "n\r"}
 
 # Confirm package name
 expect "✨ Your package name will be called:" {send "y\r"}
@@ -97,7 +99,7 @@ if [ -d "react-native-test-module" ]; then
             -scheme TestModuleExample \
             -sdk iphonesimulator \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16' build
+            -destination 'platform=iOS Simulator,name=iPhone 17' build
 
         cd ../android
         ./gradlew assembleDebug --no-daemon

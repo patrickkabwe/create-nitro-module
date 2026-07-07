@@ -1,4 +1,0 @@
-appId: ${APP_ID}
----
-- launchApp
-- assertVisible: '3'
