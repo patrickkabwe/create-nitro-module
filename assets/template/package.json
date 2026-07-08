@@ -54,7 +54,7 @@
     "@semantic-release/git": "^10.0.1",
     "@types/jest": "^29.5.12",
     "@types/react": "19.2.0",
-    "nitrogen": "^0.35.2",
+    "nitrogen": "^0.36.1",
     "react": "19.2.3",
     "react-native": "0.86.0",
     "react-native-builder-bob": "^0.40.18",
