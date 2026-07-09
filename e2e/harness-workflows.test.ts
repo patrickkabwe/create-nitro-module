@@ -145,7 +145,7 @@ const assertHarnessWorkflowContent = async (
     expect(androidWorkflow).toContain('chmod +x ./gradlew')
     expect(androidWorkflow).toContain('projectRoot: example')
     expect(iosWorkflow).toContain(
-        'uses: callstackincubator/react-native-harness@v1.0.0'
+        'uses: callstackincubator/react-native-harness@v1.2.0'
     )
     expect(iosWorkflow).toContain('projectRoot: example')
     expect(androidWorkflow).toContain(expectation.harnessWorkflowPath)

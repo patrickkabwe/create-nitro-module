@@ -445,9 +445,9 @@ ${getHarnessCodegenBuildStep(packageManager, monorepo)}
             CODE_SIGNING_ALLOWED=NO
 
       - name: Run React Native Harness
-        uses: callstackincubator/react-native-harness@v1.0.0
+        uses: callstackincubator/react-native-harness@v1.2.0
         with:
-          app: example/ios/build/Build/Products/Debug-iphonesimulator/${exampleAppName}.app
+          app: ios/build/Build/Products/Debug-iphonesimulator/${exampleAppName}.app
           runner: ios
           projectRoot: example
           packageManager: ${packageManager}`
