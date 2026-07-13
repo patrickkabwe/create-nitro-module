@@ -1,3 +1,21 @@
+## [3.7.1](https://github.com/patrickkabwe/create-nitro-module/compare/v3.7.0...v3.7.1) (2026-07-13)
+
+### 🐛 Bug Fixes
+
+* **ci:** release workflow ([9d93a5e](https://github.com/patrickkabwe/create-nitro-module/commit/9d93a5eda4f86912b1759e7b179001073151300f))
+* **harness:** fix iOS harness action version and app path ([a9417e4](https://github.com/patrickkabwe/create-nitro-module/commit/a9417e480312a530bb493266f1d6eeacf0a2197a))
+* **test:** update iOS harness version assertion to v1.2.0 ([a84b192](https://github.com/patrickkabwe/create-nitro-module/commit/a84b192c24b9af95c9addec871159ea17bcc67ff))
+
+### 🛠️ Other changes
+
+* **deps-dev:** bump @types/node from 25.6.0 to 26.1.1 ([8ecc2c2](https://github.com/patrickkabwe/create-nitro-module/commit/8ecc2c20c683ac52ef2512c56be4b42637fc33e5))
+* **deps-dev:** bump lefthook from 2.1.9 to 2.1.10 ([cfee14f](https://github.com/patrickkabwe/create-nitro-module/commit/cfee14f34404592a1dfa130a99264e9fd47dac1e))
+* **deps-dev:** bump nitrogen ([b718b96](https://github.com/patrickkabwe/create-nitro-module/commit/b718b96c6c4327b35b9270c08f4b290cbac535c1))
+* **deps-dev:** bump prettier from 3.9.4 to 3.9.5 ([86f52aa](https://github.com/patrickkabwe/create-nitro-module/commit/86f52aa0a369d5f4e3a185acb2ad312a41077f94))
+* **deps-dev:** bump semantic-release from 25.0.5 to 25.0.7 ([4dd4e0e](https://github.com/patrickkabwe/create-nitro-module/commit/4dd4e0e478ce3e790464492cd7149ff2e3aa1ed1))
+* **deps-dev:** bump semantic-release in /assets/template ([c7407fb](https://github.com/patrickkabwe/create-nitro-module/commit/c7407fb6c62c27bd55089f738240b14821db0e36))
+* **deps:** bump commander from 14.0.3 to 15.0.0 ([570336f](https://github.com/patrickkabwe/create-nitro-module/commit/570336ff38d805f3a194e49ae7222f84e00a78dd))
+
 ## [3.7.0](https://github.com/patrickkabwe/create-nitro-module/compare/v3.6.0...v3.7.0) (2026-07-07)
 
 ### ✨ Features
