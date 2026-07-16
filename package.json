@@ -82,7 +82,7 @@
         "lefthook": "^2.1.9",
         "prettier": "^3.9.4",
         "semantic-release": "^25.0.5",
-        "typescript": "^6.0.3"
+        "typescript": "^7.0.2"
     },
     "engines": {
         "node": ">=24.3.0"
