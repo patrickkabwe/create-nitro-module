@@ -20,5 +20,8 @@ if (!allowedBranches.has(releaseBranch)) {
  */
 module.exports = {
     ...releaseConfig,
-    branches: [{ name: releaseBranch, channel: 'next', prerelease: 'next' }],
+    branches:
+        releaseBranch === 'main'
+            ? [{ name: 'main', channel: 'next', prerelease: 'next' }, 'next']
+            : ['main', { name: 'next', channel: 'next', prerelease: 'next' }],
 }
