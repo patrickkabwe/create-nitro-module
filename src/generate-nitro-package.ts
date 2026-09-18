@@ -597,7 +597,6 @@ export class NitroModuleFactory {
             encoding: 'utf8',
         })
         const exampleAppPackageJson = JSON.parse(examplePackageJsonStr)
-        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
 
         exampleAppPackageJson.name = `${this.config.finalPackageName}-example`
 
@@ -642,50 +641,14 @@ export class NitroModuleFactory {
                 'test:harness': 'react-native-harness',
                 ...(this.config.platforms.includes(SupportedPlatform.ANDROID)
                     ? {
-                          'test:harness:android': [
-                              'if [ -z "${HARNESS_APP_PATH:-}" ]; then',
-                              '  set -euo pipefail',
-                              '  chmod +x android/gradlew',
-                              '  (cd android && ./gradlew assembleDebug --no-daemon --build-cache)',
-                              '  HARNESS_APP_PATH="$(find android/app/build/outputs/apk/debug -maxdepth 1 -type f -name "*.apk" | head -1)"',
-                              '  if [ -z "${HARNESS_APP_PATH}" ]; then',
-                              '    echo "Unable to locate the built Android app bundle."',
-                              '    exit 1',
-                              '  fi',
-                              '  export HARNESS_APP_PATH',
-                              'fi',
+                          'test:harness:android':
                               'react-native-harness --harnessRunner android',
-                          ].join('\n'),
                       }
                     : {}),
                 ...(this.config.platforms.includes(SupportedPlatform.IOS)
                     ? {
-                          'test:harness:ios': [
-                              'set -euo pipefail',
-                              'if [ -z "${DEVICE_MODEL:-}" ] || [ -z "${IOS_VERSION:-}" ]; then',
-                              '  IOS_VERSION="${IOS_VERSION:-26.5}"',
-                              '  export IOS_VERSION',
-                              '  IOS_SIMULATOR="$(xcrun simctl list devices available --json | node -e \'const fs = require("node:fs"); const input = fs.readFileSync(0, "utf8"); const data = JSON.parse(input); const desiredVersion = process.env.IOS_VERSION; const candidates = Object.entries(data.devices).flatMap(([runtime, devices]) => { const version = runtime.match(/iOS-(\\d+(?:-\\d+)*)$/)?.[1]?.replaceAll("-", "."); if (version == null || (desiredVersion != null && version !== desiredVersion)) return []; return devices.filter(device => device.isAvailable === true && device.name.startsWith("iPhone")).map(device => ({ name: device.name, version })); }); candidates.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }) || b.name.localeCompare(a.name, undefined, { numeric: true })); const selected = candidates[0]; if (selected == null) process.exit(1); console.log(`${selected.name}|${selected.version}`);\' || true)"',
-                              '  if [ -z "${IOS_SIMULATOR}" ]; then',
-                              '    echo "Unable to resolve an available iOS simulator."',
-                              '    xcrun simctl list devices available',
-                              '    exit 1',
-                              '  fi',
-                              '  DEVICE_MODEL="${IOS_SIMULATOR%%|*}"',
-                              '  IOS_VERSION="${IOS_SIMULATOR#*|}"',
-                              '  export DEVICE_MODEL IOS_VERSION',
-                              'fi',
-                              'if [ -z "${HARNESS_APP_PATH:-}" ]; then',
-                              `  xcodebuild CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ -derivedDataPath build -UseModernBuildSystem=YES -workspace ${exampleAppName}.xcworkspace -scheme ${exampleAppName} -sdk iphonesimulator -configuration Debug build CODE_SIGNING_ALLOWED=NO`,
-                              '  HARNESS_APP_PATH="$(find ios/build/Build/Products/Debug-iphonesimulator -maxdepth 1 -type d -name "*.app" | head -1)"',
-                              '  if [ -z "${HARNESS_APP_PATH}" ]; then',
-                              '    echo "Unable to locate the built iOS app bundle."',
-                              '    exit 1',
-                              '  fi',
-                              '  export HARNESS_APP_PATH',
-                              'fi',
+                          'test:harness:ios':
                               'react-native-harness --harnessRunner ios',
-                          ].join('\n'),
                       }
                     : {}),
             }

@@ -101,13 +101,10 @@ const assertHarnessScripts = async (rootDir: string): Promise<void> => {
     const scripts = examplePackageJson.scripts
 
     expect(scripts?.['test:harness']).toBe('react-native-harness')
-    expect(scripts?.['test:harness:android']).toContain(
-        'chmod +x android/gradlew'
-    )
-    expect(scripts?.['test:harness:android']).toContain(
+    expect(scripts?.['test:harness:android']).toBe(
         'react-native-harness --harnessRunner android'
     )
-    expect(scripts?.['test:harness:ios']).toContain(
+    expect(scripts?.['test:harness:ios']).toBe(
         'react-native-harness --harnessRunner ios'
     )
 }
