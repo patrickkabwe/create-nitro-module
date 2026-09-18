@@ -41,8 +41,11 @@ jobs:
             - name: Prepare pre-release config
               run: |
                   PRERELEASE_CONFIG="$RUNNER_TEMP/release.prerelease.config.cjs"
+                  PRERELEASE_RUNNER="$RUNNER_TEMP/semantic-release-prerelease.cjs"
                   cp release.prerelease.config.cjs "$PRERELEASE_CONFIG"
+                  cp scripts/semantic-release-prerelease.cjs "$PRERELEASE_RUNNER"
                   echo "PRERELEASE_CONFIG=$PRERELEASE_CONFIG" >> "$GITHUB_ENV"
+                  echo "PRERELEASE_RUNNER=$PRERELEASE_RUNNER" >> "$GITHUB_ENV"
 
             - name: Checkout pre-release branch
               shell: bash
@@ -104,7 +107,7 @@ jobs:
                   # The workflow ref can differ from the selected release branch.
                   # Let semantic-release read the checked-out git branch instead.
                   env -u GITHUB_ACTIONS \
-                    bun semantic-release --no-ci --extends "$PRERELEASE_CONFIG"
+                    bun "$PRERELEASE_RUNNER" --no-ci
 
             - name: Dry-run pre-release
               if: ${{ inputs.dry_run }}
@@ -120,4 +123,4 @@ jobs:
                   # The workflow ref can differ from the selected release branch.
                   # Let semantic-release read the checked-out git branch instead.
                   env -u GITHUB_ACTIONS \
-                    bun semantic-release --dry-run --no-ci --extends "$PRERELEASE_CONFIG"
+                    bun "$PRERELEASE_RUNNER" --dry-run --no-ci
