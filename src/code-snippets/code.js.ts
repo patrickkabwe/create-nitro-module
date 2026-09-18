@@ -252,6 +252,7 @@ const config = {
     ${runners}
   ],
   defaultRunner: '${defaultRunner}',
+  platformReadyTimeout: 600000,
   bridgeTimeout: 300000,
 }
 

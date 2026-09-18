@@ -17,6 +17,10 @@ type WorkflowExpectation = {
     readonly rootDir: string
 }
 
+type PackageJson = {
+    readonly devDependencies?: Record<string, string>
+}
+
 const execFileAsync = promisify(execFile)
 const generatedRoots: string[] = []
 
@@ -108,6 +112,20 @@ const assertHarnessScripts = async (rootDir: string): Promise<void> => {
     )
 }
 
+const assertTemplateDependencyVersions = async (
+    rootDir: string,
+    packagePath: string
+): Promise<void> => {
+    const packageJson = JSON.parse(
+        await readText(path.join(rootDir, packagePath, 'package.json'))
+    ) as PackageJson
+    const devDependencies = packageJson.devDependencies
+
+    expect(devDependencies?.nitrogen).toBe('^0.37.1')
+    expect(devDependencies?.['react-native']).toBe('0.87.1')
+    expect(devDependencies?.['react-native-nitro-modules']).toBe('^0.37.1')
+}
+
 const assertHarnessWorkflowContent = async (
     expectation: WorkflowExpectation
 ): Promise<void> => {
@@ -155,6 +173,15 @@ const assertHarnessWorkflowContent = async (
     expect(iosBuildWorkflow).not.toContain('$$exampleApp$$')
 }
 
+const assertHarnessConfigContent = async (rootDir: string): Promise<void> => {
+    const harnessConfig = await readText(
+        path.join(rootDir, 'example', 'rn-harness.config.mjs')
+    )
+
+    expect(harnessConfig).toContain('platformReadyTimeout: 600000')
+    expect(harnessConfig).toContain('bridgeTimeout: 300000')
+}
+
 afterAll(async () => {
     await Promise.all(
         generatedRoots.map(rootDir =>
@@ -169,6 +196,8 @@ describe('React Native Harness workflow generation', () => {
 
         await assertWorkflowFiles(project.rootDir)
         await assertHarnessScripts(project.rootDir)
+        await assertTemplateDependencyVersions(project.rootDir, '.')
+        await assertHarnessConfigContent(project.rootDir)
         await assertHarnessWorkflowContent({
             androidBuildWorkflowPath: 'android/**',
             harnessWorkflowPath: 'src/**',
@@ -183,6 +212,8 @@ describe('React Native Harness workflow generation', () => {
 
         await assertWorkflowFiles(project.rootDir)
         await assertHarnessScripts(project.rootDir)
+        await assertTemplateDependencyVersions(project.rootDir, packagePath)
+        await assertHarnessConfigContent(project.rootDir)
         await assertHarnessWorkflowContent({
             androidBuildWorkflowPath: `${packagePath}/android/**`,
             harnessWorkflowPath: `${packagePath}/src/**`,
