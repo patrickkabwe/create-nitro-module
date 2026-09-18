@@ -1,0 +1,123 @@
+name: Pre-release
+
+on:
+    workflow_dispatch:
+        inputs:
+            release_branch:
+                description: Branch to create a pre-release from
+                required: true
+                type: choice
+                default: next
+                options:
+                    - next
+                    - main
+            dry_run:
+                description: Preview the pre-release without publishing
+                required: true
+                type: boolean
+                default: false
+
+concurrency:
+    group: ${{ github.workflow }}-${{ inputs.release_branch }}-${{ inputs.dry_run }}
+    cancel-in-progress: true
+
+jobs:
+    prerelease:
+        name: Pre-release
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            id-token: write
+            issues: write
+            pull-requests: write
+        env:
+            PRERELEASE_BRANCH: ${{ inputs.release_branch }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
+
+            - name: Prepare pre-release config
+              run: |
+                  PRERELEASE_CONFIG="$RUNNER_TEMP/release.prerelease.config.cjs"
+                  cp release.prerelease.config.cjs "$PRERELEASE_CONFIG"
+                  echo "PRERELEASE_CONFIG=$PRERELEASE_CONFIG" >> "$GITHUB_ENV"
+
+            - name: Checkout pre-release branch
+              shell: bash
+              run: |
+                  case "$PRERELEASE_BRANCH" in
+                    main|next) ;;
+                    *)
+                      echo "Unsupported pre-release branch: $PRERELEASE_BRANCH"
+                      exit 1
+                      ;;
+                  esac
+
+                  git fetch origin "$PRERELEASE_BRANCH" --tags
+
+                  if git show-ref --verify --quiet "refs/heads/$PRERELEASE_BRANCH"; then
+                    git switch "$PRERELEASE_BRANCH"
+                  else
+                    git switch --track "origin/$PRERELEASE_BRANCH"
+                  fi
+
+                  git pull --ff-only origin "$PRERELEASE_BRANCH"
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 22.14.0
+
+            - name: Setup Bun.js
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Cache bun dependencies
+              id: bun-cache
+              uses: actions/cache@v6
+              with:
+                  path: ~/.bun/install/cache
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun-
+
+            - name: Install npm dependencies (bun)
+              run: bun install
+
+            - name: Build lib
+              run: bun run build
+
+            - name: Pre-release
+              if: ${{ !inputs.dry_run }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+                  NPM_CONFIG_PROVENANCE: true
+                  GIT_AUTHOR_NAME: ${{ github.actor }}
+                  GIT_AUTHOR_EMAIL: '${{ github.actor }}@users.noreply.github.com'
+                  GIT_COMMITTER_NAME: ${{ github.actor }}
+                  GIT_COMMITTER_EMAIL: '${{ github.actor }}@users.noreply.github.com'
+              run: |
+                  # The workflow ref can differ from the selected release branch.
+                  # Let semantic-release read the checked-out git branch instead.
+                  env -u GITHUB_ACTIONS \
+                    bun semantic-release --no-ci --extends "$PRERELEASE_CONFIG"
+
+            - name: Dry-run pre-release
+              if: ${{ inputs.dry_run }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+                  NPM_CONFIG_PROVENANCE: true
+                  GIT_AUTHOR_NAME: ${{ github.actor }}
+                  GIT_AUTHOR_EMAIL: '${{ github.actor }}@users.noreply.github.com'
+                  GIT_COMMITTER_NAME: ${{ github.actor }}
+                  GIT_COMMITTER_EMAIL: '${{ github.actor }}@users.noreply.github.com'
+              run: |
+                  # The workflow ref can differ from the selected release branch.
+                  # Let semantic-release read the checked-out git branch instead.
+                  env -u GITHUB_ACTIONS \
+                    bun semantic-release --dry-run --no-ci --extends "$PRERELEASE_CONFIG"
