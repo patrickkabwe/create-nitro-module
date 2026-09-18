@@ -1,4 +1,5 @@
 import type * as p from '@clack/prompts'
+import type { NativeToolingLang } from './native-tooling'
 import type { detectPackageManager } from './utils'
 
 export type PlatformLangMap = Partial<Record<SupportedPlatform, SupportedLang>>
@@ -9,6 +10,7 @@ export interface UserAnswers {
     platforms: SupportedPlatform[]
     packageType: Nitro
     platformLangs: PlatformLangMap
+    nativeTooling: NativeToolingLang[]
     includeHarness: boolean
     monorepo: boolean
     pm: PackageManager
@@ -36,6 +38,7 @@ export type CreateModuleOptions = {
     includeHarness?: boolean
     langs?: string
     moduleDir?: string
+    nativeTooling?: string
     platforms?: string
     skipExample?: boolean
     skipInstall?: boolean
@@ -57,6 +60,7 @@ export type GenerateModuleConfig = {
     pm: PackageManager
     cwd: string
     platformLangs: PlatformLangMap
+    nativeTooling: NativeToolingLang[]
     prefix?: string
     spinner: ReturnType<typeof p.spinner>
     description: string
@@ -66,7 +70,10 @@ export type GenerateModuleConfig = {
     packageName: string
     finalPackageName: string
     monorepo: boolean
-} & Omit<CreateModuleOptions, 'moduleDir' | 'langs' | 'platforms' | 'monorepo'>
+} & Omit<
+    CreateModuleOptions,
+    'moduleDir' | 'langs' | 'nativeTooling' | 'platforms' | 'monorepo'
+>
 
 export interface FileGenerator {
     /**
@@ -87,6 +94,7 @@ export type InstructionsParams = {
     includeHarness?: boolean
     monorepo: boolean
     modulePath: string
+    nativeTooling: NativeToolingLang[]
     packagePath: string
     pm: string
     platforms: SupportedPlatform[]

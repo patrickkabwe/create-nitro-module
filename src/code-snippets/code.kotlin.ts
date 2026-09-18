@@ -14,10 +14,13 @@ import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
     moduleName
 )}Spec
 
-class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec() {    
-    override fun ${funcName}(num1: Double, num2: Double): Double {
-        return num1 + num2
-    }
+class Hybrid${toPascalCase(moduleName)} : Hybrid${toPascalCase(moduleName)}Spec() {
+  override fun ${funcName}(
+    num1: Double,
+    num2: Double,
+  ): Double {
+    return num1 + num2
+  }
 }
 `
 
@@ -47,15 +50,17 @@ import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
 
 @Keep
 @DoNotStrip
-class Hybrid${toPascalCase(moduleName)}(val context: ThemedReactContext): Hybrid${toPascalCase(moduleName)}Spec() {
-    // View
-    override val view = View(context)
+class Hybrid${toPascalCase(moduleName)}(
+  val context: ThemedReactContext,
+) : Hybrid${toPascalCase(moduleName)}Spec() {
+  // View
+  override val view: View = View(context)
 
-    // Props
-    override var isRed: Boolean = false
-        set(value) {
-            field = value
-            view.setBackgroundColor(if (value) Color.RED else Color.BLACK)
-        }
+  // Props
+  override var isRed: Boolean = false
+    set(value) {
+      field = value
+      view.setBackgroundColor(if (value) Color.RED else Color.BLACK)
+    }
 }
 `

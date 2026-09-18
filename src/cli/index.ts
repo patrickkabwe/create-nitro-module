@@ -14,6 +14,10 @@ program
     .option('--platforms <platforms>', 'comma-separated platforms to target')
     .option('--langs <langs>', 'comma-separated languages to generate')
     .option(
+        '--native-tooling <langs>',
+        'comma-separated languages ("all" for every selected one) to add linter/formatter scripts for'
+    )
+    .option(
         '-d, --module-dir <moduleDirectory>',
         'directory to create the module in'
     )

@@ -35,6 +35,12 @@ import { CppFileGenerator } from './file-generators/cpp-file-generator'
 import { IOSFileGenerator } from './file-generators/ios-file-generator'
 import { JSFileGenerator } from './file-generators/js-file-generator'
 import {
+    CLANG_FORMAT_CONFIG,
+    getNativeToolingDevDependencies,
+    getNativeToolingScripts,
+    KTLINT_EDITOR_CONFIG,
+} from './native-tooling'
+import {
     type GenerateModuleConfig,
     Nitro,
     SupportedLang,
@@ -99,6 +105,46 @@ export class NitroModuleFactory {
             : path.join(this.config.cwd, 'example')
     }
 
+    private get nativeToolingScripts(): Record<string, string> {
+        return getNativeToolingScripts(
+            this.config.nativeTooling,
+            this.config.pm
+        )
+    }
+
+    /**
+     * Resolves the latest published version for each tooling devDependency,
+     * falling back to the pinned range when the registry is unreachable.
+     */
+    private async resolveNativeToolingDevDependencies(): Promise<
+        Record<string, string>
+    > {
+        const fallbacks = getNativeToolingDevDependencies(
+            this.config.nativeTooling
+        )
+        const names = Object.keys(fallbacks)
+
+        if (names.length === 0) {
+            return {}
+        }
+
+        if (this.config.skipInstall) {
+            return fallbacks
+        }
+
+        const resolved = await Promise.all(
+            names.map(async name => {
+                const version = await this.getLatestVersion(name)
+                return [
+                    name,
+                    version != null ? `^${version}` : fallbacks[name],
+                ] as const
+            })
+        )
+
+        return Object.fromEntries(resolved)
+    }
+
     private get packageRelativeFromExample(): string {
         return this.config.monorepo
             ? path.posix.join('..', 'packages', this.config.finalPackageName)
@@ -140,6 +186,7 @@ export class NitroModuleFactory {
         await this.copyNitroTemplateFiles()
         await this.replaceNitroJsonPlaceholders()
         await this.updatePackageJsonConfig(this.config.skipExample)
+        await this.setupNativeTooling()
         if (this.config.monorepo) {
             await this.createWorkspaceRoot()
             if (this.config.pm === 'yarn') {
@@ -272,6 +319,12 @@ export class NitroModuleFactory {
                 build: this.getWorkspaceRunCommand('build'),
                 codegen: this.getWorkspaceRunCommand('codegen'),
                 release: this.getWorkspaceRunCommand('release'),
+                ...Object.fromEntries(
+                    Object.keys(this.nativeToolingScripts).map(scriptName => [
+                        scriptName,
+                        this.getWorkspaceRunCommand(scriptName),
+                    ])
+                ),
                 ...(this.config.includeHarness && !this.config.skipExample
                     ? {
                           'test:harness':
@@ -399,6 +452,14 @@ export class NitroModuleFactory {
             )
                 ? this.getPostCodegenScript()
                 : undefined,
+            ...this.nativeToolingScripts,
+        }
+
+        if (this.config.monorepo) {
+            // The README lives at the workspace root for monorepos.
+            newWorkspacePackageJsonFile.files = (
+                newWorkspacePackageJsonFile.files as string[] | undefined
+            )?.filter((file: string) => file !== 'README.md')
         }
 
         const nitrogen = 'nitrogen'
@@ -414,6 +475,7 @@ export class NitroModuleFactory {
             [nitrogen]:
                 nitrogenVersion ??
                 newWorkspacePackageJsonFile.devDependencies?.[nitrogen],
+            ...(await this.resolveNativeToolingDevDependencies()),
         }
 
         newWorkspacePackageJsonFile.keywords = [
@@ -459,8 +521,37 @@ export class NitroModuleFactory {
         )
     }
 
+    private async setupNativeTooling() {
+        const writes: Promise<void>[] = []
+
+        if (this.config.nativeTooling.includes(SupportedLang.CPP)) {
+            writes.push(
+                writeFile(
+                    path.join(this.config.cwd, '.clang-format'),
+                    CLANG_FORMAT_CONFIG,
+                    { encoding: 'utf8' }
+                )
+            )
+        }
+
+        if (this.config.nativeTooling.includes(SupportedLang.KOTLIN)) {
+            writes.push(
+                writeFile(
+                    path.join(this.config.cwd, '.editorconfig'),
+                    KTLINT_EDITOR_CONFIG,
+                    { encoding: 'utf8' }
+                )
+            )
+        }
+
+        await Promise.all(writes)
+    }
+
     private async updateTemplateFiles() {
-        const readmePath = path.join(this.config.cwd, 'README.md')
+        const readmePath = path.join(
+            this.config.monorepo ? this.workspaceRoot : this.config.cwd,
+            'README.md'
+        )
         const licensePath = path.join(this.config.cwd, 'LICENSE')
 
         const replacements = {
@@ -541,6 +632,10 @@ export class NitroModuleFactory {
             await rename(
                 path.join(this.config.cwd, '.github'),
                 path.join(this.workspaceRoot, '.github')
+            )
+            await rename(
+                path.join(this.config.cwd, 'README.md'),
+                path.join(this.workspaceRoot, 'README.md')
             )
             if (this.config.pm === 'bun') {
                 await rename(

@@ -6,6 +6,12 @@ import projectPackageJsonFile from '../../package.json'
 import { generateInstructions, messages } from '../constants'
 import { NitroModuleFactory } from '../generate-nitro-package'
 import {
+    getNativeToolingCandidates,
+    isNativeToolingLang,
+    NATIVE_TOOLING,
+    type NativeToolingLang,
+} from '../native-tooling'
+import {
     type CreateModuleOptions,
     Nitro,
     type PackageManager,
@@ -170,6 +176,63 @@ const parsePlatformLangsOption = (
     return getPlatformLangMap(platforms, langs)
 }
 
+const parseNativeToolingOption = (
+    value: string | undefined,
+    platformLangs: PlatformLangMap
+): NativeToolingLang[] => {
+    const candidates = getNativeToolingCandidates(platformLangs)
+
+    if (!value) {
+        return []
+    }
+
+    const requested = parseListOption(value)
+
+    if (requested.includes('all')) {
+        return candidates
+    }
+
+    return Array.from(
+        new Set(
+            requested.map(lang => {
+                if (
+                    !isNativeToolingLang(lang as SupportedLang) ||
+                    !candidates.includes(lang as NativeToolingLang)
+                ) {
+                    throw new Error(
+                        `Invalid native tooling "${lang}". Available for the selected languages: ${candidates.join(', ') || 'none'}`
+                    )
+                }
+
+                return lang as NativeToolingLang
+            })
+        )
+    )
+}
+
+const selectNativeTooling = async (
+    platformLangs: PlatformLangMap
+): Promise<NativeToolingLang[] | symbol> => {
+    const candidates = getNativeToolingCandidates(platformLangs)
+
+    if (candidates.length === 0) {
+        return []
+    }
+
+    return p.multiselect<NativeToolingLang>({
+        message: kleur.cyan(
+            'Add native linters and formatters to your package scripts?'
+        ),
+        options: candidates.map(lang => ({
+            label: `${NATIVE_TOOLING[lang].label} linter + formatter`,
+            value: lang,
+            hint: NATIVE_TOOLING[lang].hint,
+        })),
+        initialValues: [],
+        required: false,
+    })
+}
+
 const getFinalPackageName = (packageName: string) =>
     `react-native-${packageName.toLowerCase()}`
 
@@ -240,6 +303,7 @@ export const createModule = async (
         const moduleFactory = new NitroModuleFactory({
             description: answers.description,
             platformLangs: answers.platformLangs,
+            nativeTooling: answers.nativeTooling,
             packageName,
             platforms: answers.platforms,
             pm: answers.pm,
@@ -302,6 +366,7 @@ export const createModule = async (
                 includeHarness: answers.includeHarness,
                 monorepo: answers.monorepo,
                 modulePath: getInstructionsModulePath(resolvedTargetModulePath),
+                nativeTooling: answers.nativeTooling,
                 packagePath: getInstructionsModulePath(
                     answers.monorepo
                         ? path.join(
@@ -397,6 +462,11 @@ const getUserAnswers = async (
     if (options?.ci) {
         const platforms = parsePlatformsOption(options.platforms)
         const packageType = options?.packageType || Nitro.Module
+        const platformLangs = parsePlatformLangsOption(
+            options.langs,
+            platforms,
+            packageType
+        )
 
         return {
             packageName: name,
@@ -405,10 +475,10 @@ const getUserAnswers = async (
             packageType,
             monorepo: options.monorepo === true,
             includeHarness: options.includeHarness === true,
-            platformLangs: parsePlatformLangsOption(
-                options.langs,
-                platforms,
-                packageType
+            platformLangs,
+            nativeTooling: parseNativeToolingOption(
+                options.nativeTooling,
+                platformLangs
             ),
             pm: usedPm || 'pnpm',
         }
@@ -513,6 +583,17 @@ const getUserAnswers = async (
                     results.packageType
                 )
             },
+            nativeTooling: async ({ results }) => {
+                const platformLangs = results.platformLangs as
+                    | PlatformLangMap
+                    | undefined
+
+                if (platformLangs == null) {
+                    throw new Error('Missing required selections')
+                }
+
+                return await selectNativeTooling(platformLangs)
+            },
             pm: async () => {
                 if (usedPm) {
                     const confirm = await p.confirm({
@@ -599,6 +680,7 @@ const getUserAnswers = async (
         monorepo: group.monorepo as boolean,
         platforms: group.platforms,
         platformLangs: group.platformLangs as PlatformLangMap,
+        nativeTooling: group.nativeTooling as NativeToolingLang[],
         includeHarness: group.includeHarness as boolean,
         pm: group.pm,
         description: group.description as string,
