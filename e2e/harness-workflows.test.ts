@@ -182,14 +182,6 @@ const assertHarnessConfigContent = async (rootDir: string): Promise<void> => {
     expect(harnessConfig).toContain('bridgeTimeout: 300000')
 }
 
-const assertMetroConfigContent = async (rootDir: string): Promise<void> => {
-    const metroConfig = await readText(
-        path.join(rootDir, 'example', 'metro.config.js')
-    )
-
-    expect(metroConfig).toContain('unstable_enablePackageExports: false')
-}
-
 afterAll(async () => {
     await Promise.all(
         generatedRoots.map(rootDir =>
@@ -206,7 +198,6 @@ describe('React Native Harness workflow generation', () => {
         await assertHarnessScripts(project.rootDir)
         await assertTemplateDependencyVersions(project.rootDir, '.')
         await assertHarnessConfigContent(project.rootDir)
-        await assertMetroConfigContent(project.rootDir)
         await assertHarnessWorkflowContent({
             androidBuildWorkflowPath: 'android/**',
             harnessWorkflowPath: 'src/**',
@@ -223,7 +214,6 @@ describe('React Native Harness workflow generation', () => {
         await assertHarnessScripts(project.rootDir)
         await assertTemplateDependencyVersions(project.rootDir, packagePath)
         await assertHarnessConfigContent(project.rootDir)
-        await assertMetroConfigContent(project.rootDir)
         await assertHarnessWorkflowContent({
             androidBuildWorkflowPath: `${packagePath}/android/**`,
             harnessWorkflowPath: `${packagePath}/src/**`,

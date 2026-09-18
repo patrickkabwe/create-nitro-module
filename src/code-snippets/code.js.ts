@@ -119,9 +119,6 @@ const root = path.resolve(__dirname, '${packageRelativePath}');
  */
 const config = {
   watchFolders: [root],
-  resolver: {
-    unstable_enablePackageExports: false,
-  },
 };
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);`
