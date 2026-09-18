@@ -26,7 +26,8 @@ const generatedRoots: string[] = []
 
 const createProject = async (
     packageName: string,
-    monorepo: boolean
+    monorepo: boolean,
+    packageType: 'module' | 'view'
 ): Promise<GeneratedProject> => {
     const rootDir = await mkdtemp(path.join(os.tmpdir(), 'nitro-cli-e2e-'))
     generatedRoots.push(rootDir)
@@ -55,6 +56,8 @@ const createProject = async (
         '--include-harness',
         '--skip-install',
         '--ci',
+        '--package-type',
+        packageType,
     ]
 
     if (monorepo) {
@@ -190,6 +193,27 @@ const assertMetroConfigContent = async (rootDir: string): Promise<void> => {
     expect(metroConfig).toContain('unstable_enablePackageExports: false')
 }
 
+const assertHarnessViewTestContent = async (
+    rootDir: string,
+    harnessFileName: string,
+    testID: string
+): Promise<void> => {
+    const harnessTest = await readText(
+        path.join(
+            rootDir,
+            'example',
+            '__tests__',
+            `${harnessFileName}.harness.tsx`
+        )
+    )
+
+    expect(harnessTest).toContain(
+        "import { StyleSheet, View } from 'react-native'"
+    )
+    expect(harnessTest).toContain('collapsable={false}')
+    expect(harnessTest).toContain(`testID="${testID}"`)
+}
+
 afterAll(async () => {
     await Promise.all(
         generatedRoots.map(rootDir =>
@@ -200,7 +224,7 @@ afterAll(async () => {
 
 describe('React Native Harness workflow generation', () => {
     test('generates build and harness workflows for the default project layout', async () => {
-        const project = await createProject('rootharness', false)
+        const project = await createProject('rootharness', false, 'module')
 
         await assertWorkflowFiles(project.rootDir)
         await assertHarnessScripts(project.rootDir)
@@ -216,7 +240,7 @@ describe('React Native Harness workflow generation', () => {
     }, 120_000)
 
     test('generates build and harness workflows for the monorepo project layout', async () => {
-        const project = await createProject('monoharness', true)
+        const project = await createProject('monoharness', true, 'module')
         const packagePath = `packages/react-native-${project.packageName}`
 
         await assertWorkflowFiles(project.rootDir)
@@ -230,5 +254,15 @@ describe('React Native Harness workflow generation', () => {
             iosBuildWorkflowPath: `${packagePath}/ios/**`,
             rootDir: project.rootDir,
         })
+    }, 120_000)
+
+    test('generates stable harness test queries for native views', async () => {
+        const project = await createProject('viewharness', false, 'view')
+
+        await assertHarnessViewTestContent(
+            project.rootDir,
+            'viewharness',
+            'viewharness'
+        )
     }, 120_000)
 })
