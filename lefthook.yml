@@ -11,4 +11,4 @@ pre-commit:
                 - '*.json'
                 - '*.ts'
                 - '*.tsx'
-            run: bun biome check --write {staged_files}
+            run: bun oxfmt --write {staged_files} && bun oxlint --fix --no-error-on-unmatched-pattern {staged_files}

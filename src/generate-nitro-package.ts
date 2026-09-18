@@ -263,7 +263,7 @@ export class NitroModuleFactory {
             const { stdout } = await execAsync(`npm view ${pkg} version`)
             const v = stdout?.toString().trim()
             return v?.length ? v : null
-        } catch (_) {
+        } catch {
             try {
                 const { stdout } = await execAsync(`pnpm view ${pkg} version`)
                 const v = stdout?.toString().trim()
