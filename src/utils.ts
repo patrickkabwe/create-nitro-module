@@ -1,7 +1,7 @@
-import kleur from 'kleur'
 import { execSync } from 'node:child_process'
 import { access, cp, mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import kleur from 'kleur'
 import {
     type GenerateModuleConfig,
     type PlatformLangMap,

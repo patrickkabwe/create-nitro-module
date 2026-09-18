@@ -122,7 +122,15 @@ describe('native linter and formatter scripts', () => {
 
         expect(
             Object.keys(scripts).filter(
-                name => name.startsWith('lint:') || name.startsWith('format:')
+                name =>
+                    name.startsWith('lint:swift') ||
+                    name.startsWith('lint:kotlin') ||
+                    name.startsWith('lint:cpp') ||
+                    name.startsWith('format:swift') ||
+                    name.startsWith('format:kotlin') ||
+                    name.startsWith('format:cpp') ||
+                    name === 'lint:native' ||
+                    name === 'format:native'
             )
         ).toEqual([])
     }, 120_000)

@@ -1,11 +1,10 @@
-import kleur from 'kleur'
 import { exec } from 'node:child_process'
 import { readFile, rename, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import util from 'node:util'
+import kleur from 'kleur'
 import templatePackageJson from '../assets/template/package.json'
-import { androidSettingsGradleCode } from './code-snippets/code.kotlin'
 import {
     appExampleCode,
     babelConfig,
@@ -17,6 +16,7 @@ import {
     harnessWorkflowCode,
     metroConfig,
 } from './code-snippets/code.js'
+import { androidSettingsGradleCode } from './code-snippets/code.kotlin'
 import {
     ANDROID_CXX_LIB_NAME_TAG,
     ANDROID_NAME_SPACE_TAG,
@@ -208,12 +208,12 @@ export class NitroModuleFactory {
             }
             await this.setupWorkflows()
             await this.gitInit()
-            this.config.spinner.stop(kleur.cyan(messages.generating + 'Done'))
+            this.config.spinner.stop(kleur.cyan(`${messages.generating}Done`))
         }
         if (!this.config.skipInstall && !this.config.skipExample) {
             this.config.spinner.start(messages.installing)
             await this.installDependenciesAndRunCodegen()
-            this.config.spinner.stop(kleur.cyan(messages.installing + 'Done'))
+            this.config.spinner.stop(kleur.cyan(`${messages.installing}Done`))
         }
     }
 

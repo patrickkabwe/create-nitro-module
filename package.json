@@ -12,8 +12,9 @@
         "typecheck": "tsc --noEmit",
         "prerelease": "rm -rf ./lib/assets",
         "release": "bun run build && bun semantic-release",
-        "lint": "eslint --fix ",
-        "format": "prettier --write ",
+        "lint": "biome check .",
+        "lint:fix": "biome check --write .",
+        "format": "biome format --write .",
         "commitlint": "commitlint --edit"
     },
     "files": [
@@ -60,29 +61,17 @@
         "kleur": "^4.1.5",
         "tsup": "^8.3.5"
     },
-    "prettier": {
-        "semi": false,
-        "singleQuote": true,
-        "trailingComma": "es5",
-        "tabWidth": 4,
-        "arrowParens": "avoid"
-    },
     "devDependencies": {
+        "@biomejs/biome": "^2.5.14",
         "@commitlint/cli": "^21.2.0",
         "@commitlint/config-conventional": "^21.2.0",
-        "@eslint/js": "^10.0.1",
         "@semantic-release/changelog": "^6.0.3",
         "@semantic-release/git": "^10.0.1",
         "@types/node": "^26.1.1",
-        "@typescript-eslint/eslint-plugin": "^8.63.0",
-        "@typescript-eslint/parser": "^8.63.0",
         "conventional-changelog-conventionalcommits": "^9.3.1",
-        "eslint": "^10.6.0",
-        "eslint-plugin-n": "^18.2.1",
         "lefthook": "^2.1.9",
-        "prettier": "^3.9.4",
         "semantic-release": "^25.0.5",
-        "typescript": "^7.0.2"
+        "typescript": "6.0.3"
     },
     "engines": {
         "node": ">=24.3.0"

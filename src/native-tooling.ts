@@ -5,7 +5,9 @@ import {
 } from './types'
 
 export type NativeToolingLang =
-    SupportedLang.SWIFT | SupportedLang.KOTLIN | SupportedLang.CPP
+    | SupportedLang.SWIFT
+    | SupportedLang.KOTLIN
+    | SupportedLang.CPP
 
 type NativeToolingDefinition = {
     label: string

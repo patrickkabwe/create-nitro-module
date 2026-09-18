@@ -1,5 +1,5 @@
-import { toPascalCase } from '../utils'
 import { Nitro, type PackageManager, SupportedPlatform } from '../types'
+import { toPascalCase } from '../utils'
 
 export const appExampleCode = (
     moduleName: string,
