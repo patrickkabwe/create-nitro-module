@@ -26,8 +26,6 @@
   "exclude": [
     "**/node_modules",
     "**/lib",
-    "**/.eslintrc.js",
-    "**/.prettierrc.js",
     "**/jest.config.js",
     "**/babel.config.js",
     "**/metro.config.js",

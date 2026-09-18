@@ -1,12 +1,12 @@
-import { cp, rm, writeFile } from 'fs/promises'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { cp, rm, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { postScript } from '../code-snippets/code.js'
 import {
     androidManifestCode,
     getKotlinCode,
     getKotlinViewCode,
 } from '../code-snippets/code.kotlin'
-import { postScript } from '../code-snippets/code.js'
 import { ANDROID_CXX_LIB_NAME_TAG, ANDROID_NAME_SPACE_TAG } from '../constants'
 import {
     type FileGenerator,
@@ -187,7 +187,7 @@ export class AndroidFileGenerator implements FileGenerator {
         const isHybridView = config.packageType === Nitro.View
         const androidPackageFilePath = path.join(
             config.cwd,
-            prefixPath + `/com/${ANDROID_NAME_SPACE_TAG}`,
+            `${prefixPath}/com/${ANDROID_NAME_SPACE_TAG}`,
             isHybridView
                 ? `${ANDROID_CXX_LIB_NAME_TAG}Package_view.kt`
                 : `${ANDROID_CXX_LIB_NAME_TAG}Package.kt`

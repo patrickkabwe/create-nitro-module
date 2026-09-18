@@ -1,14 +1,14 @@
-import { cp } from 'fs/promises'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { cp } from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { getSwiftCode, getSwiftViewCode } from '../code-snippets/code.swift'
 import { IOS_MODULE_NAME_TAG } from '../constants'
 import {
+    type FileGenerator,
+    type GenerateModuleConfig,
     Nitro,
     SupportedLang,
     SupportedPlatform,
-    type FileGenerator,
-    type GenerateModuleConfig,
 } from '../types'
 import {
     createFolder,

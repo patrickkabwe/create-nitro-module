@@ -1,5 +1,5 @@
 import kleur from 'kleur'
-import { SupportedPlatform, type InstructionsParams } from './types'
+import { type InstructionsParams, SupportedPlatform } from './types'
 
 export const SUPPORTED_PLATFORMS = ['ios', 'android']
 

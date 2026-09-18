@@ -1,7 +1,7 @@
+import { mkdirSync, rmSync } from 'node:fs'
+import path from 'node:path'
 import * as p from '@clack/prompts'
-import { mkdirSync, rmSync } from 'fs'
 import kleur from 'kleur'
-import path from 'path'
 import projectPackageJsonFile from '../../package.json'
 import { generateInstructions, messages } from '../constants'
 import { NitroModuleFactory } from '../generate-nitro-package'
@@ -575,7 +575,7 @@ const getUserAnswers = async (
                 }
                 const packageNameConfirmation = await p.confirm({
                     message: kleur.cyan(
-                        `Your package name will be called: ${kleur.bold(kleur.green('react-native-' + packageName.toLowerCase()))} would you like to continue?`
+                        `Your package name will be called: ${kleur.bold(kleur.green(`react-native-${packageName.toLowerCase()}`))} would you like to continue?`
                     ),
                 })
                 if (!packageNameConfirmation) {

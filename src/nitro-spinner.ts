@@ -12,7 +12,6 @@ export class NitroSpinner {
     private readonly colors: Record<string, string>
     private readonly symbols: Record<LogLevel, string>
     private currentFrame: number
-    private isSpinning: boolean
     private spinnerInterval: NodeJS.Timeout | null
     private readonly stdout: NodeJS.WriteStream
     public text: string = ''
@@ -45,7 +44,6 @@ export class NitroSpinner {
             error: '✖',
         }
         this.currentFrame = 0
-        this.isSpinning = false
         this.spinnerInterval = null
         this.stdout = process.stdout
         this.text = ''
@@ -69,7 +67,6 @@ export class NitroSpinner {
     public start(text: string): this {
         this.stopSpinner()
         this.text = text
-        this.isSpinning = true
 
         this.spinnerInterval = setInterval(() => {
             const frame = this.frames[this.currentFrame]
@@ -94,7 +91,6 @@ export class NitroSpinner {
         this.write(
             `${this.colors.green}${this.symbols.success}${this.colors.reset} ${text ?? this.text}\n`
         )
-        this.isSpinning = false
         this.text = ''
         return this
     }
@@ -104,7 +100,6 @@ export class NitroSpinner {
         this.write(
             `${this.colors.yellow}${this.symbols.warning}${this.colors.reset} ${text}\n`
         )
-        this.isSpinning = false
         this.text = ''
         return this
     }
@@ -114,7 +109,6 @@ export class NitroSpinner {
         this.write(
             `${this.colors.red}${this.symbols.error}${this.colors.reset} ${text}\n`
         )
-        this.isSpinning = false
         this.text = ''
         return this
     }
@@ -124,7 +118,6 @@ export class NitroSpinner {
         this.write(
             `${this.colors.cyan}${this.symbols.info}${this.colors.reset} ${text}\n`
         )
-        this.isSpinning = false
         this.text = ''
         return this
     }
@@ -139,7 +132,6 @@ export class NitroSpinner {
         }
 
         this.stopSpinner()
-        this.isSpinning = false
         this.text = ''
         return this
     }
