@@ -14,9 +14,9 @@ export const getSwiftCode = (
 import Foundation
 
 class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
-    func ${funcName}(num1: Double, num2: Double) throws -> Double {
-        return num1 + num2
-    }
+  func ${funcName}(num1: Double, num2: Double) throws -> Double {
+    return num1 + num2
+  }
 }
 `
 
@@ -30,7 +30,7 @@ export const getSwiftViewCode = (moduleName: string, userName: string) => `//
 import Foundation
 import UIKit
 
-class Hybrid${toPascalCase(moduleName)} : Hybrid${toPascalCase(moduleName)}Spec {
+class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
   // UIView
   var view: UIView = UIView()
 

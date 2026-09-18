@@ -1,4 +1,8 @@
 import kleur from 'kleur'
+import {
+    getNativeToolingPrerequisites,
+    type NativeToolingLang,
+} from './native-tooling'
 import { SupportedPlatform, type InstructionsParams } from './types'
 
 export const SUPPORTED_PLATFORMS = ['ios', 'android']
@@ -54,7 +58,33 @@ const getHarnessInstructions = (
     return `   ${kleur.green('cd example')}\n   ${kleur.green(`${pm} run test:harness`)}`
 }
 
-export const NITRO_GRAPHIC = `   
+const getNativeToolingInstructions = (
+    nativeTooling: NativeToolingLang[],
+    pm: string
+) => {
+    if (nativeTooling.length === 0) {
+        return ''
+    }
+
+    const prerequisites = getNativeToolingPrerequisites(nativeTooling)
+
+    return `\n\nLint and format your native code:
+
+   ${kleur.green(`${pm} run lint:native`)}      ${kleur.dim('# Check every selected native toolchain')}
+   ${kleur.green(`${pm} run format:native`)}    ${kleur.dim('# Auto-fix formatting')}
+${
+    prerequisites.length === 0
+        ? ''
+        : `\n${prerequisites
+              .map(
+                  ({ label, prerequisite }) =>
+                      `   ${kleur.dim(`• ${label} needs ${prerequisite}`)}`
+              )
+              .join('\n')}`
+}`
+}
+
+export const NITRO_GRAPHIC = `
    ┌─────┐
    │ ⏲️  |
    │╭───╮│
@@ -71,6 +101,7 @@ export const generateInstructions = ({
     includeHarness,
     monorepo,
     modulePath,
+    nativeTooling,
     packagePath,
     pm,
     platforms,
@@ -117,7 +148,7 @@ ${
         : `\n\nRun your React Native Harness tests:
 
 ${getHarnessInstructions(monorepo, pm, platforms)}`
-}
+}${getNativeToolingInstructions(nativeTooling, pm)}
 
 ${kleur.yellow('Pro Tips:')}
 ${kleur.dim('• iOS:')} Open ${kleur.green('example/ios/example.xcworkspace')} in Xcode for native debugging. Make sure to run ${kleur.green(`${pm} pod`)} first in the example directory
