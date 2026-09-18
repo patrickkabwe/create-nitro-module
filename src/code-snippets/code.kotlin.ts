@@ -49,13 +49,18 @@ import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
 @DoNotStrip
 class Hybrid${toPascalCase(moduleName)}(val context: ThemedReactContext): Hybrid${toPascalCase(moduleName)}Spec() {
     // View
-    override val view = View(context)
+    override val view: View = View(context)
 
     // Props
-    override var isRed: Boolean = false
+    private var _isRed = false
+    override var isRed: Boolean
+        get() = _isRed
         set(value) {
-            field = value
-            view.setBackgroundColor(if (value) Color.RED else Color.BLACK)
+            _isRed = value
+            view.setBackgroundColor(
+                if (value) Color.RED
+                else Color.BLACK
+            )
         }
 }
 `
