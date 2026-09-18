@@ -295,7 +295,7 @@ describe('${toPascalCase(moduleName)}', () => {
     }
 
     return `import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { describe, it, expect, render } from 'react-native-harness'
 import { screen } from '@react-native-harness/ui'
 import { ${toPascalCase(moduleName)} } from '${finalModuleName}'
@@ -303,12 +303,11 @@ import { ${toPascalCase(moduleName)} } from '${finalModuleName}'
 describe('${toPascalCase(moduleName)}', () => {
   it('renders the native view', async () => {
     await render(
-      <View collapsable={false} testID="${moduleName}">
-        <${toPascalCase(moduleName)}
-          isRed={true}
-          style={styles.view}
-        />
-      </View>
+      <${toPascalCase(moduleName)}
+        isRed={true}
+        style={styles.view}
+        testID="${moduleName}"
+      />
     )
 
     const view = await screen.findByTestId('${moduleName}')
