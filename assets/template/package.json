@@ -62,7 +62,7 @@
     "react-native": "0.87.1",
     "react-native-builder-bob": "^0.43.0",
     "react-native-nitro-modules": "^0.37.1",
-    "conventional-changelog-conventionalcommits": "^10.2.1",
+    "conventional-changelog-conventionalcommits": "^10.4.0",
     "semantic-release": "^25.0.7",
     "typescript": "^6.0.3"
   },
