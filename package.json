@@ -14,9 +14,10 @@
         "prerelease:dry-run:main": "PRERELEASE_BRANCH=main bun scripts/semantic-release-prerelease.cjs --dry-run --no-ci",
         "prerelease:dry-run:next": "PRERELEASE_BRANCH=next bun scripts/semantic-release-prerelease.cjs --dry-run --no-ci",
         "release": "bun run build && bun semantic-release",
-        "lint": "biome check .",
-        "lint:fix": "biome check --write .",
-        "format": "biome format --write .",
+        "lint": "oxlint",
+        "lint:fix": "oxlint --fix",
+        "format": "oxfmt --write .",
+        "format:check": "oxfmt --check .",
         "commitlint": "commitlint --edit"
     },
     "files": [
@@ -64,7 +65,6 @@
         "tsup": "^8.3.5"
     },
     "devDependencies": {
-        "@biomejs/biome": "^2.5.14",
         "@commitlint/cli": "^21.2.0",
         "@commitlint/config-conventional": "^21.2.0",
         "@semantic-release/changelog": "^6.0.3",
@@ -72,6 +72,8 @@
         "@types/node": "^26.1.1",
         "conventional-changelog-conventionalcommits": "^9.3.1",
         "lefthook": "^2.1.9",
+        "oxfmt": "^0.68.0",
+        "oxlint": "^1.83.0",
         "semantic-release": "^25.0.5",
         "typescript": "6.0.3"
     },
