@@ -57,11 +57,9 @@ class Hybrid${toPascalCase(moduleName)}(
   override val view: View = View(context)
 
   // Props
-  private var _isRed = false
-  override var isRed: Boolean
-    get() = _isRed
+  override var isRed: Boolean = false
     set(value) {
-      _isRed = value
+      field = value
       view.setBackgroundColor(if (value) Color.RED else Color.BLACK)
     }
 }

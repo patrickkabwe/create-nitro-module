@@ -17,12 +17,17 @@ type WorkflowExpectation = {
     readonly rootDir: string
 }
 
+type PackageJson = {
+    readonly devDependencies?: Record<string, string>
+}
+
 const execFileAsync = promisify(execFile)
 const generatedRoots: string[] = []
 
 const createProject = async (
     packageName: string,
-    monorepo: boolean
+    monorepo: boolean,
+    packageType: 'module' | 'view'
 ): Promise<GeneratedProject> => {
     const rootDir = await mkdtemp(path.join(os.tmpdir(), 'nitro-cli-e2e-'))
     generatedRoots.push(rootDir)
@@ -51,6 +56,8 @@ const createProject = async (
         '--include-harness',
         '--skip-install',
         '--ci',
+        '--package-type',
+        packageType,
     ]
 
     if (monorepo) {
@@ -97,15 +104,26 @@ const assertHarnessScripts = async (rootDir: string): Promise<void> => {
     const scripts = examplePackageJson.scripts
 
     expect(scripts?.['test:harness']).toBe('react-native-harness')
-    expect(scripts?.['test:harness:android']).toContain(
-        'chmod +x android/gradlew'
-    )
-    expect(scripts?.['test:harness:android']).toContain(
+    expect(scripts?.['test:harness:android']).toBe(
         'react-native-harness --harnessRunner android'
     )
-    expect(scripts?.['test:harness:ios']).toContain(
+    expect(scripts?.['test:harness:ios']).toBe(
         'react-native-harness --harnessRunner ios'
     )
+}
+
+const assertTemplateDependencyVersions = async (
+    rootDir: string,
+    packagePath: string
+): Promise<void> => {
+    const packageJson = JSON.parse(
+        await readText(path.join(rootDir, packagePath, 'package.json'))
+    ) as PackageJson
+    const devDependencies = packageJson.devDependencies
+
+    expect(devDependencies?.nitrogen).toBe('^0.37.1')
+    expect(devDependencies?.['react-native']).toBe('0.87.1')
+    expect(devDependencies?.['react-native-nitro-modules']).toBe('^0.37.1')
 }
 
 const assertHarnessWorkflowContent = async (
@@ -155,6 +173,36 @@ const assertHarnessWorkflowContent = async (
     expect(iosBuildWorkflow).not.toContain('$$exampleApp$$')
 }
 
+const assertHarnessConfigContent = async (rootDir: string): Promise<void> => {
+    const harnessConfig = await readText(
+        path.join(rootDir, 'example', 'rn-harness.config.mjs')
+    )
+
+    expect(harnessConfig).toContain('platformReadyTimeout: 600000')
+    expect(harnessConfig).toContain('bridgeTimeout: 300000')
+}
+
+const assertHarnessViewTestContent = async (
+    rootDir: string,
+    harnessFileName: string,
+    testID: string
+): Promise<void> => {
+    const harnessTest = await readText(
+        path.join(
+            rootDir,
+            'example',
+            '__tests__',
+            `${harnessFileName}.harness.tsx`
+        )
+    )
+
+    expect(harnessTest).toContain(
+        "import { StyleSheet, View } from 'react-native'"
+    )
+    expect(harnessTest).toContain('collapsable={false}')
+    expect(harnessTest).toContain(`testID="${testID}"`)
+}
+
 afterAll(async () => {
     await Promise.all(
         generatedRoots.map(rootDir =>
@@ -165,10 +213,12 @@ afterAll(async () => {
 
 describe('React Native Harness workflow generation', () => {
     test('generates build and harness workflows for the default project layout', async () => {
-        const project = await createProject('rootharness', false)
+        const project = await createProject('rootharness', false, 'module')
 
         await assertWorkflowFiles(project.rootDir)
         await assertHarnessScripts(project.rootDir)
+        await assertTemplateDependencyVersions(project.rootDir, '.')
+        await assertHarnessConfigContent(project.rootDir)
         await assertHarnessWorkflowContent({
             androidBuildWorkflowPath: 'android/**',
             harnessWorkflowPath: 'src/**',
@@ -178,16 +228,28 @@ describe('React Native Harness workflow generation', () => {
     }, 120_000)
 
     test('generates build and harness workflows for the monorepo project layout', async () => {
-        const project = await createProject('monoharness', true)
+        const project = await createProject('monoharness', true, 'module')
         const packagePath = `packages/react-native-${project.packageName}`
 
         await assertWorkflowFiles(project.rootDir)
         await assertHarnessScripts(project.rootDir)
+        await assertTemplateDependencyVersions(project.rootDir, packagePath)
+        await assertHarnessConfigContent(project.rootDir)
         await assertHarnessWorkflowContent({
             androidBuildWorkflowPath: `${packagePath}/android/**`,
             harnessWorkflowPath: `${packagePath}/src/**`,
             iosBuildWorkflowPath: `${packagePath}/ios/**`,
             rootDir: project.rootDir,
         })
+    }, 120_000)
+
+    test('generates stable harness test queries for native views', async () => {
+        const project = await createProject('viewharness', false, 'view')
+
+        await assertHarnessViewTestContent(
+            project.rootDir,
+            'viewharness',
+            'viewharness'
+        )
     }, 120_000)
 })
