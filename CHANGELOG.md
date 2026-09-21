@@ -1,3 +1,37 @@
+## [3.8.0-next.1](https://github.com/patrickkabwe/create-nitro-module/compare/v3.7.1...v3.8.0-next.1) (2026-09-21)
+
+### ✨ Features
+
+* add native linter and formatter tooling ([670db55](https://github.com/patrickkabwe/create-nitro-module/commit/670db559d4c99b47fcc264ba89d3d4b2374d0216))
+
+### 🐛 Bug Fixes
+
+* **ci:** calculate prerelease versions in dry runs ([f88e85f](https://github.com/patrickkabwe/create-nitro-module/commit/f88e85f3aa6c0fafd9a99b187b2ac979ef3f95e0))
+* hide release commits from prerelease notes ([530e2bf](https://github.com/patrickkabwe/create-nitro-module/commit/530e2bff803539b035317b7f5c7e550a79e178fa))
+* include build commits in release notes ([bde0589](https://github.com/patrickkabwe/create-nitro-module/commit/bde0589bff8a5995618f520ae4d267f9d23c73f3))
+* pin TypeScript to supported ESLint parser range ([d7b1106](https://github.com/patrickkabwe/create-nitro-module/commit/d7b110684b28ef9213dba8e7123adb9583b08357))
+* preserve github actions env for prerelease provenance ([3771809](https://github.com/patrickkabwe/create-nitro-module/commit/37718096ab1837ae67cb448b65f03a235cf630a4))
+* simplify generated harness scripts ([fb73a1c](https://github.com/patrickkabwe/create-nitro-module/commit/fb73a1c012ff9b7182c7fb9d6013c09fadf22c3d))
+* stabilize generated view harness query ([ad55fb3](https://github.com/patrickkabwe/create-nitro-module/commit/ad55fb3adff1463da7e0ef240d2bbb3b5882925c))
+* update nitro template deps for react native 0.87 ([a47adcd](https://github.com/patrickkabwe/create-nitro-module/commit/a47adcd249ca671923ed872a5a690912df51209d))
+
+### 🛠️ Other changes
+
+* **ci:** add manual prerelease workflow ([d78b41c](https://github.com/patrickkabwe/create-nitro-module/commit/d78b41c5681bea8b621a2cc1eeca9ad781fbd88f))
+* **deps-dev:** bump @typescript-eslint/parser from 8.63.0 to 8.64.0 ([04c5293](https://github.com/patrickkabwe/create-nitro-module/commit/04c529367eb40984170f11ae079ac3021f725d28))
+* **deps-dev:** bump eslint-plugin-n from 18.2.1 to 18.2.2 ([07c8842](https://github.com/patrickkabwe/create-nitro-module/commit/07c884214ee31cc9c22115a0d970edfdc19be9f9))
+* **deps-dev:** bump react-native ([42e4e19](https://github.com/patrickkabwe/create-nitro-module/commit/42e4e1919f7c8c42711c5957599467b72b13f484))
+* **deps-dev:** bump react-native-builder-bob in /assets/template ([7ab6c66](https://github.com/patrickkabwe/create-nitro-module/commit/7ab6c6603b112d8e53f1fc3a9f5a52703e324bdc))
+* **deps-dev:** bump the nitro group across 1 directory with 2 updates ([b644cfe](https://github.com/patrickkabwe/create-nitro-module/commit/b644cfe8761ad583f141a039d63192fff53aae66))
+* **deps-dev:** bump typescript from 6.0.3 to 7.0.2 ([b714df0](https://github.com/patrickkabwe/create-nitro-module/commit/b714df0adc6b6cd370b28b50104d4894754d2608))
+* **deps:** bump @clack/prompts from 1.7.0 to 1.8.1 ([ac65755](https://github.com/patrickkabwe/create-nitro-module/commit/ac657554ff712fcf81b6591cb9a3f30af45bac41))
+* **deps:** bump actions/setup-java from 5 to 6 ([52bd84c](https://github.com/patrickkabwe/create-nitro-module/commit/52bd84cfff27cf15e7c78a737d4452592382a925))
+* **deps:** bump actions/setup-node from 6 to 7 ([46645a0](https://github.com/patrickkabwe/create-nitro-module/commit/46645a0ce50d3c03dd1f8b11839dc6a928b29942))
+* **deps:** bump callstackincubator/react-native-harness ([e29e468](https://github.com/patrickkabwe/create-nitro-module/commit/e29e468074548d4df69960285c8c2ad6a1f601e2))
+* merge main into native tooling branch ([66775b1](https://github.com/patrickkabwe/create-nitro-module/commit/66775b1ac8f7c760ac4ad82cec0d0ce5a2cdb15b))
+* replace biome with oxlint ([ed695f1](https://github.com/patrickkabwe/create-nitro-module/commit/ed695f11659bf355c0503bf7084362e129f8f620))
+* replace eslint and prettier with Biome ([3f55240](https://github.com/patrickkabwe/create-nitro-module/commit/3f5524084b840afe478b37ee02c88574999da955))
+
 ## [3.8.0-next.2](https://github.com/patrickkabwe/create-nitro-module/compare/v3.8.0-next.1...v3.8.0-next.2) (2026-09-21)
 
 ### 🐛 Bug Fixes
