@@ -106,7 +106,7 @@ jobs:
               run: |
                   # The workflow ref can differ from the selected release branch.
                   # Let semantic-release read the checked-out git branch instead.
-                  env -u GITHUB_ACTIONS \
+                  env GITHUB_REF="refs/heads/$PRERELEASE_BRANCH" \
                     bun "$PRERELEASE_RUNNER" --no-ci
 
             - name: Dry-run pre-release
@@ -122,5 +122,5 @@ jobs:
               run: |
                   # The workflow ref can differ from the selected release branch.
                   # Let semantic-release read the checked-out git branch instead.
-                  env -u GITHUB_ACTIONS \
+                  env GITHUB_REF="refs/heads/$PRERELEASE_BRANCH" \
                     bun "$PRERELEASE_RUNNER" --dry-run --no-ci
