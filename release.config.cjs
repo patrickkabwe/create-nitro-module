@@ -5,6 +5,7 @@ const rules = [
     { type: 'refactor', release: 'patch', title: '🔄 Code Refactors' },
     { type: 'docs', release: 'patch', title: '📚 Documentation' },
     { type: 'chore', release: 'patch', title: '🛠️ Other changes' },
+    { type: 'build', release: 'patch', title: '🛠️ Other changes' },
 ]
 
 const sortMap = Object.fromEntries(
