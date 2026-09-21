@@ -11,6 +11,15 @@ const sortMap = Object.fromEntries(
     rules.map((rule, index) => [rule.title, index])
 )
 
+const releaseNoteTypes = [
+    { type: 'chore', scope: 'release', hidden: true },
+].concat(
+    rules.map(({ type, title }) => ({
+        type,
+        section: title,
+    }))
+)
+
 /**
  * @type {import('semantic-release').GlobalConfig}
  */
@@ -32,10 +41,7 @@ module.exports = {
             {
                 preset: 'conventionalcommits',
                 presetConfig: {
-                    types: rules.map(({ type, title }) => ({
-                        type,
-                        section: title,
-                    })),
+                    types: releaseNoteTypes,
                 },
                 writerOpts: {
                     commitGroupsSort: (a, z) =>
