@@ -1,3 +1,9 @@
+## [3.8.0-next.2](https://github.com/patrickkabwe/create-nitro-module/compare/v3.8.0-next.1...v3.8.0-next.2) (2026-09-21)
+
+### 🐛 Bug Fixes
+
+* preserve github actions env for prerelease provenance ([3771809](https://github.com/patrickkabwe/create-nitro-module/commit/37718096ab1837ae67cb448b65f03a235cf630a4))
+
 ## [3.8.0-next.1](https://github.com/patrickkabwe/create-nitro-module/compare/v3.7.1...v3.8.0-next.1) (2026-09-21)
 
 ### ✨ Features
