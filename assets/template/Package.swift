@@ -7,4 +7,9 @@ let package = Package(
   platforms: [.iOS(.v16)]
 )
 
-addNitrogenTargets(to: package, swiftSources: ["apple"])
+addNitrogenTargets(
+  to: package,
+  swiftSources: ["apple"],
+  cxxSources: $$cxxSources$$,
+  cxxSettings: [.headerSearchPath("nitrogen/generated/ios/c++/include")]
+)

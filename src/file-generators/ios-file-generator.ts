@@ -33,6 +33,11 @@ export class IOSFileGenerator implements FileGenerator {
         )
         const replacements: Record<string, string> = {
             [IOS_MODULE_NAME_TAG]: toPascalCase(config.packageName),
+            $$cxxSources$$:
+                config.platformLangs[SupportedPlatform.IOS] ===
+                SupportedLang.CPP
+                    ? '["cpp"]'
+                    : '[]',
         }
         await createModuleFile(
             config.cwd,

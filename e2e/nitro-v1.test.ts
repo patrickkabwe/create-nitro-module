@@ -304,10 +304,26 @@ describe('Nitro V1 templates', () => {
                     'utf8'
                 )
                 expect(manifest).toContain('swift-tools-version: 6.4')
+                expect(manifest).toContain('swiftSources: ["apple"]')
                 expect(manifest).toContain(
-                    'addNitrogenTargets(to: package, swiftSources: ["apple"])'
+                    scenario.langs.startsWith('c++')
+                        ? 'cxxSources: ["cpp"]'
+                        : 'cxxSources: []'
+                )
+                expect(manifest).toContain(
+                    '.headerSearchPath("nitrogen/generated/ios/c++/include")'
                 )
                 expect(packageJson.files).toContain('apple/**/*.swift')
+                if (scenario.packageType === 'view') {
+                    const swiftView: string = await readFile(
+                        path.join(packageDir, 'apple/HybridSample.swift'),
+                        'utf8'
+                    )
+                    expect(swiftView).toContain('@MainActor')
+                    expect(swiftView).toContain(
+                        '@preconcurrency HybridSampleSpec'
+                    )
+                }
                 await expect(
                     stat(path.join(packageDir, 'ios'))
                 ).rejects.toMatchObject({

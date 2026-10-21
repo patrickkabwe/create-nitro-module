@@ -28,7 +28,8 @@ export const getSwiftViewCode = (moduleName: string, userName: string) => `//
 import NitroModules
 import UIKit
 
-final class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
+@MainActor
+final class Hybrid${toPascalCase(moduleName)}: @preconcurrency Hybrid${toPascalCase(moduleName)}Spec {
   // UIView
   var view: UIView = UIView()
 
