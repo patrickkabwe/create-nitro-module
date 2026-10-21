@@ -43,8 +43,8 @@ export const NATIVE_TOOLING: Record<
             // SwiftLint/SwiftFormat which would require Homebrew.
             // --strict promotes findings to a non-zero exit; without it
             // `swift format lint` only prints warnings and always exits 0.
-            'lint:swift': 'swift format lint --strict --recursive ios',
-            'format:swift': 'swift format --in-place --recursive ios',
+            'lint:swift': 'swift format lint --strict --recursive apple',
+            'format:swift': 'swift format --in-place --recursive apple',
         },
         devDependencies: {},
     },

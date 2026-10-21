@@ -1,4 +1,4 @@
-import { replaceHyphen, toPascalCase } from '../utils'
+import { toPascalCase } from '../utils'
 
 export const androidManifestCode = `<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 </manifest>
@@ -10,10 +10,11 @@ export const getKotlinCode = (
     funcName: string
 ) => `package ${packageName}
 
-import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
-    moduleName
-)}Spec
+import androidx.annotation.Keep
+import com.facebook.proguard.annotations.DoNotStrip
 
+@Keep
+@DoNotStrip
 class Hybrid${toPascalCase(moduleName)} : Hybrid${toPascalCase(moduleName)}Spec() {
   override fun ${funcName}(
     num1: Double,
@@ -44,9 +45,6 @@ import android.view.View
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
 import com.facebook.react.uimanager.ThemedReactContext
-import com.margelo.nitro.${replaceHyphen(moduleName)}.Hybrid${toPascalCase(
-    moduleName
-)}Spec
 
 @Keep
 @DoNotStrip

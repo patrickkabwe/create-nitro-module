@@ -5,7 +5,7 @@ import {
     nitroViewSpecCode,
 } from '../code-snippets/code.js'
 import type { FileGenerator, GenerateModuleConfig } from '../types'
-import { Nitro, SupportedLang } from '../types'
+import { Nitro } from '../types'
 import { createFolder, createModuleFile } from '../utils'
 
 export class JSFileGenerator implements FileGenerator {
@@ -14,33 +14,23 @@ export class JSFileGenerator implements FileGenerator {
 
         await createFolder(config.cwd, nitroSpecFolder)
 
-        const platformLang = Object.entries(config.platformLangs)
-            .map(
-                ([platform, lang]) =>
-                    `${platform}: '${lang === SupportedLang.CPP ? 'c++' : lang}'`
-            )
-            .join(', ')
-
         switch (config.packageType) {
             case Nitro.View:
-                await this.generateNitroViewFiles(config, platformLang)
+                await this.generateNitroViewFiles(config)
                 break
             case Nitro.Module:
-                await this.generateNitroModuleFiles(config, platformLang)
+                await this.generateNitroModuleFiles(config)
                 break
             default:
                 throw new Error('Invalid module type')
         }
     }
 
-    async generateNitroViewFiles(
-        config: GenerateModuleConfig,
-        platformLang: string
-    ): Promise<void> {
+    async generateNitroViewFiles(config: GenerateModuleConfig): Promise<void> {
         await createModuleFile(
             config.cwd,
             `/src/specs/${config.packageName}.nitro.ts`,
-            nitroViewSpecCode(config.packageName, platformLang)
+            nitroViewSpecCode(config.packageName, config.platformLangs)
         )
         await createModuleFile(
             config.cwd,
@@ -50,15 +40,14 @@ export class JSFileGenerator implements FileGenerator {
     }
 
     async generateNitroModuleFiles(
-        config: GenerateModuleConfig,
-        platformLang: string
+        config: GenerateModuleConfig
     ): Promise<void> {
         await createModuleFile(
             config.cwd,
             `/src/specs/${config.packageName}.nitro.ts`,
             nitroModuleSpecCode(
                 config.packageName,
-                platformLang,
+                config.platformLangs,
                 `${config.funcName}`
             )
         )

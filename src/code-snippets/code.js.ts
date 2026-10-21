@@ -1,4 +1,10 @@
-import { Nitro, type PackageManager, SupportedPlatform } from '../types'
+import {
+    Nitro,
+    type PackageManager,
+    type PlatformLangMap,
+    SupportedLang,
+    SupportedPlatform,
+} from '../types'
 import { toPascalCase } from '../utils'
 
 export const appExampleCode = (
@@ -44,72 +50,79 @@ const styles = StyleSheet.create({
 
 export default App;`
 
+const platformDecoratorImports = (platformLangs: PlatformLangMap): string =>
+    Object.keys(platformLangs)
+        .map(platform =>
+            platform === SupportedPlatform.IOS ? 'iOS' : 'Android'
+        )
+        .join(', ')
+
+const platformDecorators = (
+    moduleName: string,
+    platformLangs: PlatformLangMap
+): string =>
+    Object.entries(platformLangs)
+        .map(([platform, language]) => {
+            const decorator: string =
+                platform === SupportedPlatform.IOS ? 'iOS' : 'Android'
+            const className: string = `Hybrid${toPascalCase(moduleName)}`
+            const include: string =
+                language === SupportedLang.CPP
+                    ? `, include: '"${className}.hpp"'`
+                    : ''
+            return `@${decorator}({
+  language: '${language}',
+  implementation: { className: '${className}'${include} },
+})`
+        })
+        .join('\n')
+
 export const nitroModuleSpecCode = (
     moduleName: string,
-    platformLang: string,
+    platformLangs: PlatformLangMap,
     funcName: string
-) => `import type { HybridObject } from 'react-native-nitro-modules'
+): string => `import { ${platformDecoratorImports(platformLangs)}, type HybridObject } from 'nitro-core'
 
-export interface ${toPascalCase(
-    moduleName
-)} extends HybridObject<{ ${platformLang} }> {
+${platformDecorators(moduleName, platformLangs)}
+export declare class ${toPascalCase(moduleName)} extends HybridObject {
+  constructor()
+
   ${funcName}(num1: number, num2: number): number
-}`
+}
+export * from '#nitro/${toPascalCase(moduleName)}'
+`
 
 export const nitroViewSpecCode = (
     moduleName: string,
-    platformLang: string
-) => `import type {
-  HybridView,
-  HybridViewProps,
-  HybridViewMethods,
-} from 'react-native-nitro-modules'
+    platformLangs: PlatformLangMap
+): string => `import { ${platformDecoratorImports(platformLangs)}, type HybridView } from 'react-native-nitro-modules'
 
-export interface ${toPascalCase(moduleName)}Props extends HybridViewProps {
-   isRed: boolean
+${platformDecorators(moduleName, platformLangs)}
+export declare class ${toPascalCase(moduleName)} extends HybridView {
+  isRed: boolean
 }
-
-export interface ${toPascalCase(moduleName)}Methods extends HybridViewMethods {}
-
-export type ${toPascalCase(moduleName)} = HybridView<${toPascalCase(moduleName)}Props, ${toPascalCase(moduleName)}Methods, { ${platformLang} }>`
+export * from '#nitro/${toPascalCase(moduleName)}'
+`
 
 // Nitro Module index.ts code
 export const nitroModuleCode = (
     moduleName: string
-) => `import { NitroModules } from 'react-native-nitro-modules'
-import type { ${toPascalCase(moduleName)} as ${toPascalCase(
-    moduleName
-)}Spec } from './specs/${moduleName}.nitro'
+): string => `import { ${toPascalCase(moduleName)} as ${toPascalCase(moduleName)}Hybrid } from './specs/${moduleName}.nitro'
 
-export const ${toPascalCase(moduleName)} =
-  NitroModules.createHybridObject<${toPascalCase(
-      moduleName
-  )}Spec>('${toPascalCase(moduleName)}')`
+export const ${toPascalCase(moduleName)} = new ${toPascalCase(moduleName)}Hybrid()
+`
 
 // Nitro View index.ts code
 export const nitroViewCode = (
     moduleName: string
-) => `import { getHostComponent, type HybridRef } from 'react-native-nitro-modules'
-import ${toPascalCase(moduleName)}Config from '../nitrogen/generated/shared/json/${toPascalCase(moduleName)}Config.json'
-import type {
-  ${toPascalCase(moduleName)}Props,
-  ${toPascalCase(moduleName)}Methods,
-} from './specs/${moduleName}.nitro'
-
-
-export const ${toPascalCase(moduleName)} = getHostComponent<${toPascalCase(moduleName)}Props, ${toPascalCase(moduleName)}Methods>(
-  '${toPascalCase(moduleName)}',
-  () => ${toPascalCase(moduleName)}Config
-)
-
-export type ${toPascalCase(moduleName)}Ref = HybridRef<${toPascalCase(moduleName)}Props, ${toPascalCase(moduleName)}Methods>
+): string => `export { ${toPascalCase(moduleName)}Component as ${toPascalCase(moduleName)} } from './specs/${moduleName}.nitro'
+export type { ${toPascalCase(moduleName)} as ${toPascalCase(moduleName)}Ref } from './specs/${moduleName}.nitro'
 `
 
-export const metroConfig = (
-    packageRelativePath = '..'
-) => `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+export const metroConfig =
+    (): string => `const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const path = require('path');
-const root = path.resolve(__dirname, '${packageRelativePath}');
+const root = path.resolve(__dirname, '..');
 
 /**
  * Metro configuration
@@ -132,6 +145,7 @@ module.exports = api => {
   api.cache(true);
   return {
     presets: ['module:@react-native/babel-preset'],
+    parserOpts: { plugins: ['decorators'] },
     plugins: [
       [
         'module-resolver',
@@ -155,11 +169,6 @@ const pkg = require('${packageRelativePath}/package.json')
  * @type {import('@react-native-community/cli-types').Config}
  */
 module.exports = {
-    project: {
-        ios: {
-            automaticPodsInstallation: true,
-        },
-    },
     dependencies: {
         [pkg.name]: {
             root: path.join(__dirname, '${packageRelativePath}'),
@@ -177,9 +186,9 @@ export const exampleTsConfig = (
   "exclude": ["**/node_modules", "**/Pods"],
   "compilerOptions": {
     "strict": true,
-    "baseUrl": ".",
+    "resolvePackageJsonImports": true,
     "paths": {
-      "${finalModuleName}": ["${packageRelativePath}/src"]
+      "${finalModuleName}": ["./${packageRelativePath}/src"]
     }
   }
 }`
@@ -236,7 +245,7 @@ export const harnessConfigCode = ({
       name: 'ios',
       device: appleSimulator(
         process.env.DEVICE_MODEL ?? 'iPhone 17 Pro',
-        process.env.IOS_VERSION ?? '26.5'
+        process.env.IOS_VERSION ?? '27.0'
       ),
       bundleId: '${iosBundleId}',
     })`,
@@ -280,12 +289,31 @@ export const harnessTestCode = (
     packageType: Nitro
 ) => {
     if (packageType === Nitro.Module) {
-        return `import { describe, it, expect } from 'react-native-harness'
+        return `import React from 'react'
+import { Text, View } from 'react-native'
+import { describe, it, expect, render } from 'react-native-harness'
+import { screen } from '@react-native-harness/ui'
 import { ${toPascalCase(moduleName)} } from '${finalModuleName}'
 
 describe('${toPascalCase(moduleName)}', () => {
-  it('calls the native implementation', () => {
-    expect(${toPascalCase(moduleName)}.${funcName}(1, 2)).toBe(3)
+  it('calls the native implementation', async () => {
+    const result = ${toPascalCase(moduleName)}.${funcName}(1, 2)
+    expect(result).toBe(3)
+
+    await render(
+      <View
+        collapsable={false}
+        testID="${moduleName}-result"
+        style={{ width: 300, padding: 24, backgroundColor: 'white' }}
+      >
+        <Text style={{ color: 'black', fontSize: 24 }}>1 + 2 = {result}</Text>
+      </View>
+    )
+
+    const view = await screen.findByTestId('${moduleName}-result')
+    const screenshot = await screen.screenshot(view)
+    expect(screenshot).not.toBeNull()
+    await expect(screenshot).toMatchImageSnapshot({ name: '${moduleName}-module-result' })
   })
 })
 `
@@ -311,6 +339,9 @@ describe('${toPascalCase(moduleName)}', () => {
     const view = await screen.findByTestId('${moduleName}')
 
     expect(view.nativeId).toBeDefined()
+    const screenshot = await screen.screenshot(view)
+    expect(screenshot).not.toBeNull()
+    await expect(screenshot).toMatchImageSnapshot({ name: '${moduleName}-native-view' })
   })
 })
 
@@ -335,6 +366,15 @@ const getPackageManagerRunCommand = (
 }
 
 const getPackageManagerSetupStep = (packageManager: PackageManager) => {
+    if (packageManager === 'yarn') {
+        return `      - name: Setup Yarn
+        run: |
+          npm install --prefix "$RUNNER_TEMP/ci-tools" corepack@0.36.0
+          echo "$RUNNER_TEMP/ci-tools/node_modules/.bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/ci-tools/node_modules/.bin/corepack" enable
+`
+    }
+
     if (packageManager !== 'bun') {
         return ''
     }
@@ -343,25 +383,17 @@ const getPackageManagerSetupStep = (packageManager: PackageManager) => {
 `
 }
 
-const getHarnessCodegenBuildStep = (
-    packageManager: PackageManager,
-    monorepo: boolean
-) => {
-    if (!monorepo) {
-        return ''
-    }
-
+const getHarnessCodegenBuildStep = (packageManager: PackageManager): string => {
     return `
       - name: Run codegen and build
-        run: ${getPackageManagerRunCommand(packageManager, 'codegen')} && ${getPackageManagerRunCommand(packageManager, 'build')}
+        run: ${getPackageManagerRunCommand(packageManager, 'codegen')}
 `
 }
 
 const getHarnessJobCode = (
     exampleAppName: string,
     packageManager: PackageManager,
-    platform: SupportedPlatform,
-    monorepo = false
+    platform: SupportedPlatform
 ) => {
     if (platform === SupportedPlatform.ANDROID) {
         return `  test:
@@ -383,7 +415,7 @@ ${getPackageManagerSetupStep(packageManager)}
 
       - name: Install dependencies
         run: ${packageManager} install
-${getHarnessCodegenBuildStep(packageManager, monorepo)}
+${getHarnessCodegenBuildStep(packageManager)}
       - name: Setup JDK 17
         uses: actions/setup-java@v5
         with:
@@ -398,12 +430,27 @@ ${getHarnessCodegenBuildStep(packageManager, monorepo)}
           ./gradlew :app:assembleDebug --no-daemon --build-cache -PreactNativeArchitectures=\${{ env.DEVICE_ARCH }}
 
       - name: Run React Native Harness
-        uses: callstackincubator/react-native-harness@v1.2.0
+        uses: callstackincubator/react-native-harness@v1.6.0
         with:
           app: android/app/build/outputs/apk/debug/app-debug.apk
           runner: android
           projectRoot: example
           packageManager: ${packageManager}
+          harnessArgs: --json --outputFile=harness-results.json
+          uploadVisualTestArtifacts: false
+
+      - name: Upload Harness evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-${platform}
+          path: |
+            example/__tests__/__image_snapshots__/
+            example/harness-results.json
+            example/.harness/crash-reports/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Stop Gradle
         if: always()
@@ -415,7 +462,7 @@ ${getHarnessCodegenBuildStep(packageManager, monorepo)}
 
     return `  test:
     name: Test iOS Harness
-    runs-on: macos-26
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -425,13 +472,13 @@ ${getPackageManagerSetupStep(packageManager)}
 
       - name: Install dependencies
         run: ${packageManager} install
-${getHarnessCodegenBuildStep(packageManager, monorepo)}
+${getHarnessCodegenBuildStep(packageManager)}
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_26.5.app/Contents/Developer
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
-      - name: Install Pods
+      - name: Set up Swift Package Manager
         working-directory: example
-        run: ${getPackageManagerRunCommand(packageManager, 'pod')}
+        run: ${getPackageManagerRunCommand(packageManager, 'spm')}
 
       - name: Build iOS app
         working-directory: example/ios
@@ -439,7 +486,7 @@ ${getHarnessCodegenBuildStep(packageManager, monorepo)}
           set -o pipefail && xcodebuild \
             CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
             -derivedDataPath build -UseModernBuildSystem=YES \
-            -workspace ${exampleAppName}.xcworkspace \
+            -project ${exampleAppName}.xcodeproj \
             -scheme ${exampleAppName} \
             -sdk iphonesimulator \
             -configuration Debug \
@@ -447,19 +494,33 @@ ${getHarnessCodegenBuildStep(packageManager, monorepo)}
             CODE_SIGNING_ALLOWED=NO
 
       - name: Run React Native Harness
-        uses: callstackincubator/react-native-harness@v1.2.0
+        uses: callstackincubator/react-native-harness@v1.6.0
         with:
           app: ios/build/Build/Products/Debug-iphonesimulator/${exampleAppName}.app
           runner: ios
           projectRoot: example
-          packageManager: ${packageManager}`
+          packageManager: ${packageManager}
+          harnessArgs: --json --outputFile=harness-results.json
+          uploadVisualTestArtifacts: false
+
+      - name: Upload Harness evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-${platform}
+          path: |
+            example/__tests__/__image_snapshots__/
+            example/harness-results.json
+            example/.harness/crash-reports/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14`
 }
 
 export const harnessWorkflowCode = (
     exampleAppName: string,
     packageManager: PackageManager,
-    platform: SupportedPlatform,
-    monorepo = false
+    platform: SupportedPlatform
 ) => `name: Run React Native Harness ${platform === SupportedPlatform.ANDROID ? 'Android' : 'iOS'}
 
 permissions:
@@ -473,11 +534,12 @@ on:
       - '.github/workflows/harness-${platform}.yml'
       - 'example/**'
       - 'android/**'
-      - 'ios/**'
+      - 'apple/**'
       - 'cpp/**'
       - 'src/**'
       - 'nitrogen/**'
       - '*.podspec'
+      - 'Package.swift'
       - 'package.json'
       - 'bun.lock'
       - 'pnpm-lock.yaml'
@@ -490,11 +552,12 @@ on:
       - '.github/workflows/harness-${platform}.yml'
       - 'example/**'
       - 'android/**'
-      - 'ios/**'
+      - 'apple/**'
       - 'cpp/**'
       - 'src/**'
       - 'nitrogen/**'
       - '*.podspec'
+      - 'Package.swift'
       - 'package.json'
       - 'bun.lock'
       - 'pnpm-lock.yaml'
@@ -509,74 +572,5 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-${getHarnessJobCode(exampleAppName, packageManager, platform, monorepo)}
+${getHarnessJobCode(exampleAppName, packageManager, platform)}
 `
-
-export const postScript = (moduleName: string, isHybridView: boolean) => `/**
-* @file This script is auto-generated by create-nitro-module and should not be edited.
-*
-* @description This script applies a workaround for Android by modifying the '<ModuleName>OnLoad.cpp' file.
-* It reads the file content and removes the 'margelo/nitro/' string from it. This enables support for custom package names.
-*
-* @module create-nitro-module
-*/
-const path = require('node:path')
-const { writeFile, readFile } = require('node:fs/promises')
-${isHybridView ? "const { readdir } = require('node:fs/promises')" : ''}
-
-${
-    isHybridView
-        ? `
-const updateViewManagerFiles = async (file) => {
-  const viewManagerFile = path.join(
-    process.cwd(),
-    'nitrogen/generated/android/kotlin/com/margelo/nitro/${moduleName.toLowerCase()}/views',
-    file
-  )
-
-  const viewManagerStr = await readFile(viewManagerFile, { encoding: 'utf8' })
-  await writeFile(
-    viewManagerFile,
-    viewManagerStr.replace(
-      /com\\.margelo\\.nitro\\.${moduleName.toLowerCase()}\\.\\*/g,
-      'com.${moduleName.toLowerCase()}.*'
-    )
-  )
-}  
-`
-        : ''
-}
-
-const androidWorkaround = async () => {
- const androidOnLoadFile = path.join(
-   process.cwd(),
-   'nitrogen/generated/android',
-   '${moduleName}OnLoad.cpp'
- )
- ${
-     isHybridView
-         ? `
- const viewManagerDir = await readdir(
-  path.join(
-    process.cwd(),
-    'nitrogen/generated/android/kotlin/com/margelo/nitro/${moduleName.toLowerCase()}/views'
-  )
- )
- const viewManagerFiles = viewManagerDir.filter((file) =>
-   file.endsWith('Manager.kt')
- )
- const res = await Promise.allSettled(
-   viewManagerFiles.map(updateViewManagerFiles)
- )
-
- if (res.some((r) => r.status === 'rejected')) {
-   throw new Error('Error updating view manager files: ' + JSON.stringify(res))
- }
-`
-         : ''
- }
- 
- const str = await readFile(androidOnLoadFile, { encoding: 'utf8' })
- await writeFile(androidOnLoadFile, str.replace(/margelo\\/nitro\\//g, ''))
-}
-androidWorkaround()`

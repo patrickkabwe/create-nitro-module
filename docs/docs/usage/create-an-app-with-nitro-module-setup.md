@@ -29,7 +29,7 @@ MyNitroApp
 │   └── my-nitro-module/  # Example of a nitro module
 │       ├── __tests__/    # Test files
 │       ├── android/      # Android native module implementation
-│       ├── ios/          # iOS native module implementation
+│       ├── apple/        # Apple native module implementation
 │       └── src/          # native module specs
 ├── package.json          # Project configuration
 ├── tsconfig.json         # TypeScript settings
@@ -43,7 +43,7 @@ MyNitroApp
     - **my-nitro-module/**: Example of a nitro module.
         - **\_**_tests_**\_/**: Contains test files.
         - **android/**: Contains the Android native module implementation.
-        - **ios/**: Contains the iOS native module implementation.
+        - **apple/**: Contains the Apple native module implementation.
         - **src/**: Contains the native module specs.
 - **package.json**: Contains the metadata about the project and its dependencies.
 - **tsconfig.json**: Contains the TypeScript configuration.

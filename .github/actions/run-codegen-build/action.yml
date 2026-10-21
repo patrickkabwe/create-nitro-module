@@ -1,5 +1,5 @@
 name: Run codegen and build
-description: Run nitro codegen, build the package, and execute post-script
+description: Generate Nitro V1 bindings and build the package
 inputs:
     pm:
         description: Package manager (bun|yarn|pnpm|npm)
@@ -14,8 +14,14 @@ runs:
           run: |
               set -euo pipefail
               cd "${{ inputs.working-directory }}"
-              bunx nitrogen --logLevel="debug"
-              ${{ inputs.pm }} run build
-              if [ -f post-script.js ]; then
-                node post-script.js
-              fi
+              node --input-type=commonjs <<'NODE'
+              const assert = require('node:assert/strict')
+              const { devDependencies } = require('./package.json')
+              for (const name of ['nitro-core', 'nitrogen', 'react-native-nitro-modules']) {
+                const expected = devDependencies[name]
+                const { version } = require(`${name}/package.json`)
+                assert.equal(version, expected, `${name}: expected ${expected}, installed ${version}`)
+                console.log(JSON.stringify({ package: name, expected, installed: version }))
+              }
+              NODE
+              ${{ inputs.pm }} run codegen
