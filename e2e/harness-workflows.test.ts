@@ -100,6 +100,16 @@ const assertWorkflowFiles = async (rootDir: string): Promise<void> => {
 }
 
 const assertHarnessScripts = async (rootDir: string): Promise<void> => {
+    const iosDir: string = path.join(rootDir, 'example', 'ios')
+    const project: string | undefined = (await readdir(iosDir)).find(name =>
+        name.endsWith('.xcodeproj')
+    )
+    expect(project).toBeDefined()
+    const xcodeProject: string = await readText(
+        path.join(iosDir, project!, 'project.pbxproj')
+    )
+    expect(xcodeProject).toContain('IPHONEOS_DEPLOYMENT_TARGET = 16.0;')
+    expect(xcodeProject).not.toContain('IPHONEOS_DEPLOYMENT_TARGET = 15.1;')
     const examplePackageJson = JSON.parse(
         await readText(path.join(rootDir, 'example', 'package.json'))
     ) as PackageJson

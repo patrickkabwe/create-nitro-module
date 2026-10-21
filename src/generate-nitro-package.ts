@@ -201,6 +201,9 @@ export class NitroModuleFactory {
             await this.createExampleApp()
             await this.configureExamplePackageJson()
             await this.syncExampleAppConfigurations()
+            if (this.config.platforms.includes(SupportedPlatform.IOS)) {
+                await this.configureExampleIOSDeploymentTarget()
+            }
             if (this.config.includeHarness) {
                 await this.setupReactNativeHarness()
             }
@@ -815,14 +818,32 @@ export class NitroModuleFactory {
         }
     }
 
-    private async getExampleIOSBundleId() {
-        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
-        const projectFilePath = path.join(
+    private get exampleIOSProjectPath(): string {
+        return path.join(
             this.exampleDir,
             'ios',
-            `${exampleAppName}.xcodeproj`,
+            `${toPascalCase(this.config.packageName)}Example.xcodeproj`,
             'project.pbxproj'
         )
+    }
+
+    private async configureExampleIOSDeploymentTarget(): Promise<void> {
+        const project: string = await readFile(
+            this.exampleIOSProjectPath,
+            'utf8'
+        )
+        await writeFile(
+            this.exampleIOSProjectPath,
+            project.replaceAll(
+                /IPHONEOS_DEPLOYMENT_TARGET = [\d.]+;/g,
+                'IPHONEOS_DEPLOYMENT_TARGET = 16.0;'
+            ),
+            'utf8'
+        )
+    }
+
+    private async getExampleIOSBundleId() {
+        const projectFilePath = this.exampleIOSProjectPath
         const projectFileContent = await readFile(projectFilePath, {
             encoding: 'utf8',
         })
