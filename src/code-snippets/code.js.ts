@@ -493,6 +493,9 @@ ${getHarnessCodegenBuildStep(packageManager)}
             build \
             CODE_SIGNING_ALLOWED=NO
 
+      - name: Prepare iOS Harness app
+        run: bash .github/scripts/prepare-ios-harness.sh example 27.0
+
       - name: Run React Native Harness
         uses: callstackincubator/react-native-harness@v1.6.0
         with:
@@ -532,6 +535,7 @@ on:
       - main
     paths:
       - '.github/workflows/harness-${platform}.yml'
+      - '.github/scripts/**'
       - 'example/**'
       - 'android/**'
       - 'apple/**'
@@ -550,6 +554,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/harness-${platform}.yml'
+      - '.github/scripts/**'
       - 'example/**'
       - 'android/**'
       - 'apple/**'

@@ -319,10 +319,8 @@ describe('Nitro V1 templates', () => {
                         path.join(packageDir, 'apple/HybridSample.swift'),
                         'utf8'
                     )
-                    expect(swiftView).toContain('@MainActor')
-                    expect(swiftView).toContain(
-                        '@preconcurrency HybridSampleSpec'
-                    )
+                    expect(swiftView).toContain('override init() throws')
+                    expect(swiftView).toContain('try super.init()')
                 }
                 await expect(
                     stat(path.join(packageDir, 'ios'))

@@ -581,28 +581,15 @@ jobs:
                   ios-dir: ${{ env.WORKING_DIR }}/example/ios
                   mode: ${{ matrix.mode }}
 
+            - name: Prepare iOS Harness app
+              run: bash assets/template/.github/scripts/prepare-ios-harness.sh "${{ env.WORKING_DIR }}/example" 27.0
+
             - name: Run iOS Harness Tests
               working-directory: ${{ env.WORKING_DIR }}/example
               shell: bash
               env:
                   HARNESS_DEBUG: '1'
-                  # Let Harness report the original startup error after its cleanup promise rejects.
-                  NODE_OPTIONS: '--unhandled-rejections=warn'
-              run: |
-                  IOS_SIMULATOR="$(xcrun simctl list devices available --json | IOS_VERSION=27.0 node -e 'const fs = require("node:fs"); const input = fs.readFileSync(0, "utf8"); const data = JSON.parse(input); const desiredVersion = process.env.IOS_VERSION; const candidates = Object.entries(data.devices).flatMap(([runtime, devices]) => { const version = runtime.match(/iOS-(\d+(?:-\d+)*)$/)?.[1]?.replaceAll("-", "."); if (version == null || (desiredVersion != null && version !== desiredVersion)) return []; return devices.filter(device => device.isAvailable === true && device.name.startsWith("iPhone")).map(device => ({ name: device.name, version })); }); candidates.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }) || b.name.localeCompare(a.name, undefined, { numeric: true })); const selected = candidates[0]; if (selected == null) process.exit(1); console.log(`${selected.name}|${selected.version}`);' || true)"
-                  if [ -z "$IOS_SIMULATOR" ]; then
-                    echo "Unable to resolve an available iOS simulator."
-                    xcrun simctl list devices available
-                    exit 1
-                  fi
-
-                  APP_PATH="$(find ios/build/Build/Products/Debug-iphonesimulator -maxdepth 1 -type d -name '*.app' | head -1)"
-                  if [ -z "$APP_PATH" ]; then
-                    echo "No built iOS app bundle found in ios/build/Build/Products/Debug-iphonesimulator"
-                    exit 1
-                  fi
-
-                  DEVICE_MODEL="${IOS_SIMULATOR%%|*}" IOS_VERSION="${IOS_SIMULATOR#*|}" HARNESS_APP_PATH="$APP_PATH" ${{ matrix.pm }} run test:harness:ios --json --outputFile=harness-results.json 2>&1 | tee harness-ios.log
+              run: ${{ matrix.pm }} run test:harness:ios --json --outputFile=harness-results.json 2>&1 | tee harness-ios.log
 
             - name: Upload iOS Harness evidence
               if: always()

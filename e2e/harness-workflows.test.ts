@@ -195,6 +195,21 @@ const assertHarnessWorkflowContent = async (
     const releaseWorkflow = await readText(
         path.join(expectation.rootDir, '.github', 'workflows', 'release.yml')
     )
+    const iosSetup: string = await readText(
+        path.join(
+            expectation.rootDir,
+            '.github',
+            'scripts',
+            'prepare-ios-harness.sh'
+        )
+    )
+    expect(iosSetup).toContain('xcrun simctl install')
+    expect(iosWorkflow).toContain(
+        'bash .github/scripts/prepare-ios-harness.sh example 27.0'
+    )
+    expect(iosWorkflow.indexOf('name: Prepare iOS Harness app')).toBeLessThan(
+        iosWorkflow.indexOf('- name: Run React Native Harness')
+    )
 
     for (const workflow of [
         androidBuildWorkflow,
