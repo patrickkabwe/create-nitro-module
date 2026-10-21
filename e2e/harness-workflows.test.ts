@@ -105,7 +105,9 @@ const assertHarnessScripts = async (rootDir: string): Promise<void> => {
     ) as PackageJson
     const scripts = examplePackageJson.scripts
 
-    expect(scripts?.spm).toBe('react-native spm')
+    expect(scripts?.spm).toBe(
+        'node ./harness-spm/setup.mjs && react-native spm'
+    )
     expect(scripts?.pod).toBeUndefined()
     expect(scripts?.['test:harness']).toBe('react-native-harness')
     expect(scripts?.['test:harness:android']).toBe(
@@ -116,7 +118,17 @@ const assertHarnessScripts = async (rootDir: string): Promise<void> => {
     )
     expect(
         examplePackageJson.devDependencies?.['@react-native-harness/ui']
-    ).toBeDefined()
+    ).toBe('1.6.0')
+    expect(
+        await readText(
+            path.join(rootDir, 'example', 'harness-spm', 'Package.swift')
+        )
+    ).toContain('name: "HarnessUI"')
+    expect(
+        await readText(
+            path.join(rootDir, 'example', 'harness-spm', 'setup.mjs')
+        )
+    ).toContain('copyFile')
 }
 
 const assertTemplateDependencyVersions = async (

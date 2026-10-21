@@ -11,7 +11,7 @@ on:
             - 'scripts/**'
             - 'package.json'
             - 'bun.lock'
-            - 'assets/template/**'
+            - 'assets/**'
     pull_request:
         branches: [main, next]
         paths:
@@ -22,7 +22,7 @@ on:
             - 'scripts/**'
             - 'package.json'
             - 'bun.lock'
-            - 'assets/template/**'
+            - 'assets/**'
     workflow_dispatch:
     schedule:
         - cron: '0 0 * * *'

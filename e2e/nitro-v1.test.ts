@@ -187,6 +187,12 @@ describe('Nitro V1 templates', () => {
             )
 
             const packageDir: string = path.join(root, 'react-native-sample')
+            expect(
+                await readFile(
+                    path.join(packageDir, 'react-native.config.js'),
+                    'utf8'
+                )
+            ).toContain('componentDescriptors: []')
             const packageJson: PackageJson = JSON.parse(
                 await readFile(path.join(packageDir, 'package.json'), 'utf8')
             ) as PackageJson

@@ -159,3 +159,4 @@ ${kleur.yellow('Need help?')} Create an issue: ${kleur.blue().underline('https:/
 
 ${kleur.yellow('Love this tool?')} Leave a ⭐️ on ${kleur.blue().underline('https://github.com/patrickkabwe/create-nitro-module')}
 `
+export const HARNESS_UI_VERSION = '1.6.0'

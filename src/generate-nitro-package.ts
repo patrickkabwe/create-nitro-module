@@ -1,5 +1,5 @@
 import { exec } from 'node:child_process'
-import { readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { cp, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import util from 'node:util'
@@ -24,6 +24,7 @@ import {
     CXX_NAME_SPACE_TAG,
     DESCRIPTION_TAG,
     foldersToRemoveFromExampleApp,
+    HARNESS_UI_VERSION,
     IOS_MODULE_NAME_TAG,
     JS_PACKAGE_NAME_TAG,
     LICENSE_YEAR_TAG,
@@ -542,6 +543,7 @@ export class NitroModuleFactory {
         const filesToCopy = [
             '.watchmanconfig',
             'babel.config.js',
+            'react-native.config.js',
             'nitro.json',
             'tsconfig.json',
             'gitignore',
@@ -657,16 +659,19 @@ export class NitroModuleFactory {
                 reactNativeHarnessVersion,
                 androidHarnessVersion,
                 appleHarnessVersion,
-                uiHarnessVersion,
             ] = await Promise.all([
                 this.getLatestVersion('react-native-harness'),
                 this.getLatestVersion('@react-native-harness/platform-android'),
                 this.getLatestVersion('@react-native-harness/platform-apple'),
-                this.getLatestVersion('@react-native-harness/ui'),
             ])
 
             exampleAppPackageJson.scripts = {
                 ...exampleAppPackageJson.scripts,
+                ...(this.config.platforms.includes(SupportedPlatform.IOS)
+                    ? {
+                          spm: 'node ./harness-spm/setup.mjs && react-native spm',
+                      }
+                    : {}),
                 'test:harness': 'react-native-harness',
                 ...(this.config.platforms.includes(SupportedPlatform.ANDROID)
                     ? {
@@ -704,10 +709,7 @@ export class NitroModuleFactory {
                                   : '^1.0.0',
                       }
                     : {}),
-                '@react-native-harness/ui':
-                    uiHarnessVersion != null
-                        ? `^${uiHarnessVersion}`
-                        : '^1.0.0',
+                '@react-native-harness/ui': HARNESS_UI_VERSION,
             }
         }
 
@@ -838,6 +840,13 @@ export class NitroModuleFactory {
     }
 
     private async setupReactNativeHarness() {
+        if (this.config.platforms.includes(SupportedPlatform.IOS)) {
+            await cp(
+                path.join(__dirname, '..', 'assets', 'harness-spm'),
+                path.join(this.exampleDir, 'harness-spm'),
+                { recursive: true }
+            )
+        }
         const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
         const androidBundleId = this.config.platforms.includes(
             SupportedPlatform.ANDROID
