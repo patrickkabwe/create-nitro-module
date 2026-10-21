@@ -332,6 +332,8 @@ export class NitroModuleFactory {
         const yarnCwd = this.config.monorepo
             ? this.workspaceRoot
             : this.config.cwd
+        // Keep Yarn from treating a parent package as this project's root.
+        await writeFile(path.join(yarnCwd, 'yarn.lock'), '', { flag: 'wx' })
         await execAsync('corepack enable', { cwd: yarnCwd })
         await execAsync('yarn set version 4.6.0', { cwd: yarnCwd })
         await execAsync('yarn config set enableImmutableInstalls false', {
