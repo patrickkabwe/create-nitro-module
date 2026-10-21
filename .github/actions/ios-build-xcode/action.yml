@@ -50,7 +50,7 @@ runs:
                   -sdk iphonesimulator \
                   -configuration "${{ inputs.mode }}" \
                   build \
-                  CODE_SIGNING_ALLOWED=NO | xcpretty; then
+                  CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild.log | xcpretty; then
                   echo "xcodebuild succeeded on attempt $attempt"
                   exit 0
                 fi

@@ -458,6 +458,28 @@ jobs:
                   java-version: '17'
                   cache: 'gradle'
 
+            - name: Install Android NDK
+              working-directory: ${{ env.WORKING_DIR }}/example/android
+              shell: bash
+              run: |
+                  ndk_version=$(sed -n 's/.*ndkVersion = "\([^"]*\)".*/\1/p' build.gradle)
+                  if [ -z "$ndk_version" ]; then
+                    echo "::error::No ndkVersion found in example/android/build.gradle"
+                    exit 1
+                  fi
+                  for attempt in 1 2 3; do
+                    if "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$ndk_version"; then
+                      exit 0
+                    else
+                      status=$?
+                    fi
+                    echo "::warning::NDK installation failed (version=$ndk_version, attempt=$attempt, exit_code=$status)"
+                    if [ "$attempt" -eq 3 ]; then
+                      exit "$status"
+                    fi
+                    sleep 5
+                  done
+
             - name: Build Android app
               working-directory: ${{ env.WORKING_DIR }}/example/android
               run: |
@@ -562,6 +584,10 @@ jobs:
             - name: Run iOS Harness Tests
               working-directory: ${{ env.WORKING_DIR }}/example
               shell: bash
+              env:
+                  HARNESS_DEBUG: '1'
+                  # Let Harness report the original startup error after its cleanup promise rejects.
+                  NODE_OPTIONS: '--unhandled-rejections=warn'
               run: |
                   IOS_SIMULATOR="$(xcrun simctl list devices available --json | IOS_VERSION=27.0 node -e 'const fs = require("node:fs"); const input = fs.readFileSync(0, "utf8"); const data = JSON.parse(input); const desiredVersion = process.env.IOS_VERSION; const candidates = Object.entries(data.devices).flatMap(([runtime, devices]) => { const version = runtime.match(/iOS-(\d+(?:-\d+)*)$/)?.[1]?.replaceAll("-", "."); if (version == null || (desiredVersion != null && version !== desiredVersion)) return []; return devices.filter(device => device.isAvailable === true && device.name.startsWith("iPhone")).map(device => ({ name: device.name, version })); }); candidates.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }) || b.name.localeCompare(a.name, undefined, { numeric: true })); const selected = candidates[0]; if (selected == null) process.exit(1); console.log(`${selected.name}|${selected.version}`);' || true)"
                   if [ -z "$IOS_SIMULATOR" ]; then
@@ -576,7 +602,7 @@ jobs:
                     exit 1
                   fi
 
-                  DEVICE_MODEL="${IOS_SIMULATOR%%|*}" IOS_VERSION="${IOS_SIMULATOR#*|}" HARNESS_APP_PATH="$APP_PATH" ${{ matrix.pm }} run test:harness:ios --json --outputFile=harness-results.json
+                  DEVICE_MODEL="${IOS_SIMULATOR%%|*}" IOS_VERSION="${IOS_SIMULATOR#*|}" HARNESS_APP_PATH="$APP_PATH" ${{ matrix.pm }} run test:harness:ios --json --outputFile=harness-results.json 2>&1 | tee harness-ios.log
 
             - name: Upload iOS Harness evidence
               if: always()
@@ -584,6 +610,8 @@ jobs:
               with:
                   name: harness-ios-${{ matrix.package_type }}-${{ matrix.scenario }}
                   path: |
+                      ${{ env.WORKING_DIR }}/example/ios/xcodebuild.log
+                      ${{ env.WORKING_DIR }}/example/harness-ios.log
                       ${{ env.WORKING_DIR }}/example/__tests__/__image_snapshots__/
                       ${{ env.WORKING_DIR }}/example/harness-results.json
                       ${{ env.WORKING_DIR }}/example/.harness/crash-reports/
