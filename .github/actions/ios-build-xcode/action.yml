@@ -1,5 +1,5 @@
 name: iOS xcodebuild
-description: Build iOS workspace/scheme with xcpretty
+description: Build iOS project/scheme with xcpretty
 inputs:
     ios-dir:
         description: Path to example/ios directory
@@ -21,19 +21,19 @@ runs:
 
               set -o pipefail
 
-              WORKSPACE_NAME="$(find . -maxdepth 1 -name '*.xcworkspace' ! -name 'Pods.xcworkspace' -exec basename {} .xcworkspace \; | head -1)"
+              PROJECT_NAME="$(find . -maxdepth 1 -name '*.xcodeproj' -exec basename {} .xcodeproj \; | head -1)"
               SCHEME_NAME="${{ inputs.scheme }}"
 
-              if [ -z "$WORKSPACE_NAME" ]; then
-                echo "No Xcode workspace found in ${{ inputs.ios-dir }}"
+              if [ -z "$PROJECT_NAME" ]; then
+                echo "No Xcode project found in ${{ inputs.ios-dir }}"
                 exit 1
               fi
 
               if [ -z "$SCHEME_NAME" ]; then
-                SCHEME_NAME="$WORKSPACE_NAME"
+                SCHEME_NAME="$PROJECT_NAME"
               fi
 
-              echo "Building workspace ${WORKSPACE_NAME}.xcworkspace with scheme ${SCHEME_NAME}"
+              echo "Building project ${PROJECT_NAME}.xcodeproj with scheme ${SCHEME_NAME}"
 
               max_retries=3
               attempt=1
@@ -45,12 +45,12 @@ runs:
               if xcodebuild \
                   CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
                   -derivedDataPath build -UseModernBuildSystem=YES \
-                  -workspace "${WORKSPACE_NAME}.xcworkspace" \
+                  -project "${PROJECT_NAME}.xcodeproj" \
                   -scheme "${SCHEME_NAME}" \
                   -sdk iphonesimulator \
                   -configuration "${{ inputs.mode }}" \
                   build \
-                  CODE_SIGNING_ALLOWED=NO | xcpretty; then
+                  CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild.log | xcpretty; then
                   echo "xcodebuild succeeded on attempt $attempt"
                   exit 0
                 fi

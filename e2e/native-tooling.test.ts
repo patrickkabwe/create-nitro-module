@@ -146,10 +146,10 @@ describe('native linter and formatter scripts', () => {
             (await readPackageJson(project.packageDir)).scripts ?? {}
 
         expect(scripts['lint:swift']).toBe(
-            'swift format lint --strict --recursive ios'
+            'swift format lint --strict --recursive apple'
         )
         expect(scripts['format:swift']).toBe(
-            'swift format --in-place --recursive ios'
+            'swift format --in-place --recursive apple'
         )
         expect(scripts['lint:kotlin']).toBe('ktlint "android/src/**/*.kt"')
         expect(scripts['format:kotlin']).toBe(

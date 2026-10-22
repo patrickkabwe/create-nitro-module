@@ -1,7 +1,6 @@
-import { cp, rm, writeFile } from 'node:fs/promises'
+import { cp, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { postScript } from '../code-snippets/code.js'
 import {
     androidManifestCode,
     getKotlinCode,
@@ -30,7 +29,7 @@ export class AndroidFileGenerator implements FileGenerator {
     private androidPackageName: string = ''
 
     async generate(config: GenerateModuleConfig): Promise<void> {
-        this.androidPackageName = `com.${replaceHyphen(config.packageName)}`
+        this.androidPackageName = `com.margelo.nitro.${replaceHyphen(config.packageName)}`
         await this.copyAndroidFiles(config)
         await this.generateAndroidFiles(config)
     }
@@ -54,6 +53,8 @@ export class AndroidFileGenerator implements FileGenerator {
             'main',
             'java',
             'com',
+            'margelo',
+            'nitro',
             replaceHyphen(config.packageName)
         )
         await createFolder(config.cwd, androidNamespacePath)
@@ -94,7 +95,6 @@ export class AndroidFileGenerator implements FileGenerator {
                           `${config.funcName}`
                       )
             )
-            this.applyCustomAndroidPackageNameWorkaround(config)
         }
         await this.generateGradleFile(config)
         await this.generateCMakeFile(config)
@@ -212,18 +212,5 @@ export class AndroidFileGenerator implements FileGenerator {
         )
 
         await rm(path.join(androidPackageFilePath, '..'), { recursive: true })
-    }
-
-    async applyCustomAndroidPackageNameWorkaround(
-        config: GenerateModuleConfig
-    ) {
-        const androidWorkaroundPath = path.join(config.cwd, 'post-script.js')
-        await writeFile(
-            androidWorkaroundPath,
-            postScript(
-                toPascalCase(config.packageName),
-                config.packageType === Nitro.View
-            )
-        )
     }
 }

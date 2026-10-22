@@ -5,22 +5,24 @@ on:
         branches: [next]
         paths:
             - 'src/**'
+            - 'e2e/**'
             - '.github/workflows/**'
             - '.github/actions/**'
             - 'scripts/**'
             - 'package.json'
             - 'bun.lock'
-            - 'assets/template/**'
+            - 'assets/**'
     pull_request:
         branches: [main, next]
         paths:
             - 'src/**'
+            - 'e2e/**'
             - '.github/workflows/**'
             - '.github/actions/**'
             - 'scripts/**'
             - 'package.json'
             - 'bun.lock'
-            - 'assets/template/**'
+            - 'assets/**'
     workflow_dispatch:
     schedule:
         - cron: '0 0 * * *'
@@ -41,6 +43,11 @@ jobs:
             - name: Checkout Repo
               uses: actions/checkout@v7
 
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 24.x
+
             - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
               with:
@@ -50,7 +57,7 @@ jobs:
               uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
@@ -176,21 +183,29 @@ jobs:
                     },
                   ]
 
-                  const enrich = (item, extra = {}) => ({
-                    ...item,
-                    ...extra,
-                    package_dir: `react-native-test-${item.package_type}-${item.scenario}`,
-                  })
+                  const enrich = (item, extra) => {
+                    const packageDir = `react-native-test-${item.package_type}-${item.scenario}`
+                    return {
+                      ...item,
+                      ...extra,
+                      package_dir: packageDir,
+                      library_dir: extra.layout === 'monorepo'
+                        ? `${packageDir}/packages/${packageDir}`
+                        : packageDir,
+                    }
+                  }
 
                   const generation = pms.flatMap(pm =>
-                    scenarios.map(item => enrich(item, { pm }))
+                    ['standalone', 'monorepo'].flatMap(layout =>
+                      scenarios.map(item => enrich(item, { pm, layout }))
+                    )
                   )
                   const iosHarness = scenarios
                     .filter(item => item.runs_ios)
-                    .map(item => enrich(item, { pm: 'bun', mode: 'Debug' }))
+                    .map(item => enrich(item, { pm: 'bun', mode: 'Debug', layout: 'standalone' }))
                   const androidHarness = scenarios
                     .filter(item => item.runs_android)
-                    .map(item => enrich(item, { pm: 'bun', mode: 'Debug' }))
+                    .map(item => enrich(item, { pm: 'bun', mode: 'Debug', layout: 'standalone' }))
 
                   console.log(`generation=${JSON.stringify({ include: generation })}`)
                   console.log(`ios_harness=${JSON.stringify({ include: iosHarness })}`)
@@ -198,7 +213,7 @@ jobs:
                   NODE
 
     generate-packages:
-        name: Generate ${{ matrix.package_type }} - ${{ matrix.scenario }} - ${{ matrix.pm }}
+        name: Generate ${{ matrix.package_type }} - ${{ matrix.scenario }} - ${{ matrix.pm }} - ${{ matrix.layout }}
         needs: [lint-and-build, define-matrix]
         runs-on: macos-latest
         strategy:
@@ -215,10 +230,15 @@ jobs:
                   git config --global user.email "actions@github.com"
 
             - name: Setup Node.js
-              if: matrix.pm == 'yarn'
               uses: actions/setup-node@v7
               with:
-                  node-version: 22.x
+                  node-version: 24.x
+
+            - name: Setup Corepack for Yarn
+              if: matrix.pm == 'yarn'
+              run: |
+                  npm install --prefix "$RUNNER_TEMP/ci-tools" corepack@0.36.0
+                  echo "$RUNNER_TEMP/ci-tools/node_modules/.bin" >> "$GITHUB_PATH"
 
             - name: Setup Bun.js
               uses: oven-sh/setup-bun@v2
@@ -229,21 +249,26 @@ jobs:
               uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
             - name: Install repository dependencies
               run: bun install
 
-            - name: Build CLI and Link Locally
-              run: |
-                  bun run build
-                  ${{ matrix.pm }} link
+            - name: Build CLI
+              run: bun run build
 
             - name: Generate package
+              env:
+                  npm_config_user_agent: ${{ matrix.pm }}
               run: |
-                  ${{ matrix.pm }} create nitro-module test-${{ matrix.package_type }}-${{ matrix.scenario }} \
+                  LAYOUT_ARGS=()
+                  if [ "${{ matrix.layout }}" = "monorepo" ]; then
+                    LAYOUT_ARGS+=(--monorepo)
+                  fi
+                  node lib/cli/index.js test-${{ matrix.package_type }}-${{ matrix.scenario }} \
+                    "${LAYOUT_ARGS[@]}" \
                     --skip-install \
                     --include-harness \
                     --ci \
@@ -251,10 +276,14 @@ jobs:
                     --platforms ${{ matrix.platforms }} \
                     --langs ${{ matrix.langs }}
 
+            - name: Enable Yarn after generation
+              if: matrix.pm == 'yarn'
+              run: corepack enable
+
             - name: Verify generated package structure
               shell: bash
               run: |
-                  PACKAGE_DIR="${{ matrix.package_dir }}"
+                  PACKAGE_DIR="${{ matrix.library_dir }}"
                   if [ ! -d "$PACKAGE_DIR" ]; then
                     echo "Package directory not found: $PACKAGE_DIR"
                     ls -la
@@ -265,9 +294,7 @@ jobs:
 
                   REQUIRED_PATHS=(
                     "package.json"
-                    "README.md"
                     "src/"
-                    "example/"
                   )
 
                   if [ "${{ matrix.runs_android }}" = "true" ]; then
@@ -275,7 +302,7 @@ jobs:
                   fi
 
                   if [ "${{ matrix.runs_ios }}" = "true" ]; then
-                    REQUIRED_PATHS+=("ios/")
+                    REQUIRED_PATHS+=("apple/")
                   fi
 
                   for path in "${REQUIRED_PATHS[@]}"; do
@@ -287,13 +314,16 @@ jobs:
                     echo "Found: $path"
                   done
 
+                  test -f "${{ github.workspace }}/${{ matrix.package_dir }}/README.md"
+                  test -d "${{ github.workspace }}/${{ matrix.package_dir }}/example"
+
                   if [ "${{ matrix.runs_android }}" != "true" ] && [ -e "android" ]; then
                     echo "Unexpected android directory for scenario ${{ matrix.scenario }}"
                     exit 1
                   fi
 
-                  if [ "${{ matrix.runs_ios }}" != "true" ] && [ -e "ios" ]; then
-                    echo "Unexpected ios directory for scenario ${{ matrix.scenario }}"
+                  if [ "${{ matrix.runs_ios }}" != "true" ] && [ -e "apple" ]; then
+                    echo "Unexpected apple directory for scenario ${{ matrix.scenario }}"
                     exit 1
                   fi
 
@@ -327,7 +357,7 @@ jobs:
             - name: Test package.json content
               shell: bash
               run: |
-                  cd "${{ matrix.package_dir }}"
+                  cd "${{ matrix.library_dir }}"
                   if ! grep -q "react-native-test-${{ matrix.package_type }}-${{ matrix.scenario }}" package.json; then
                     echo "Package name not correct in package.json"
                     cat package.json
@@ -339,11 +369,26 @@ jobs:
                   fi
                   echo "package.json structure validated"
 
+            - name: Install generated package dependencies
+              uses: ./.github/actions/install-deps
+              with:
+                  pm: ${{ matrix.pm }}
+                  working-directory: ${{ matrix.package_dir }}
+
+            - name: Run codegen and build generated package
+              uses: ./.github/actions/run-codegen-build
+              with:
+                  pm: ${{ matrix.pm }}
+                  working-directory: ${{ matrix.library_dir }}
+
             - name: Upload generated package
               uses: actions/upload-artifact@v7
               with:
-                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
-                  path: ${{ matrix.package_dir }}
+                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}-${{ matrix.layout }}
+                  path: |
+                      ${{ matrix.package_dir }}
+                      !${{ matrix.package_dir }}/**/node_modules/**
+                      !${{ matrix.package_dir }}/.git/**
                   include-hidden-files: true
                   if-no-files-found: error
                   retention-days: 7
@@ -373,8 +418,13 @@ jobs:
             - name: Download generated package
               uses: actions/download-artifact@v8
               with:
-                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
+                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}-${{ matrix.layout }}
                   path: ${{ env.WORKING_DIR }}
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 24.x
 
             - name: Setup Bun
               uses: oven-sh/setup-bun@v2
@@ -385,7 +435,7 @@ jobs:
               uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles(format('{0}/bun.lock', matrix.package_dir)) }}
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
@@ -408,6 +458,28 @@ jobs:
                   java-version: '17'
                   cache: 'gradle'
 
+            - name: Install Android NDK
+              working-directory: ${{ env.WORKING_DIR }}/example/android
+              shell: bash
+              run: |
+                  ndk_version=$(sed -n 's/.*ndkVersion = "\([^"]*\)".*/\1/p' build.gradle)
+                  if [ -z "$ndk_version" ]; then
+                    echo "::error::No ndkVersion found in example/android/build.gradle"
+                    exit 1
+                  fi
+                  for attempt in 1 2 3; do
+                    if "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$ndk_version"; then
+                      exit 0
+                    else
+                      status=$?
+                    fi
+                    echo "::warning::NDK installation failed (version=$ndk_version, attempt=$attempt, exit_code=$status)"
+                    if [ "$attempt" -eq 3 ]; then
+                      exit "$status"
+                    fi
+                    sleep 5
+                  done
+
             - name: Build Android app
               working-directory: ${{ env.WORKING_DIR }}/example/android
               run: |
@@ -415,12 +487,27 @@ jobs:
                   ./gradlew :app:assembleDebug --no-daemon --build-cache -PreactNativeArchitectures=${{ env.DEVICE_ARCH }}
 
             - name: Run React Native Harness
-              uses: callstackincubator/react-native-harness@v1.5.0
+              uses: callstackincubator/react-native-harness@v1.6.0
               with:
                   app: android/app/build/outputs/apk/debug/app-debug.apk
                   runner: android
                   projectRoot: ${{ env.WORKING_DIR }}/example
                   packageManager: ${{ matrix.pm }}
+                  harnessArgs: --json --outputFile=harness-results.json
+                  uploadVisualTestArtifacts: false
+
+            - name: Upload Android Harness evidence
+              if: always()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: harness-android-${{ matrix.package_type }}-${{ matrix.scenario }}
+                  path: |
+                      ${{ env.WORKING_DIR }}/example/__tests__/__image_snapshots__/
+                      ${{ env.WORKING_DIR }}/example/harness-results.json
+                      ${{ env.WORKING_DIR }}/example/.harness/crash-reports/
+                  include-hidden-files: true
+                  if-no-files-found: warn
+                  retention-days: 14
 
             - name: Stop Gradle
               if: always()
@@ -432,7 +519,7 @@ jobs:
     harness-ios:
         name: iOS Harness - ${{ matrix.package_type }} - ${{ matrix.scenario }}
         needs: [generate-packages, define-matrix]
-        runs-on: macos-26
+        runs-on: xcode-27
         strategy:
             fail-fast: false
             matrix: ${{ fromJson(needs.define-matrix.outputs.ios-harness) }}
@@ -443,7 +530,7 @@ jobs:
               uses: actions/checkout@v7
 
             - name: Select Xcode
-              run: sudo xcode-select -s /Applications/Xcode_26.5.app/Contents/Developer
+              run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
             - name: Create working directory
               run: mkdir -p ${{ env.WORKING_DIR }}
@@ -451,8 +538,13 @@ jobs:
             - name: Download generated package
               uses: actions/download-artifact@v8
               with:
-                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}
+                  name: test-${{ matrix.package_type }}-${{ matrix.scenario }}-${{ matrix.pm }}-${{ matrix.layout }}
                   path: ${{ env.WORKING_DIR }}
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 24.x
 
             - name: Setup Bun
               uses: oven-sh/setup-bun@v2
@@ -463,7 +555,7 @@ jobs:
               uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles(format('{0}/bun.lock', matrix.package_dir)) }}
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
@@ -479,17 +571,9 @@ jobs:
                   pm: ${{ matrix.pm }}
                   working-directory: ${{ env.WORKING_DIR }}
 
-            - name: Cache Pods
-              uses: actions/cache@v6
-              with:
-                  path: ${{ env.WORKING_DIR }}/example/ios/Pods
-                  key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pods-
-
-            - name: Run pod install
-              working-directory: ${{ env.WORKING_DIR }}/example/ios
-              run: pod install
+            - name: Set up Swift Package Manager
+              working-directory: ${{ env.WORKING_DIR }}/example
+              run: ${{ matrix.pm }} run spm
 
             - name: Build iOS app
               uses: ./.github/actions/ios-build-xcode
@@ -497,21 +581,27 @@ jobs:
                   ios-dir: ${{ env.WORKING_DIR }}/example/ios
                   mode: ${{ matrix.mode }}
 
+            - name: Prepare iOS Harness app
+              run: bash assets/template/.github/scripts/prepare-ios-harness.sh "${{ env.WORKING_DIR }}/example" 27.0
+
             - name: Run iOS Harness Tests
               working-directory: ${{ env.WORKING_DIR }}/example
               shell: bash
-              run: |
-                  IOS_SIMULATOR="$(xcrun simctl list devices available --json | IOS_VERSION=26.5 node -e 'const fs = require("node:fs"); const input = fs.readFileSync(0, "utf8"); const data = JSON.parse(input); const desiredVersion = process.env.IOS_VERSION; const candidates = Object.entries(data.devices).flatMap(([runtime, devices]) => { const version = runtime.match(/iOS-(\d+(?:-\d+)*)$/)?.[1]?.replaceAll("-", "."); if (version == null || (desiredVersion != null && version !== desiredVersion)) return []; return devices.filter(device => device.isAvailable === true && device.name.startsWith("iPhone")).map(device => ({ name: device.name, version })); }); candidates.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }) || b.name.localeCompare(a.name, undefined, { numeric: true })); const selected = candidates[0]; if (selected == null) process.exit(1); console.log(`${selected.name}|${selected.version}`);' || true)"
-                  if [ -z "$IOS_SIMULATOR" ]; then
-                    echo "Unable to resolve an available iOS simulator."
-                    xcrun simctl list devices available
-                    exit 1
-                  fi
+              env:
+                  HARNESS_DEBUG: '1'
+              run: ${{ matrix.pm }} run test:harness:ios --json --outputFile=harness-results.json 2>&1 | tee harness-ios.log
 
-                  APP_PATH="$(find ios/build/Build/Products/Debug-iphonesimulator -maxdepth 1 -type d -name '*.app' | head -1)"
-                  if [ -z "$APP_PATH" ]; then
-                    echo "No built iOS app bundle found in ios/build/Build/Products/Debug-iphonesimulator"
-                    exit 1
-                  fi
-
-                  DEVICE_MODEL="${IOS_SIMULATOR%%|*}" IOS_VERSION="${IOS_SIMULATOR#*|}" HARNESS_APP_PATH="$APP_PATH" ${{ matrix.pm }} run test:harness:ios
+            - name: Upload iOS Harness evidence
+              if: always()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: harness-ios-${{ matrix.package_type }}-${{ matrix.scenario }}
+                  path: |
+                      ${{ env.WORKING_DIR }}/example/ios/xcodebuild.log
+                      ${{ env.WORKING_DIR }}/example/harness-ios.log
+                      ${{ env.WORKING_DIR }}/example/__tests__/__image_snapshots__/
+                      ${{ env.WORKING_DIR }}/example/harness-results.json
+                      ${{ env.WORKING_DIR }}/example/.harness/crash-reports/
+                  include-hidden-files: true
+                  if-no-files-found: warn
+                  retention-days: 14

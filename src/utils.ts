@@ -2,27 +2,7 @@ import { execSync } from 'node:child_process'
 import { access, cp, mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import kleur from 'kleur'
-import {
-    type GenerateModuleConfig,
-    type PlatformLangMap,
-    SupportedLang,
-    SupportedPlatform,
-} from './types'
-
-type AutolinkingImplementation = {
-    language: string
-    implementationClassName: string
-}
-
-type AutolinkingEntry = {
-    all?: AutolinkingImplementation
-    ios?: AutolinkingImplementation
-    android?: AutolinkingImplementation
-}
-
-type AutolinkingConfig = {
-    [key: string]: AutolinkingEntry
-}
+import type { GenerateModuleConfig } from './types'
 
 export const validatePackageName = (input: string): string => {
     if (input.length === 0) {
@@ -75,43 +55,6 @@ export const toPascalCase = (str: string) => {
         .split(/[-_\s]+/)
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join('')
-}
-
-export const generateAutolinking = (
-    moduleName: string,
-    platformLangs: PlatformLangMap
-): AutolinkingConfig => {
-    const className = `Hybrid${moduleName}`
-    const langs = Object.values(platformLangs)
-
-    // If all platforms use C++, use the "all" shorthand
-    if (langs.every(lang => lang === SupportedLang.CPP)) {
-        return {
-            [moduleName]: {
-                all: {
-                    language: SupportedLang.CPP,
-                    implementationClassName: className,
-                },
-            },
-        }
-    }
-
-    const entry: AutolinkingEntry = {}
-
-    if (platformLangs[SupportedPlatform.IOS]) {
-        entry.ios = {
-            language: platformLangs[SupportedPlatform.IOS],
-            implementationClassName: className,
-        }
-    }
-    if (platformLangs[SupportedPlatform.ANDROID]) {
-        entry.android = {
-            language: platformLangs[SupportedPlatform.ANDROID],
-            implementationClassName: className,
-        }
-    }
-
-    return { [moduleName]: entry }
 }
 
 export const dirExist = async (dir: string) => {

@@ -6,14 +6,13 @@ export const getSwiftCode = (
     userName: string
 ) => `//
 //  Hybrid${toPascalCase(moduleName)}.swift
-//  Pods
 //
 //  Created by ${userName} on ${new Date().toLocaleDateString()}.
 //
 
-import Foundation
+import NitroModules
 
-class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
+final class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
   func ${funcName}(num1: Double, num2: Double) throws -> Double {
     return num1 + num2
   }
@@ -22,17 +21,21 @@ class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
 
 export const getSwiftViewCode = (moduleName: string, userName: string) => `//
 //  Hybrid${toPascalCase(moduleName)}.swift
-//  Pods
 //
 //  Created by ${userName} on ${new Date().toLocaleDateString()}.
 //
 
-import Foundation
+import NitroModules
 import UIKit
 
-class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
+final class Hybrid${toPascalCase(moduleName)}: Hybrid${toPascalCase(moduleName)}Spec {
   // UIView
-  var view: UIView = UIView()
+  let view: UIView
+
+  override init() throws {
+    view = UIView()
+    try super.init()
+  }
 
   // Props
   var isRed: Bool = false {

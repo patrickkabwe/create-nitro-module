@@ -1,5 +1,5 @@
 import { exec } from 'node:child_process'
-import { readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { cp, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import util from 'node:util'
@@ -24,6 +24,7 @@ import {
     CXX_NAME_SPACE_TAG,
     DESCRIPTION_TAG,
     foldersToRemoveFromExampleApp,
+    HARNESS_UI_VERSION,
     IOS_MODULE_NAME_TAG,
     JS_PACKAGE_NAME_TAG,
     LICENSE_YEAR_TAG,
@@ -50,7 +51,6 @@ import {
     copyTemplateFiles,
     createFolder,
     createModuleFile,
-    generateAutolinking,
     getGitUserInfo,
     replaceHyphen,
     replacePlaceholder,
@@ -60,7 +60,6 @@ import {
 const execAsync = util.promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-type NitroDependencyName = 'nitrogen' | 'react-native-nitro-modules'
 type PackageJson = Record<string, unknown> & {
     name?: string
     private?: boolean
@@ -69,7 +68,6 @@ type PackageJson = Record<string, unknown> & {
 }
 
 export class NitroModuleFactory {
-    private nitroModulesVersion: string | null = null
     private workspaceRoot: string
 
     private androidGenerator: AndroidFileGenerator
@@ -203,6 +201,9 @@ export class NitroModuleFactory {
             await this.createExampleApp()
             await this.configureExamplePackageJson()
             await this.syncExampleAppConfigurations()
+            if (this.config.platforms.includes(SupportedPlatform.IOS)) {
+                await this.configureExampleIOSDeploymentTarget()
+            }
             if (this.config.includeHarness) {
                 await this.setupReactNativeHarness()
             }
@@ -214,47 +215,6 @@ export class NitroModuleFactory {
             this.config.spinner.start(messages.installing)
             await this.installDependenciesAndRunCodegen()
             this.config.spinner.stop(kleur.cyan(`${messages.installing}Done`))
-        }
-    }
-
-    private getTemplateDevDependencyVersion(pkg: NitroDependencyName): string {
-        const version = templatePackageJson.devDependencies[pkg]
-
-        if (typeof version !== 'string' || version.length === 0) {
-            throw new Error(
-                `Missing template devDependency version for package "${pkg}"`
-            )
-        }
-
-        return version
-    }
-
-    private async resolveNitroDependencyVersions(): Promise<{
-        nitrogenVersion: string
-        nitroModulesVersion: string
-    }> {
-        const defaultNitrogenVersion =
-            this.getTemplateDevDependencyVersion('nitrogen')
-        const defaultNitroModulesVersion = this.getTemplateDevDependencyVersion(
-            'react-native-nitro-modules'
-        )
-
-        if (this.config.skipInstall) {
-            return {
-                nitrogenVersion: defaultNitrogenVersion,
-                nitroModulesVersion: defaultNitroModulesVersion,
-            }
-        }
-
-        const [nitroModulesVersion, nitrogenVersion] = await Promise.all([
-            this.getLatestVersion('react-native-nitro-modules'),
-            this.getLatestVersion('nitrogen'),
-        ])
-
-        return {
-            nitrogenVersion: nitrogenVersion ?? defaultNitrogenVersion,
-            nitroModulesVersion:
-                nitroModulesVersion ?? defaultNitroModulesVersion,
         }
     }
 
@@ -313,7 +273,7 @@ export class NitroModuleFactory {
             ? ['packages/*']
             : ['packages/*', 'example']
         const rootPackageJson: PackageJson = {
-            name: this.config.finalPackageName,
+            name: `${this.config.finalPackageName}-workspace`,
             private: true,
             scripts: {
                 build: this.getWorkspaceRunCommand('build'),
@@ -376,6 +336,8 @@ export class NitroModuleFactory {
         const yarnCwd = this.config.monorepo
             ? this.workspaceRoot
             : this.config.cwd
+        // Keep Yarn from treating a parent package as this project's root.
+        await writeFile(path.join(yarnCwd, 'yarn.lock'), '', { flag: 'wx' })
         await execAsync('corepack enable', { cwd: yarnCwd })
         await execAsync('yarn set version 4.6.0', { cwd: yarnCwd })
         await execAsync('yarn config set enableImmutableInstalls false', {
@@ -399,10 +361,6 @@ export class NitroModuleFactory {
             [ANDROID_CXX_LIB_NAME_TAG]: toPascalCase(this.config.packageName),
         }
         const newNitroJsonContent = JSON.parse(nitroJsonContent)
-        newNitroJsonContent.autolinking = generateAutolinking(
-            toPascalCase(this.config.packageName),
-            this.config.platformLangs
-        )
         await createModuleFile(
             this.config.cwd,
             'nitro.json',
@@ -411,17 +369,6 @@ export class NitroModuleFactory {
                 data: JSON.stringify(newNitroJsonContent, null, 2),
             })
         )
-    }
-
-    private getPostCodegenScript() {
-        const examplePath = this.config.monorepo ? '../example' : 'example'
-        let script = `${this.config.pm} --cwd ${examplePath} pod`
-        if (this.config.pm === 'npm') {
-            script = `${this.config.pm} --prefix ${examplePath} run pod`
-        } else if (this.config.pm === 'pnpm') {
-            script = `pnpm --dir ${examplePath} run pod`
-        }
-        return script
     }
 
     private async updatePackageJsonConfig(skipExample?: boolean) {
@@ -446,12 +393,7 @@ export class NitroModuleFactory {
         newWorkspacePackageJsonFile.scripts = {
             ...newWorkspacePackageJsonFile.scripts,
             build: `${this.config.pm} run typecheck && bob build`,
-            codegen: `nitrogen --logLevel="debug" && ${this.config.pm} run build${Object.values(this.config.platformLangs).includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`,
-            postcodegen: !Object.values(this.config.platformLangs).includes(
-                SupportedLang.KOTLIN
-            )
-                ? this.getPostCodegenScript()
-                : undefined,
+            codegen: `nitrogen --logLevel="debug" && ${this.config.pm} run build`,
             ...this.nativeToolingScripts,
         }
 
@@ -462,20 +404,15 @@ export class NitroModuleFactory {
             )?.filter((file: string) => file !== 'README.md')
         }
 
-        const nitrogen = 'nitrogen'
-        const nitroModules = 'react-native-nitro-modules'
-        const { nitrogenVersion, nitroModulesVersion } =
-            await this.resolveNitroDependencyVersions()
-        this.nitroModulesVersion = nitroModulesVersion
         newWorkspacePackageJsonFile.devDependencies = {
             ...newWorkspacePackageJsonFile.devDependencies,
-            [nitroModules]:
-                nitroModulesVersion ??
-                newWorkspacePackageJsonFile.devDependencies?.[nitroModules],
-            [nitrogen]:
-                nitrogenVersion ??
-                newWorkspacePackageJsonFile.devDependencies?.[nitrogen],
             ...(await this.resolveNativeToolingDevDependencies()),
+        }
+        if (this.config.platforms.includes(SupportedPlatform.IOS)) {
+            newWorkspacePackageJsonFile.swiftpmConfig = {
+                name: toPascalCase(this.config.packageName),
+                dependencies: ['react-native-nitro-modules'],
+            }
         }
 
         newWorkspacePackageJsonFile.keywords = [
@@ -483,11 +420,7 @@ export class NitroModuleFactory {
             this.config.finalPackageName,
         ]
 
-        if (this.config.pm === 'yarn') {
-            if (!this.config.monorepo) {
-                await this.configureYarnWorkspace()
-            }
-        } else if (this.config.pm === 'pnpm') {
+        if (this.config.pm === 'pnpm') {
             const workspaceDirs = ['example']
             const yamlContent = `packages:\n${workspaceDirs.map(d => `  - ${d}`).join('\n')}\n`
 
@@ -519,6 +452,10 @@ export class NitroModuleFactory {
             JSON.stringify(newWorkspacePackageJsonFile, null, 2),
             { encoding: 'utf8' }
         )
+
+        if (this.config.pm === 'yarn' && !this.config.monorepo) {
+            await this.configureYarnWorkspace()
+        }
     }
 
     private async setupNativeTooling() {
@@ -609,6 +546,7 @@ export class NitroModuleFactory {
         const filesToCopy = [
             '.watchmanconfig',
             'babel.config.js',
+            'react-native.config.js',
             'nitro.json',
             'tsconfig.json',
             'gitignore',
@@ -699,16 +637,19 @@ export class NitroModuleFactory {
             ...exampleAppPackageJson.scripts,
             ios: 'react-native run-ios',
             start: 'react-native start --reset-cache',
-            pod: 'bundle install && bundle exec pod install --project-directory=ios',
+            spm: 'react-native spm',
         }
 
-        const nitroKey = `react-native-nitro-modules`
         exampleAppPackageJson.dependencies = {
             ...exampleAppPackageJson.dependencies,
             ...(this.config.monorepo
                 ? { [this.config.finalPackageName]: '*' }
                 : {}),
-            [nitroKey]: this.nitroModulesVersion ?? '*',
+            'nitro-core': templatePackageJson.devDependencies['nitro-core'],
+            'react-native-nitro-modules':
+                templatePackageJson.devDependencies[
+                    'react-native-nitro-modules'
+                ],
         }
 
         exampleAppPackageJson.devDependencies = {
@@ -721,18 +662,19 @@ export class NitroModuleFactory {
                 reactNativeHarnessVersion,
                 androidHarnessVersion,
                 appleHarnessVersion,
-                uiHarnessVersion,
             ] = await Promise.all([
                 this.getLatestVersion('react-native-harness'),
                 this.getLatestVersion('@react-native-harness/platform-android'),
                 this.getLatestVersion('@react-native-harness/platform-apple'),
-                this.config.packageType === Nitro.View
-                    ? this.getLatestVersion('@react-native-harness/ui')
-                    : Promise.resolve(null),
             ])
 
             exampleAppPackageJson.scripts = {
                 ...exampleAppPackageJson.scripts,
+                ...(this.config.platforms.includes(SupportedPlatform.IOS)
+                    ? {
+                          spm: 'node ./harness-spm/setup.mjs && react-native spm',
+                      }
+                    : {}),
                 'test:harness': 'react-native-harness',
                 ...(this.config.platforms.includes(SupportedPlatform.ANDROID)
                     ? {
@@ -770,14 +712,7 @@ export class NitroModuleFactory {
                                   : '^1.0.0',
                       }
                     : {}),
-                ...(this.config.packageType === Nitro.View
-                    ? {
-                          '@react-native-harness/ui':
-                              uiHarnessVersion != null
-                                  ? `^${uiHarnessVersion}`
-                                  : '^1.0.0',
-                      }
-                    : {}),
+                '@react-native-harness/ui': HARNESS_UI_VERSION,
             }
         }
 
@@ -851,7 +786,7 @@ export class NitroModuleFactory {
 
         const filesToWrite = [
             { saveTo: reactNativeConfigPath, data: reactNativeConfig },
-            { saveTo: metroConfigPath, data: metroConfig(packageRelativePath) },
+            { saveTo: metroConfigPath, data: metroConfig() },
             { saveTo: babelConfigPath, data: babelConfig(packageRelativePath) },
             {
                 saveTo: tsConfigPath,
@@ -883,14 +818,32 @@ export class NitroModuleFactory {
         }
     }
 
-    private async getExampleIOSBundleId() {
-        const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
-        const projectFilePath = path.join(
+    private get exampleIOSProjectPath(): string {
+        return path.join(
             this.exampleDir,
             'ios',
-            `${exampleAppName}.xcodeproj`,
+            `${toPascalCase(this.config.packageName)}Example.xcodeproj`,
             'project.pbxproj'
         )
+    }
+
+    private async configureExampleIOSDeploymentTarget(): Promise<void> {
+        const project: string = await readFile(
+            this.exampleIOSProjectPath,
+            'utf8'
+        )
+        await writeFile(
+            this.exampleIOSProjectPath,
+            project.replaceAll(
+                /IPHONEOS_DEPLOYMENT_TARGET = [\d.]+;/g,
+                'IPHONEOS_DEPLOYMENT_TARGET = 16.0;'
+            ),
+            'utf8'
+        )
+    }
+
+    private async getExampleIOSBundleId() {
+        const projectFilePath = this.exampleIOSProjectPath
         const projectFileContent = await readFile(projectFilePath, {
             encoding: 'utf8',
         })
@@ -908,6 +861,13 @@ export class NitroModuleFactory {
     }
 
     private async setupReactNativeHarness() {
+        if (this.config.platforms.includes(SupportedPlatform.IOS)) {
+            await cp(
+                path.join(__dirname, '..', 'assets', 'harness-spm'),
+                path.join(this.exampleDir, 'harness-spm'),
+                { recursive: true }
+            )
+        }
         const exampleAppName = `${toPascalCase(this.config.packageName)}Example`
         const androidBundleId = this.config.platforms.includes(
             SupportedPlatform.ANDROID
@@ -948,9 +908,7 @@ export class NitroModuleFactory {
                 path.join(
                     this.exampleDir,
                     '__tests__',
-                    `${this.config.packageName}.harness.${
-                        this.config.packageType === Nitro.View ? 'tsx' : 'ts'
-                    }`
+                    `${this.config.packageName}.harness.tsx`
                 ),
                 harnessTestCode(
                     this.config.packageName,
@@ -969,7 +927,7 @@ export class NitroModuleFactory {
         })
         const packageManager =
             this.config.pm === 'npm' ? 'npx --yes' : this.config.pm
-        const codegenCommand = `${packageManager} nitrogen --logLevel="debug" && ${this.config.pm} run build${Object.values(this.config.platformLangs).includes(SupportedLang.KOTLIN) ? ' && node post-script.js' : ''}`
+        const codegenCommand = `${packageManager} nitrogen --logLevel="debug" && ${this.config.pm} run build`
         await execAsync(codegenCommand, { cwd: this.config.cwd })
     }
 
@@ -1048,8 +1006,7 @@ export class NitroModuleFactory {
                     harnessWorkflowCode(
                         exampleAppName,
                         this.config.pm,
-                        platform,
-                        this.config.monorepo
+                        platform
                     )
                 ),
                 {
@@ -1070,13 +1027,14 @@ export class NitroModuleFactory {
         const packagePathReplacements: Record<string, string> = {
             'cpp/**': `${packagePath}/cpp/**`,
             'android/**': `${packagePath}/android/**`,
-            'ios/**': `${packagePath}/ios/**`,
+            'apple/**': `${packagePath}/apple/**`,
             'src/**': `${packagePath}/src/**`,
             'nitrogen/**': `${packagePath}/nitrogen/**`,
             'nitrogen/generated/shared/**': `${packagePath}/nitrogen/generated/shared/**`,
             'nitrogen/generated/android/**': `${packagePath}/nitrogen/generated/android/**`,
             'nitrogen/generated/ios/**': `${packagePath}/nitrogen/generated/ios/**`,
             '*.podspec': `${packagePath}/*.podspec`,
+            'Package.swift': `${packagePath}/Package.swift`,
             'package.json': `${packagePath}/package.json`,
             'react-native.config.js': `${packagePath}/react-native.config.js`,
             'nitro.json': `${packagePath}/nitro.json`,

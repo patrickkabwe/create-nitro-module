@@ -1,4 +1,3 @@
-import { cp } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getSwiftCode, getSwiftViewCode } from '../code-snippets/code.swift'
@@ -25,62 +24,38 @@ export class IOSFileGenerator implements FileGenerator {
     async generate(config: GenerateModuleConfig): Promise<void> {
         const { name } = getGitUserInfo()
 
-        // Copy iOS template files
-        await createFolder(config.cwd, 'ios')
-        const iosFolderPath = path.join(
+        await createFolder(config.cwd, 'apple')
+        const templatePath: string = path.join(
             __dirname,
             '..',
             'assets',
-            'template',
-            'ios'
+            'template'
         )
-        const unnamedPodspecFilePath = path.join(
-            __dirname,
-            '..',
-            'assets',
-            'template',
-            `${IOS_MODULE_NAME_TAG}.podspec`
-        )
-        const podspecFilePath = path.join(
-            config.cwd,
-            `${toPascalCase(config.packageName)}.podspec`
-        )
-        await cp(iosFolderPath, path.join(config.cwd, 'ios'), {
-            recursive: true,
-        })
-
-        await cp(unnamedPodspecFilePath, podspecFilePath)
-
-        // Create a podspec file
-        const replacements = {
+        const replacements: Record<string, string> = {
             [IOS_MODULE_NAME_TAG]: toPascalCase(config.packageName),
-            'patrickkabwe/create-nitro-module':
-                `${name.replaceAll(' ', '')}/${config.finalPackageName}`.toLowerCase(),
+            $$cxxSources$$:
+                config.platformLangs[SupportedPlatform.IOS] ===
+                SupportedLang.CPP
+                    ? '["cpp"]'
+                    : '[]',
         }
-
         await createModuleFile(
             config.cwd,
             `${toPascalCase(config.packageName)}.podspec`,
             await replacePlaceholder({
-                filePath: podspecFilePath,
+                filePath: path.join(
+                    templatePath,
+                    `${IOS_MODULE_NAME_TAG}.podspec`
+                ),
                 replacements,
             })
         )
-
-        // Create a Bridge.h file
-        const bridgeFilePath = path.join(config.cwd, 'ios', 'Bridge.h')
-
-        const bridgeReplacements = {
-            [IOS_MODULE_NAME_TAG]: config.packageName,
-            'Created by Marc Rousavy on 22.07.24.': `Created by ${name} on ${new Date().toLocaleDateString()}`, //TODO: user regex
-        }
-
         await createModuleFile(
             config.cwd,
-            'ios/Bridge.h',
+            'Package.swift',
             await replacePlaceholder({
-                filePath: bridgeFilePath,
-                replacements: bridgeReplacements,
+                filePath: path.join(templatePath, 'Package.swift'),
+                replacements,
             })
         )
         if (
@@ -89,7 +64,7 @@ export class IOSFileGenerator implements FileGenerator {
             const isHybridView = config.packageType === Nitro.View
             await createModuleFile(
                 config.cwd,
-                `ios/Hybrid${toPascalCase(config.packageName)}.swift`,
+                `apple/Hybrid${toPascalCase(config.packageName)}.swift`,
                 isHybridView
                     ? getSwiftViewCode(config.packageName, name)
                     : getSwiftCode(

@@ -128,7 +128,7 @@ Begin development:
    ${kleur.green(`${pm} run codegen`)}         ${kleur.dim('# Generates native interfaces from TypeScript definitions')}
    
    ${kleur.cyan('Implement native code:')}
-   ${kleur.white(`${monorepo ? `${packagePath}/` : ''}ios/`)}                     ${kleur.dim('# iOS native implementation using swift')}
+   ${kleur.white(`${monorepo ? `${packagePath}/` : ''}apple/`)}                   ${kleur.dim('# Apple native implementation using Swift')}
    ${kleur.white(`${monorepo ? `${packagePath}/` : ''}android/`)}                 ${kleur.dim('# Android native implementation using kotlin')}
    ${kleur.white(`${monorepo ? `${packagePath}/` : ''}cpp/`)}                     ${kleur.dim('# C++ native implementation. Shareable between iOS and Android (Will be generated if c++ was selected)')}
    
@@ -138,7 +138,7 @@ ${
         : `Run your example app to test the package:
 
    ${kleur.green('cd example')}
-   ${kleur.green(`${pm} run pod`)}             ${kleur.dim('# Install CocoaPods dependencies (iOS)')}
+   ${kleur.green(`${pm} run spm`)}             ${kleur.dim('# Set up Swift Package Manager (iOS)')}
    ${kleur.green(`${pm} run ios|android`)}     ${kleur.dim('# Run your example app')}`
 }
 
@@ -151,7 +151,7 @@ ${getHarnessInstructions(monorepo, pm, platforms)}`
 }${getNativeToolingInstructions(nativeTooling, pm)}
 
 ${kleur.yellow('Pro Tips:')}
-${kleur.dim('• iOS:')} Open ${kleur.green('example/ios/example.xcworkspace')} in Xcode for native debugging. Make sure to run ${kleur.green(`${pm} pod`)} first in the example directory
+${kleur.dim('• iOS:')} Open ${kleur.green('example/ios/<AppName>.xcodeproj')} in Xcode for native debugging. Make sure to run ${kleur.green(`${pm} run spm`)} first in the example directory
 ${kleur.dim('• Android:')} Open ${kleur.green('example/android')} in Android Studio
 ${kleur.dim('• Metro:')} Clear cache with ${kleur.green(`${pm} start`)} if needed
 
@@ -159,3 +159,4 @@ ${kleur.yellow('Need help?')} Create an issue: ${kleur.blue().underline('https:/
 
 ${kleur.yellow('Love this tool?')} Leave a ⭐️ on ${kleur.blue().underline('https://github.com/patrickkabwe/create-nitro-module')}
 `
+export const HARNESS_UI_VERSION = '1.6.0'

@@ -8,16 +8,15 @@ $$description$$
 
 ## Requirements
 
-- React Native v0.76.0 or higher
-- Node 18.0.0 or higher
-
-> [!IMPORTANT]  
-> To Support `Nitro Views` you need to install React Native version v0.78.0 or higher.
+- React Native 0.88 or higher with the New Architecture
+- Nitro V1, with matching versions of `nitro-core`, `nitrogen`, and `react-native-nitro-modules`
+- Node 24.3.0 or higher
+- iOS 16 or higher, Swift 6.4 or higher, and Swift Package Manager
 
 ## Installation
 
 ```bash
-$$command$$ $$packageName$$ react-native-nitro-modules
+$$command$$ $$packageName$$ nitro-core@1.0.0-alpha.nightly.84.gc5ad5050ce94 react-native-nitro-modules@1.0.0-alpha.nightly.84.gc5ad5050ce94
 ```
 
 ## Credits

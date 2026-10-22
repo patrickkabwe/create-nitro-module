@@ -1,3 +1,4 @@
 module.exports = {
-  presets: ['module:@react-native/babel-preset'],
+  presets: ['react-native-builder-bob/babel-preset'],
+  parserOpts: { plugins: ['decorators'] },
 }

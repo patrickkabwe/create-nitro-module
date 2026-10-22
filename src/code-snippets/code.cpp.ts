@@ -13,14 +13,11 @@ double Hybrid${moduleName}::${funcName}(double a, double b) {
 `
 
 export const hppCode = (moduleName: string, funcName: string) => `#pragma once
-#include "Hybrid${moduleName}Spec.hpp"
-#include <vector>
+#include <${moduleName}/Hybrid${moduleName}Spec.hpp>
 
 namespace margelo::nitro::${moduleName.toLowerCase()} {
-class Hybrid${moduleName} : public Hybrid${moduleName}Spec {
+class Hybrid${moduleName} final : public Hybrid${moduleName}Spec {
 public:
-  Hybrid${moduleName}() : HybridObject(TAG), Hybrid${moduleName}Spec() {}
-
   double ${funcName}(double a, double b) override;
 };
 } // namespace margelo::nitro::${moduleName.toLowerCase()}

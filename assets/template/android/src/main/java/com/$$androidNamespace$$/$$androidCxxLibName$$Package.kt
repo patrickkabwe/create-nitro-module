@@ -1,4 +1,4 @@
-package com.$$androidNamespace$$
+package com.margelo.nitro.$$androidNamespace$$
 
 import com.facebook.react.BaseReactPackage
 import com.facebook.react.bridge.NativeModule
