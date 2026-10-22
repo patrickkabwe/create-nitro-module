@@ -57,7 +57,7 @@ jobs:
               uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
@@ -249,7 +249,7 @@ jobs:
               uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
@@ -435,7 +435,7 @@ jobs:
               uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles(format('{0}/bun.lock', matrix.package_dir)) }}
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
@@ -555,7 +555,7 @@ jobs:
               uses: actions/cache@v6
               with:
                   path: ~/.bun/install/cache
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles(format('{0}/bun.lock', matrix.package_dir)) }}
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
