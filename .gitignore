@@ -80,3 +80,4 @@ tsconfig.tsbuildinfo
 *test-module
 *awesome-library
 example
+assets/harness-spm/.build/index-build/
